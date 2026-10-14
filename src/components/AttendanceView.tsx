@@ -1,0 +1,388 @@
+"use client";
+
+import { useState, useEffect } from "react";
+import { Activity, Profile, AttendanceRecord, AttendanceToken } from "@/types/database";
+import {
+  generateTokenAction,
+  checkInStudentAction,
+  correctAttendanceAction,
+  getActiveTokenAction,
+  getAttendanceRecordsAction,
+} from "@/actions/attendance";
+import {
+  QrCode,
+  CheckCircle,
+  AlertTriangle,
+  Clock,
+  ShieldAlert,
+  UserCheck,
+  RefreshCw,
+  Edit2,
+  KeyRound,
+} from "lucide-react";
+import QRCode from "qrcode";
+
+interface AttendanceViewProps {
+  currentUser: Profile;
+  activities: Activity[];
+  onRefresh: () => void;
+}
+
+export function AttendanceView({
+  currentUser,
+  activities,
+  onRefresh,
+}: AttendanceViewProps) {
+  const approvedActivities = activities.filter((a) => a.status === "approved");
+  const [selectedActId, setSelectedActId] = useState<string>(approvedActivities[0]?.id || "");
+  const [activeToken, setActiveToken] = useState<AttendanceToken | null>(null);
+  const [qrDataUrl, setQrDataUrl] = useState<string>("");
+  const [passcode, setPasscode] = useState("");
+  const [records, setRecords] = useState<AttendanceRecord[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState<{ text: string; type: "success" | "error" } | null>(null);
+
+  // Manual correction state
+  const [correctingRecord, setCorrectingRecord] = useState<AttendanceRecord | null>(null);
+  const [newStatus, setNewStatus] = useState<AttendanceRecord["status"]>("present");
+  const [correctionReason, setCorrectionReason] = useState("");
+
+  const isStudent = currentUser.role === "student";
+  const canManage =
+    currentUser.role === "student_coordinator" ||
+    currentUser.role === "faculty_advisor" ||
+    currentUser.role === "college_admin";
+
+  const loadAttendanceData = async (actId: string) => {
+    if (!actId) return;
+    const token = await getActiveTokenAction(actId);
+    setActiveToken(token || null);
+    if (token) {
+      const url = await QRCode.toDataURL(token.tokenCode, { margin: 2, width: 220 });
+      setQrDataUrl(url);
+    } else {
+      setQrDataUrl("");
+    }
+    const recs = await getAttendanceRecordsAction(actId);
+    setRecords(recs);
+  };
+
+  useEffect(() => {
+    if (selectedActId) {
+      loadAttendanceData(selectedActId);
+    }
+  }, [selectedActId]);
+
+  const handleGenerateToken = async () => {
+    setLoading(true);
+    setMessage(null);
+    const res = await generateTokenAction(selectedActId, 60);
+    setLoading(false);
+    if (res.success && res.data) {
+      setActiveToken(res.data);
+      const url = await QRCode.toDataURL(res.data.tokenCode, { margin: 2, width: 220 });
+      setQrDataUrl(url);
+      setMessage({ text: "New 60-minute dynamic attendance token activated!", type: "success" });
+    } else {
+      setMessage({ text: res.error || "Failed to generate token", type: "error" });
+    }
+  };
+
+  const handleCheckIn = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    setMessage(null);
+    const res = await checkInStudentAction(selectedActId, passcode, "passcode");
+    setLoading(false);
+    if (res.success) {
+      setMessage({ text: "Successfully checked in! Attendance recorded.", type: "success" });
+      setPasscode("");
+      loadAttendanceData(selectedActId);
+      onRefresh();
+    } else {
+      setMessage({ text: res.error || "Check-in failed.", type: "error" });
+    }
+  };
+
+  const handleCorrection = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!correctingRecord) return;
+    setLoading(true);
+    const res = await correctAttendanceAction(correctingRecord.id, newStatus, correctionReason);
+    setLoading(false);
+    if (res.success) {
+      setMessage({ text: "Attendance record updated with audit note.", type: "success" });
+      setCorrectingRecord(null);
+      setCorrectionReason("");
+      loadAttendanceData(selectedActId);
+      onRefresh();
+    } else {
+      setMessage({ text: res.error || "Update failed", type: "error" });
+    }
+  };
+
+  const selectedActivity = activities.find((a) => a.id === selectedActId);
+
+  return (
+    <div className="space-y-6">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200 pb-5">
+        <div>
+          <h2 className="text-2xl font-black tracking-tight text-slate-900">
+            Club Day Check-In & Attendance
+          </h2>
+          <p className="text-sm text-slate-600 mt-1">
+            Dynamic QR Authentication &middot; Anti-Screenshot Time Limit &middot; Duplicate Prevention
+          </p>
+        </div>
+
+        {/* Activity Selector */}
+        <div className="flex items-center gap-2">
+          <label className="text-xs font-semibold text-slate-500 whitespace-nowrap">Session:</label>
+          <select
+            value={selectedActId}
+            onChange={(e) => setSelectedActId(e.target.value)}
+            className="text-xs font-semibold rounded-xl border border-slate-300 p-2 bg-white"
+          >
+            {approvedActivities.map((a) => (
+              <option key={a.id} value={a.id}>
+                {a.title} ({a.clubName})
+              </option>
+            ))}
+          </select>
+        </div>
+      </div>
+
+      {message && (
+        <div
+          className={`p-4 rounded-xl flex items-center gap-3 text-sm font-medium ${
+            message.type === "success"
+              ? "bg-emerald-50 text-emerald-800 border border-emerald-200"
+              : "bg-rose-50 text-rose-800 border border-rose-200"
+          }`}
+        >
+          {message.type === "success" ? <CheckCircle className="w-5 h-5 text-emerald-600" /> : <AlertTriangle className="w-5 h-5 text-rose-600" />}
+          {message.text}
+        </div>
+      )}
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Left Column: QR Code / Token Display (Coordinator view or Student scan target) */}
+        <div className="lg:col-span-1 p-6 rounded-2xl border border-slate-200 bg-white shadow-sm flex flex-col items-center text-center space-y-4">
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-indigo-50 text-indigo-700 text-xs font-bold uppercase tracking-wider">
+            <QrCode className="w-3.5 h-3.5" />
+            Live Check-in Code
+          </div>
+
+          {activeToken ? (
+            <div className="space-y-3 w-full flex flex-col items-center">
+              {qrDataUrl && (
+                <div className="p-3 bg-white border-2 border-indigo-600 rounded-2xl shadow-sm">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={qrDataUrl} alt="Attendance QR Code" className="w-48 h-48 object-contain" />
+                </div>
+              )}
+              <div className="p-3 rounded-xl bg-slate-900 text-white w-full">
+                <div className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">One-Time Passcode</div>
+                <div className="text-2xl font-mono font-extrabold tracking-widest text-indigo-400">
+                  {activeToken.tokenCode}
+                </div>
+              </div>
+              <div className="text-xs text-slate-500 flex items-center gap-1 font-medium">
+                <Clock className="w-3.5 h-3.5 text-slate-400" />
+                Expires: {new Date(activeToken.validUntil).toLocaleTimeString()}
+              </div>
+            </div>
+          ) : (
+            <div className="py-12 px-4 rounded-xl border border-dashed border-slate-200 text-slate-400 text-xs">
+              No active attendance window. Coordinators can generate a new session code below.
+            </div>
+          )}
+
+          {canManage && (
+            <button
+              onClick={handleGenerateToken}
+              disabled={loading}
+              className="w-full py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs flex items-center justify-center gap-2 shadow-sm transition"
+            >
+              <RefreshCw className="w-3.5 h-3.5" />
+              {activeToken ? "Rotate / Regenerate Code" : "Open Attendance Window"}
+            </button>
+          )}
+        </div>
+
+        {/* Right Columns: Student Check-In Form & Real-Time Roster */}
+        <div className="lg:col-span-2 space-y-6">
+          {/* Student Fast Check-In Form */}
+          {isStudent && (
+            <div className="p-6 rounded-2xl border-2 border-indigo-200 bg-gradient-to-r from-indigo-50/50 to-white shadow-sm space-y-4">
+              <div className="flex items-center gap-2">
+                <KeyRound className="w-5 h-5 text-indigo-600" />
+                <h3 className="font-extrabold text-base text-slate-900">
+                  Student Instant Check-In
+                </h3>
+              </div>
+              <p className="text-xs text-slate-600">
+                Enter the 6-character session passcode displayed by your coordinator on the screen.
+              </p>
+
+              <form onSubmit={handleCheckIn} className="flex gap-2">
+                <input
+                  type="text"
+                  placeholder="e.g. CLYRO-7492"
+                  value={passcode}
+                  onChange={(e) => setPasscode(e.target.value)}
+                  className="flex-1 font-mono uppercase tracking-wider text-sm rounded-xl border border-slate-300 p-2.5 bg-white font-bold"
+                  required
+                />
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="px-6 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs shadow-xs"
+                >
+                  {loading ? "Checking..." : "Confirm Presence"}
+                </button>
+              </form>
+            </div>
+          )}
+
+          {/* Roster / Log of Attendees */}
+          <div className="p-6 rounded-2xl border border-slate-200 bg-white shadow-sm space-y-4">
+            <div className="flex items-center justify-between">
+              <h3 className="font-bold text-base text-slate-900 flex items-center gap-2">
+                <UserCheck className="w-4 h-4 text-indigo-600" />
+                Session Attendees ({records.length})
+              </h3>
+              <span className="text-[11px] font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
+                Live Roster
+              </span>
+            </div>
+
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-xs">
+                <thead className="bg-slate-50 border-b text-slate-500 font-semibold uppercase">
+                  <tr>
+                    <th className="py-2.5 px-3">Student Name</th>
+                    <th className="py-2.5 px-3">Student ID</th>
+                    <th className="py-2.5 px-3">Timestamp</th>
+                    <th className="py-2.5 px-3">Status</th>
+                    <th className="py-2.5 px-3">Method</th>
+                    {canManage && <th className="py-2.5 px-3 text-right">Correction</th>}
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100">
+                  {records.map((r) => (
+                    <tr key={r.id} className="hover:bg-slate-50/50">
+                      <td className="py-2.5 px-3 font-bold text-slate-900">{r.userFullName || "Student"}</td>
+                      <td className="py-2.5 px-3 text-slate-500 font-mono">{r.studentId || "—"}</td>
+                      <td className="py-2.5 px-3 text-slate-500">
+                        {new Date(r.checkInTime).toLocaleTimeString()}
+                      </td>
+                      <td className="py-2.5 px-3">
+                        <span className={`px-2 py-0.5 rounded-full text-[10px] font-extrabold uppercase ${
+                          r.status === "present"
+                            ? "bg-emerald-100 text-emerald-800"
+                            : r.status === "late"
+                            ? "bg-amber-100 text-amber-800"
+                            : "bg-slate-100 text-slate-800"
+                        }`}>
+                          {r.status}
+                        </span>
+                        {r.correctionReason && (
+                          <div className="text-[10px] text-slate-400 mt-0.5 italic">
+                            &quot;{r.correctionReason}&quot;
+                          </div>
+                        )}
+                      </td>
+                      <td className="py-2.5 px-3 text-slate-400 uppercase font-mono text-[10px]">
+                        {r.checkInMethod}
+                      </td>
+                      {canManage && (
+                        <td className="py-2.5 px-3 text-right">
+                          <button
+                            onClick={() => {
+                              setCorrectingRecord(r);
+                              setNewStatus(r.status);
+                            }}
+                            className="p-1 rounded text-slate-400 hover:text-indigo-600 hover:bg-slate-100"
+                            title="Correct Attendance with Reason"
+                          >
+                            <Edit2 className="w-3.5 h-3.5" />
+                          </button>
+                        </td>
+                      )}
+                    </tr>
+                  ))}
+                  {records.length === 0 && (
+                    <tr>
+                      <td colSpan={6} className="py-8 text-center text-slate-400 text-xs">
+                        No check-ins recorded yet for this session.
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Manual Correction Modal */}
+      {correctingRecord && (
+        <div className="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4">
+          <form onSubmit={handleCorrection} className="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4">
+            <h4 className="font-black text-base text-slate-900 flex items-center gap-2">
+              <ShieldAlert className="w-5 h-5 text-indigo-600" />
+              Audit Correction for {correctingRecord.userFullName}
+            </h4>
+            <p className="text-xs text-slate-600">
+              Coordinators must state a valid reason when modifying an attendance record.
+            </p>
+
+            <div>
+              <label className="block text-xs font-semibold text-slate-700 mb-1">Status Override</label>
+              <select
+                value={newStatus}
+                onChange={(e) => setNewStatus(e.target.value as any)}
+                className="w-full text-xs rounded-xl border border-slate-300 p-2.5 bg-white"
+              >
+                <option value="present">Present</option>
+                <option value="late">Late Arrival</option>
+                <option value="excused">Excused Absence</option>
+                <option value="absent">Absent</option>
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-xs font-semibold text-slate-700 mb-1">Mandatory Audit Reason</label>
+              <textarea
+                rows={2}
+                placeholder="Reason for override (e.g. medical note, lab equipment delay)..."
+                value={correctionReason}
+                onChange={(e) => setCorrectionReason(e.target.value)}
+                className="w-full text-xs rounded-xl border border-slate-300 p-2.5 bg-white"
+                required
+              />
+            </div>
+
+            <div className="flex justify-end gap-2 pt-2">
+              <button
+                type="button"
+                onClick={() => setCorrectingRecord(null)}
+                className="px-4 py-2 rounded-xl text-xs font-semibold text-slate-600 hover:bg-slate-100"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                disabled={loading}
+                className="px-4 py-2 rounded-xl text-xs font-bold bg-indigo-600 hover:bg-indigo-700 text-white shadow-xs"
+              >
+                Save Correction
+              </button>
+            </div>
+          </form>
+        </div>
+      )}
+    </div>
+  );
+}
