@@ -112,7 +112,7 @@ function VerifyContent() {
                   <Building className="w-4 h-4 text-indigo-600 mt-0.5" />
                   <div>
                     <div className="text-xs text-slate-400 uppercase font-bold">Issuing Organization</div>
-                    <div className="font-semibold text-slate-700">{result.data.clubName}</div>
+                    <div className="font-semibold text-slate-700">{result.data.organizationName || result.data.clubName}</div>
                   </div>
                 </div>
 

@@ -244,9 +244,9 @@ export function SubmissionsView({
                           setEvaluatingSub(s);
                           if (s.evaluation) {
                             setRubric({
-                              scoreContent: s.evaluation.scoreContent,
-                              scorePresentation: s.evaluation.scorePresentation,
-                              scoreParticipation: s.evaluation.scoreParticipation,
+                              scoreContent: s.evaluation.scoreContent ?? 35,
+                              scorePresentation: s.evaluation.scorePresentation ?? 25,
+                              scoreParticipation: s.evaluation.scoreParticipation ?? 25,
                               feedback: s.evaluation.feedback || "",
                             });
                           }

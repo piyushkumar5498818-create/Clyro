@@ -1,29 +1,29 @@
 "use server";
 
 import { db } from "@/lib/store";
-import { ClubMembership } from "@/types/database";
+import { OrganizationMembership } from "@/types/database";
 
 export async function requestMembershipAction(
-  clubId: string,
-  type: "primary" | "secondary"
-): Promise<{ success: boolean; data?: ClubMembership; error?: string }> {
+  orgId: string,
+  type: "primary" | "secondary" = "primary"
+): Promise<{ success: boolean; data?: OrganizationMembership; error?: string }> {
   try {
     const activeUser = db.getActiveUser();
     if (activeUser.role !== "student") {
-      return { success: false, error: "Only students can request club memberships." };
+      return { success: false, error: "Only students can request organization memberships." };
     }
-    const mem = db.requestMembership(activeUser.id, clubId, type);
+    const mem = db.requestMembership(activeUser.id, orgId, type);
     return { success: true, data: mem };
   } catch (err: unknown) {
     return { success: false, error: (err as Error).message };
   }
 }
 
-export async function getClubMembershipsAction(clubId: string): Promise<ClubMembership[]> {
-  return db.getMembershipsByClub(clubId);
+export async function getClubMembershipsAction(orgId: string): Promise<OrganizationMembership[]> {
+  return db.getMembershipsByOrg(orgId);
 }
 
-export async function getMyMembershipsAction(): Promise<ClubMembership[]> {
+export async function getMyMembershipsAction(): Promise<OrganizationMembership[]> {
   const activeUser = db.getActiveUser();
   return db.getMembershipsByUser(activeUser.id);
 }
@@ -31,15 +31,16 @@ export async function getMyMembershipsAction(): Promise<ClubMembership[]> {
 export async function reviewMembershipAction(
   membershipId: string,
   status: "approved" | "rejected"
-): Promise<{ success: boolean; data?: ClubMembership; error?: string }> {
+): Promise<{ success: boolean; data?: OrganizationMembership; error?: string }> {
   try {
     const activeUser = db.getActiveUser();
     if (
       activeUser.role !== "student_coordinator" &&
       activeUser.role !== "faculty_advisor" &&
+      activeUser.role !== "society_admin" &&
       activeUser.role !== "college_admin"
     ) {
-      return { success: false, error: "Unauthorized: only coordinators or advisors can review." };
+      return { success: false, error: "Unauthorized: only coordinators, advisors, or society leadership can review." };
     }
     const mem = db.reviewMembership(membershipId, status, activeUser.id);
     return { success: true, data: mem };

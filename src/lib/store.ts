@@ -1,87 +1,132 @@
 import {
   Campus,
   Profile,
-  Club,
-  ClubCoordinator,
-  ClubMembership,
+  Organization,
+  OrganizationUnit,
+  Initiative,
+  OrganizationMembership,
+  UnitAssignment,
   Activity,
   AttendanceToken,
   AttendanceRecord,
   Submission,
   Evaluation,
+  Team,
   Certificate,
   UserRole,
 } from "@/types/database";
 
-// In-Memory Seed State with full hierarchy
-interface ClyroDatabaseState {
+interface MiraiDatabaseState {
   campuses: Campus[];
   profiles: Profile[];
-  clubs: Club[];
-  coordinators: ClubCoordinator[];
-  memberships: ClubMembership[];
+  organizations: Organization[];
+  units: OrganizationUnit[];
+  initiatives: Initiative[];
+  memberships: OrganizationMembership[];
+  unitAssignments: UnitAssignment[];
   activities: Activity[];
   attendanceTokens: AttendanceToken[];
   attendanceRecords: AttendanceRecord[];
   submissions: Submission[];
   evaluations: Evaluation[];
+  teams: Team[];
   certificates: Certificate[];
   activeUserId: string;
 }
 
 const INITIAL_CAMPUS: Campus = {
   id: "c0000000-0000-0000-0000-000000000001",
-  name: "MSOT Central Campus",
-  code: "MSOT-CENTRAL",
-  location: "Academic Block A",
+  name: "Mirai School of Technology",
+  code: "MSOT-MAIN",
+  location: "Innovation Campus Block A",
   createdAt: new Date().toISOString(),
 };
 
 const INITIAL_PROFILES: Profile[] = [
   {
     id: "u0000000-0000-0000-0000-000000000001",
-    email: "admin@msot.edu",
+    email: "admin@mirai.edu",
     fullName: "Dr. Sarah Jenkins",
     role: "college_admin",
     campusId: INITIAL_CAMPUS.id,
+    title: "Dean of Academic Affairs",
     createdAt: new Date().toISOString(),
   },
   {
     id: "u0000000-0000-0000-0000-000000000002",
-    email: "cm@msot.edu",
+    email: "cm@mirai.edu",
     fullName: "Marcus Vance",
     role: "campus_manager",
     campusId: INITIAL_CAMPUS.id,
+    title: "Campus Operations Director",
     createdAt: new Date().toISOString(),
   },
   {
     id: "u0000000-0000-0000-0000-000000000003",
-    email: "society@msot.edu",
-    fullName: "Elena Rostova",
-    role: "society_admin",
+    email: "advisor.tech@mirai.edu",
+    fullName: "Prof. Alan Turing",
+    role: "faculty_advisor",
     campusId: INITIAL_CAMPUS.id,
+    title: "Kaizen Tech Faculty Advisor",
+    organizationId: "o0000000-0000-0000-0000-000000000002",
     createdAt: new Date().toISOString(),
   },
   {
     id: "u0000000-0000-0000-0000-000000000004",
-    email: "advisor@msot.edu",
-    fullName: "Prof. Alan Turing",
+    email: "advisor.ecell@mirai.edu",
+    fullName: "Prof. Maya Angelou",
     role: "faculty_advisor",
     campusId: INITIAL_CAMPUS.id,
+    title: "NEX-CELL Faculty Advisor",
+    organizationId: "o0000000-0000-0000-0000-000000000001",
     createdAt: new Date().toISOString(),
   },
   {
     id: "u0000000-0000-0000-0000-000000000005",
-    email: "coordinator@msot.edu",
-    fullName: "Priya Sharma",
-    role: "student_coordinator",
+    email: "advisor.cultural@mirai.edu",
+    fullName: "Prof. Ravi Shankar",
+    role: "faculty_advisor",
     campusId: INITIAL_CAMPUS.id,
-    studentId: "STU-2024-001",
+    title: "MALHAR Society Advisor",
+    organizationId: "o0000000-0000-0000-0000-000000000003",
     createdAt: new Date().toISOString(),
   },
   {
     id: "u0000000-0000-0000-0000-000000000006",
-    email: "student@msot.edu",
+    email: "nexcell.lead@mirai.edu",
+    fullName: "Arman Mehta",
+    role: "student_coordinator",
+    campusId: INITIAL_CAMPUS.id,
+    studentId: "STU-2024-NEX",
+    title: "NEX-CELL Student Lead",
+    organizationId: "o0000000-0000-0000-0000-000000000001",
+    createdAt: new Date().toISOString(),
+  },
+  {
+    id: "u0000000-0000-0000-0000-000000000007",
+    email: "kaizen.lead@mirai.edu",
+    fullName: "Priya Sharma",
+    role: "student_coordinator",
+    campusId: INITIAL_CAMPUS.id,
+    studentId: "STU-2024-KAI",
+    title: "Kaizen Lead & AI Domain Coordinator",
+    organizationId: "o0000000-0000-0000-0000-000000000002",
+    createdAt: new Date().toISOString(),
+  },
+  {
+    id: "u0000000-0000-0000-0000-000000000008",
+    email: "malhar.president@mirai.edu",
+    fullName: "Elena Rostova",
+    role: "society_admin",
+    campusId: INITIAL_CAMPUS.id,
+    studentId: "STU-2024-MAL",
+    title: "MALHAR Society President",
+    organizationId: "o0000000-0000-0000-0000-000000000003",
+    createdAt: new Date().toISOString(),
+  },
+  {
+    id: "u0000000-0000-0000-0000-000000000009",
+    email: "alex.student@mirai.edu",
     fullName: "Alex Rivera",
     role: "student",
     campusId: INITIAL_CAMPUS.id,
@@ -90,170 +135,331 @@ const INITIAL_PROFILES: Profile[] = [
   },
 ];
 
-// Top-Level Clubs (3 Independent Clubs + 1 Society)
-const INITIAL_TOP_CLUBS: Club[] = [
+const INITIAL_ORGANIZATIONS: Organization[] = [
   {
-    id: "b0000000-0000-0000-0000-000000000001",
+    id: "o0000000-0000-0000-0000-000000000001",
     campusId: INITIAL_CAMPUS.id,
-    name: "Club 1 (Competitive Programming)",
-    description: "Algorithms, competitive programming, and interview problem solving.",
-    category: "Technical",
-    isSociety: false,
-    parentClubId: null,
+    name: "NEX-CELL — Entrepreneurship Club",
+    shortName: "NEX-CELL",
+    description: "Official entrepreneurship club empowering student founders through venture incubation, pitch sessions, and MVP sprints.",
+    type: "entrepreneurship_club",
     facultyAdvisorId: "u0000000-0000-0000-0000-000000000004",
-    capacity: 60,
-    meetingRules: "Weekly contests every Wednesday 5 PM",
+    capacity: 150,
+    meetingRules: "Thursdays 5:30 PM & Pitch Saturdays",
     createdAt: new Date().toISOString(),
   },
   {
-    id: "b0000000-0000-0000-0000-000000000002",
+    id: "o0000000-0000-0000-0000-000000000002",
     campusId: INITIAL_CAMPUS.id,
-    name: "Club 2 (Robotics & Automation)",
-    description: "Hardware prototypes, embedded C, microcontrollers, and robotics automation.",
-    category: "Engineering",
-    isSociety: false,
-    parentClubId: null,
-    facultyAdvisorId: "u0000000-0000-0000-0000-000000000004",
-    capacity: 45,
-    meetingRules: "Lab sessions alternate Thursdays",
+    name: "Kaizen Tech — Technical Club",
+    shortName: "Kaizen Tech",
+    description: "Premier technical club fostering full-stack engineering, applied machine learning, competitive programming, and open-source software.",
+    type: "technical_club",
+    facultyAdvisorId: "u0000000-0000-0000-0000-000000000003",
+    capacity: 250,
+    meetingRules: "Saturdays 10:00 AM - 1:00 PM (Domain Workshops)",
     createdAt: new Date().toISOString(),
   },
   {
-    id: "b0000000-0000-0000-0000-000000000003",
+    id: "o0000000-0000-0000-0000-000000000003",
     campusId: INITIAL_CAMPUS.id,
-    name: "Club 3 (Debating & Literary)",
-    description: "Parliamentary debates, public speaking, model UN, and creative writing.",
-    category: "Cultural",
-    isSociety: false,
-    parentClubId: null,
-    facultyAdvisorId: "u0000000-0000-0000-0000-000000000004",
-    capacity: 50,
-    meetingRules: "Sessions on Friday evenings",
-    createdAt: new Date().toISOString(),
-  },
-  {
-    id: "b0000000-0000-0000-0000-000000000004",
-    campusId: INITIAL_CAMPUS.id,
-    name: "Society (Technical & Innovation Society)",
-    description: "Apex society coordinating multidisciplinary engineering wings, cross-domain hackathons, and tech seminars.",
-    category: "Society",
-    isSociety: true,
-    parentClubId: null,
-    facultyAdvisorId: "u0000000-0000-0000-0000-000000000004",
+    name: "MALHAR — Cultural Society",
+    shortName: "MALHAR",
+    description: "Vibrant cultural society orchestrating campus fests, music, stagecraft, media coverage, design systems, and performing arts.",
+    type: "cultural_society",
+    facultyAdvisorId: "u0000000-0000-0000-0000-000000000005",
     capacity: 200,
-    meetingRules: "Governing council meets monthly",
+    meetingRules: "Fridays 4:00 PM (Department Syncs) & Event Rehearsals",
     createdAt: new Date().toISOString(),
   },
 ];
 
-// Society's 4 Sub-Clubs
-const INITIAL_SUB_CLUBS: Club[] = [
+// Kaizen Tech 6 Domains
+const INITIAL_UNITS: OrganizationUnit[] = [
   {
-    id: "b0000000-0000-0000-0000-000000000101",
-    campusId: INITIAL_CAMPUS.id,
-    name: "Society Sub-club 1 (Web & Cloud)",
-    description: "Full stack engineering, cloud platforms, DevOps, and scalable systems.",
-    category: "Technical",
-    isSociety: false,
-    parentClubId: "b0000000-0000-0000-0000-000000000004",
-    facultyAdvisorId: "u0000000-0000-0000-0000-000000000004",
-    capacity: 50,
-    meetingRules: "Saturdays 10:00 AM - 12:00 PM",
+    id: "u0000000-0000-0000-0001-000000000001",
+    organizationId: "o0000000-0000-0000-0000-000000000002",
+    name: "Full-Stack Web Development",
+    code: "WEB",
+    type: "technical_domain",
+    description: "Modern web architectures, Next.js, distributed backends, and cloud deployment.",
+    capacity: 60,
     createdAt: new Date().toISOString(),
   },
   {
-    id: "b0000000-0000-0000-0000-000000000102",
-    campusId: INITIAL_CAMPUS.id,
-    name: "Society Sub-club 2 (AI & Data Science)",
-    description: "Neural networks, generative models, computer vision, and applied ML.",
-    category: "Technical",
-    isSociety: false,
-    parentClubId: "b0000000-0000-0000-0000-000000000004",
-    facultyAdvisorId: "u0000000-0000-0000-0000-000000000004",
-    capacity: 50,
-    meetingRules: "Saturdays 1:00 PM - 3:00 PM",
+    id: "u0000000-0000-0000-0001-000000000002",
+    organizationId: "o0000000-0000-0000-0000-000000000002",
+    name: "Applied AI/ML",
+    code: "AI_ML",
+    type: "technical_domain",
+    description: "Deep learning, LLMs, computer vision, PyTorch, and intelligent agents.",
+    capacity: 60,
     createdAt: new Date().toISOString(),
   },
   {
-    id: "b0000000-0000-0000-0000-000000000103",
-    campusId: INITIAL_CAMPUS.id,
-    name: "Society Sub-club 3 (Cybersecurity)",
-    description: "Ethical hacking, cryptography, vulnerability assessment, and defense.",
-    category: "Technical",
-    isSociety: false,
-    parentClubId: "b0000000-0000-0000-0000-000000000004",
-    facultyAdvisorId: "u0000000-0000-0000-0000-000000000004",
+    id: "u0000000-0000-0000-0001-000000000003",
+    organizationId: "o0000000-0000-0000-0000-000000000002",
+    name: "Competitive Programming",
+    code: "CP",
+    type: "technical_domain",
+    description: "Algorithmic problem solving, dynamic programming, graph algorithms, and contests.",
     capacity: 40,
-    meetingRules: "Saturdays 3:30 PM - 5:30 PM",
     createdAt: new Date().toISOString(),
   },
   {
-    id: "b0000000-0000-0000-0000-000000000104",
-    campusId: INITIAL_CAMPUS.id,
-    name: "Society Sub-club 4 (Game Dev & Creative)",
-    description: "Game design, 3D modelling, shaders, and real-time interactive rendering.",
-    category: "Creative",
-    isSociety: false,
-    parentClubId: "b0000000-0000-0000-0000-000000000004",
-    facultyAdvisorId: "u0000000-0000-0000-0000-000000000004",
+    id: "u0000000-0000-0000-0001-000000000004",
+    organizationId: "o0000000-0000-0000-0000-000000000002",
+    name: "Mobile App Development",
+    code: "MOBILE",
+    type: "technical_domain",
+    description: "Cross-platform mobile applications, Flutter, React Native, and mobile UX.",
     capacity: 40,
-    meetingRules: "Saturdays 11:00 AM - 1:00 PM",
+    createdAt: new Date().toISOString(),
+  },
+  {
+    id: "u0000000-0000-0000-0001-000000000005",
+    organizationId: "o0000000-0000-0000-0000-000000000002",
+    name: "Open Source",
+    code: "OSS",
+    type: "technical_domain",
+    description: "Git workflows, upstream contributions, open licenses, and developer tooling.",
+    capacity: 35,
+    createdAt: new Date().toISOString(),
+  },
+  {
+    id: "u0000000-0000-0000-0001-000000000006",
+    organizationId: "o0000000-0000-0000-0000-000000000002",
+    name: "UI/UX Design",
+    code: "UIUX",
+    type: "technical_domain",
+    description: "Design systems, Figma wireframing, user research, accessibility, and visual hierarchy.",
+    capacity: 35,
+    createdAt: new Date().toISOString(),
+  },
+  // MALHAR 5 Departments
+  {
+    id: "u0000000-0000-0000-0002-000000000001",
+    organizationId: "o0000000-0000-0000-0000-000000000003",
+    name: "Management",
+    code: "MGMT",
+    type: "department",
+    description: "Event production, venue scheduling, hospitality, and festival execution.",
+    capacity: 40,
+    createdAt: new Date().toISOString(),
+  },
+  {
+    id: "u0000000-0000-0000-0002-000000000002",
+    organizationId: "o0000000-0000-0000-0000-000000000003",
+    name: "Media",
+    code: "MEDIA",
+    type: "department",
+    description: "Photography, cinematography, aftermovies, and visual storytelling.",
+    capacity: 30,
+    createdAt: new Date().toISOString(),
+  },
+  {
+    id: "u0000000-0000-0000-0002-000000000003",
+    organizationId: "o0000000-0000-0000-0000-000000000003",
+    name: "Tech",
+    code: "TECH",
+    type: "department",
+    description: "Stage sound, intelligent lighting, audio engineering, and live broadcast setup.",
+    capacity: 30,
+    createdAt: new Date().toISOString(),
+  },
+  {
+    id: "u0000000-0000-0000-0002-000000000004",
+    organizationId: "o0000000-0000-0000-0000-000000000003",
+    name: "Designing",
+    code: "DESIGN",
+    type: "department",
+    description: "Stage backdrops, digital banners, fest branding, and promotional collateral.",
+    capacity: 30,
+    createdAt: new Date().toISOString(),
+  },
+  {
+    id: "u0000000-0000-0000-0002-000000000005",
+    organizationId: "o0000000-0000-0000-0000-000000000003",
+    name: "PR",
+    code: "PR",
+    type: "department",
+    description: "Public relations, guest invitations, sponsorships, and campus outreach.",
+    capacity: 35,
     createdAt: new Date().toISOString(),
   },
 ];
 
-const INITIAL_COORDINATORS: ClubCoordinator[] = [
+// NEX-CELL 6 Initiatives
+const INITIAL_INITIATIVES: Initiative[] = [
   {
-    id: "k0000000-0000-0000-0000-000000000001",
-    clubId: "b0000000-0000-0000-0000-000000000101", // Priya coordinates Sub-club 1
-    userId: "u0000000-0000-0000-0000-000000000005",
-    assignedAt: new Date().toISOString(),
+    id: "i0000000-0000-0000-0000-000000000001",
+    organizationId: "o0000000-0000-0000-0000-000000000001",
+    name: "Founders Fire",
+    code: "FIRE",
+    description: "High-stakes startup pitch sessions with angel mentors and operator feedback.",
+    format: "Pitch Sessions",
+    status: "active",
+    createdAt: new Date().toISOString(),
+  },
+  {
+    id: "i0000000-0000-0000-0000-000000000002",
+    organizationId: "o0000000-0000-0000-0000-000000000001",
+    name: "Scrap to Scale",
+    code: "SCALE",
+    description: "Rapid prototyping incubator guiding zero-to-one MVP production.",
+    format: "MVP Incubator",
+    status: "active",
+    createdAt: new Date().toISOString(),
+  },
+  {
+    id: "i0000000-0000-0000-0000-000000000003",
+    organizationId: "o0000000-0000-0000-0000-000000000001",
+    name: "Masterminds",
+    code: "MINDS",
+    description: "Bi-weekly peer accountability pods tracking MRR, traction, and user retention.",
+    format: "Peer Pods",
+    status: "active",
+    createdAt: new Date().toISOString(),
+  },
+  {
+    id: "i0000000-0000-0000-0000-000000000004",
+    organizationId: "o0000000-0000-0000-0000-000000000001",
+    name: "Founder Talks",
+    code: "TALKS",
+    description: "Fireside discussions with unicorn founders, VC partners, and alumni innovators.",
+    format: "Speaker Series",
+    status: "active",
+    createdAt: new Date().toISOString(),
+  },
+  {
+    id: "i0000000-0000-0000-0000-000000000005",
+    organizationId: "o0000000-0000-0000-0000-000000000001",
+    name: "The Mirage",
+    code: "MIRAGE",
+    description: "Mirai flagship 48-hour innovation sprint and venture competition.",
+    format: "Hackathon Sprint",
+    status: "active",
+    createdAt: new Date().toISOString(),
+  },
+  {
+    id: "i0000000-0000-0000-0000-000000000006",
+    organizationId: "o0000000-0000-0000-0000-000000000001",
+    name: "Open Build",
+    code: "BUILD",
+    description: "Recurring collaborative building sessions and pair programming for founders.",
+    format: "Co-Working Sprint",
+    status: "active",
+    createdAt: new Date().toISOString(),
   },
 ];
 
-const INITIAL_MEMBERSHIPS: ClubMembership[] = [
+const INITIAL_MEMBERSHIPS: OrganizationMembership[] = [
   {
     id: "m0000000-0000-0000-0000-000000000001",
-    clubId: "b0000000-0000-0000-0000-000000000101",
-    userId: "u0000000-0000-0000-0000-000000000006", // Alex is approved member of Sub-club 1
+    organizationId: "o0000000-0000-0000-0000-000000000002", // Alex is approved member of Kaizen Tech
+    userId: "u0000000-0000-0000-0000-000000000009",
     membershipType: "primary",
     status: "approved",
     requestedAt: new Date(Date.now() - 86400000 * 5).toISOString(),
     reviewedAt: new Date(Date.now() - 86400000 * 4).toISOString(),
-    reviewedBy: "u0000000-0000-0000-0000-000000000005",
+    reviewedBy: "u0000000-0000-0000-0000-000000000007",
+  },
+];
+
+const INITIAL_UNIT_ASSIGNMENTS: UnitAssignment[] = [
+  {
+    id: "ua000000-0000-0000-0000-000000000001",
+    unitId: "u0000000-0000-0000-0001-000000000002", // Alex assigned to Applied AI/ML domain
+    userId: "u0000000-0000-0000-0000-000000000009",
+    role: "member",
+    assignedAt: new Date(Date.now() - 86400000 * 4).toISOString(),
   },
 ];
 
 const INITIAL_ACTIVITIES: Activity[] = [
   {
     id: "a0000000-0000-0000-0000-000000000001",
-    clubId: "b0000000-0000-0000-0000-000000000101",
-    title: "Club Day 1: Cloud Architecture & Serverless",
-    topic: "Serverless Microservices and Edge Deployment",
-    format: "presentation",
-    deliverableDescription: "Submit architecture slide deck (PDF/link) and GitHub repo link.",
+    organizationId: "o0000000-0000-0000-0000-000000000002",
+    unitId: "u0000000-0000-0001-0000-000000000002",
+    title: "Kaizen Club Day: LLM Agent Architectures & Vector Search",
+    topic: "RAG Pipelines, Hybrid Search, and Function Calling",
+    format: "workshop",
+    deliverableDescription: "Submit GitHub repository link with functioning RAG query pipeline and benchmark report.",
     scheduledDate: new Date().toISOString().split("T")[0],
     startTime: "10:00",
-    endTime: "12:00",
-    venue: "Seminar Hall 2",
+    endTime: "13:00",
+    venue: "Turing Computing Lab Block A",
     submissionDeadline: new Date(Date.now() + 86400000 * 2).toISOString(),
+    status: "approved",
+    approvedBy: "u0000000-0000-0000-0000-000000000003",
+    approvedAt: new Date(Date.now() - 86400000).toISOString(),
+    createdBy: "u0000000-0000-0000-0000-000000000007",
+    createdAt: new Date(Date.now() - 86400000 * 3).toISOString(),
+    rubricCriteria: [
+      { name: "Technical Depth & Architecture", maxScore: 40, description: "Quality of RAG implementation, prompt chaining, and embeddings." },
+      { name: "Demo & Code Cleanliness", maxScore: 30, description: "Repo documentation, test coverage, and live query execution." },
+      { name: "Participation & Discussion", maxScore: 30, description: "Active Q&A and technical contribution in lab session." },
+    ],
+  },
+  {
+    id: "a0000000-0000-0000-0000-000000000002",
+    organizationId: "o0000000-0000-0000-0000-000000000001",
+    initiativeId: "i0000000-0000-0000-0000-000000000001",
+    title: "NEX-CELL Founders Fire: Cohort Pitch Session 1",
+    topic: "Problem Validation, TAM Calculation & Early MVP Demo",
+    format: "pitch_session",
+    deliverableDescription: "Submit pitch deck link and 3-minute Loom walkthrough.",
+    scheduledDate: new Date().toISOString().split("T")[0],
+    startTime: "14:00",
+    endTime: "16:30",
+    venue: "Incubation Center Block B",
+    submissionDeadline: new Date(Date.now() + 86400000 * 3).toISOString(),
     status: "approved",
     approvedBy: "u0000000-0000-0000-0000-000000000004",
     approvedAt: new Date(Date.now() - 86400000).toISOString(),
-    createdBy: "u0000000-0000-0000-0000-000000000005",
-    createdAt: new Date(Date.now() - 86400000 * 3).toISOString(),
+    createdBy: "u0000000-0000-0000-0000-000000000006",
+    createdAt: new Date(Date.now() - 86400000 * 2).toISOString(),
+    rubricCriteria: [
+      { name: "Problem Validation & Market Size", maxScore: 30, description: "Clarity of customer pain point and target market sizing." },
+      { name: "Solution & Product Feasibility", maxScore: 30, description: "Technical viability and uniqueness of value proposition." },
+      { name: "Traction & Execution Plan", maxScore: 20, description: "Customer interviews, waitlist metrics, or prototype tests." },
+      { name: "Pitch Delivery & Q&A", maxScore: 20, description: "Confidence, timekeeping, and investor answer defense." },
+    ],
+  },
+  {
+    id: "a0000000-0000-0000-0000-000000000003",
+    organizationId: "o0000000-0000-0000-0000-000000000003",
+    unitId: "u0000000-0000-0002-0000-000000000002",
+    title: "MALHAR Media: Annual Fest Cinematography Workshop",
+    topic: "Gimbal Staging, Audio Syncing & Premiere Pro Speed Cuts",
+    format: "workshop",
+    deliverableDescription: "Upload 60-second teaser reel link with soundtrack sync.",
+    scheduledDate: new Date().toISOString().split("T")[0],
+    startTime: "16:00",
+    endTime: "18:00",
+    venue: "Auditorium Control Room",
+    submissionDeadline: new Date(Date.now() + 86400000 * 2).toISOString(),
+    status: "approved",
+    approvedBy: "u0000000-0000-0000-0000-000000000005",
+    approvedAt: new Date(Date.now() - 86400000).toISOString(),
+    createdBy: "u0000000-0000-0000-0000-000000000008",
+    createdAt: new Date(Date.now() - 86400000 * 2).toISOString(),
+    rubricCriteria: [
+      { name: "Cinematic Framing & Lighting", maxScore: 40, description: "Composition, color grading, and dynamic range." },
+      { name: "Audio Mastering & Pacing", maxScore: 30, description: "Soundtrack alignment and clear beat transitions." },
+      { name: "Brand Alignment & Storytelling", maxScore: 30, description: "Engagement and festival atmosphere capture." },
+    ],
   },
 ];
 
-// Active live attendance token
 const INITIAL_TOKENS: AttendanceToken[] = [
   {
     id: "t0000000-0000-0000-0000-000000000001",
     activityId: "a0000000-0000-0000-0000-000000000001",
-    tokenCode: "CLYRO-7492",
+    tokenCode: "CLYRO-KAI-8192",
     validFrom: new Date(Date.now() - 1000 * 60 * 30).toISOString(),
-    validUntil: new Date(Date.now() + 1000 * 60 * 90).toISOString(), // valid for 90 more mins
-    createdBy: "u0000000-0000-0000-0000-000000000005",
+    validUntil: new Date(Date.now() + 1000 * 60 * 90).toISOString(),
+    createdBy: "u0000000-0000-0000-0000-000000000007",
   },
 ];
 
@@ -261,9 +467,9 @@ const INITIAL_ATTENDANCE: AttendanceRecord[] = [
   {
     id: "r0000000-0000-0000-0000-000000000001",
     activityId: "a0000000-0000-0000-0000-000000000001",
-    userId: "u0000000-0000-0000-0000-000000000006",
+    userId: "u0000000-0000-0000-0000-000000000009",
     status: "present",
-    checkInTime: new Date(Date.now() - 1000 * 60 * 20).toISOString(),
+    checkInTime: new Date(Date.now() - 1000 * 60 * 25).toISOString(),
     checkInMethod: "qr_code",
   },
 ];
@@ -272,11 +478,11 @@ const INITIAL_SUBMISSIONS: Submission[] = [
   {
     id: "s0000000-0000-0000-0000-000000000001",
     activityId: "a0000000-0000-0000-0000-000000000001",
-    userId: "u0000000-0000-0000-0000-000000000006",
+    userId: "u0000000-0000-0000-0000-000000000009",
     submissionType: "link",
-    linkUrl: "https://github.com/alexrivera/serverless-clyro-demo",
-    notes: "Completed microservices architecture with AWS Lambda + DynamoDB edge cache.",
-    submittedAt: new Date(Date.now() - 1000 * 60 * 10).toISOString(),
+    linkUrl: "https://github.com/alexrivera/mirai-llm-rag-agent",
+    notes: "Implemented hybrid vector search using Qdrant and LangChain with tool calling.",
+    submittedAt: new Date(Date.now() - 1000 * 60 * 15).toISOString(),
   },
 ];
 
@@ -284,54 +490,72 @@ const INITIAL_EVALUATIONS: Evaluation[] = [
   {
     id: "e0000000-0000-0000-0000-000000000001",
     submissionId: "s0000000-0000-0000-0000-000000000001",
-    evaluatorId: "u0000000-0000-0000-0000-000000000004", // Prof. Turing
-    scoreContent: 38, // out of 40
-    scorePresentation: 28, // out of 30
-    scoreParticipation: 29, // out of 30
-    totalScore: 95,
-    feedback: "Exceptional architecture breakdown with clean container diagrams and load analysis.",
+    evaluatorId: "u0000000-0000-0000-0000-000000000003",
+    scoreBreakdown: [
+      { criteriaName: "Technical Depth & Architecture", score: 38, maxScore: 40 },
+      { criteriaName: "Demo & Code Cleanliness", score: 28, maxScore: 30 },
+      { criteriaName: "Participation & Discussion", score: 28, maxScore: 30 },
+    ],
+    totalScore: 94,
+    feedback: "High-grade architecture! Clean integration of embeddings and hybrid filtering.",
     evaluatedAt: new Date().toISOString(),
+  },
+];
+
+const INITIAL_TEAMS: Team[] = [
+  {
+    id: "team_001",
+    activityId: "a0000000-0000-0000-0000-000000000002",
+    name: "NeuralFlow Venture",
+    leadUserId: "u0000000-0000-0000-0000-000000000009",
+    memberUserIds: ["u0000000-0000-0000-0000-000000000009"],
+    projectTitle: "AI Automated Customer Retention Agent",
+    projectUrl: "https://github.com/alexrivera/neuralflow",
+    createdAt: new Date().toISOString(),
   },
 ];
 
 const INITIAL_CERTIFICATES: Certificate[] = [
   {
     id: "cert000-0000-0000-0000-000000000001",
-    userId: "u0000000-0000-0000-0000-000000000006",
-    clubId: "b0000000-0000-0000-0000-000000000101",
+    userId: "u0000000-0000-0000-0000-000000000009",
+    organizationId: "o0000000-0000-0000-0000-000000000002",
     activityId: "a0000000-0000-0000-0000-000000000001",
     certificateType: "achievement",
-    title: "Certificate of Outstanding Performance in Serverless Cloud Architecture",
+    title: "Certificate of Excellence in LLM Engineering & Applied AI",
     issueDate: new Date().toISOString().split("T")[0],
-    verificationCode: "CLYRO-ACH-2024-9581",
-    pdfHash: "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    verificationCode: "CLYRO-KAI-2024-9142",
+    pdfHash: "2cf24dba5fb0a30e26e83b2ac5b9e29e1b161e5c1fa7425e73043362938b9824",
   },
 ];
 
 // Singleton store instance
 declare global {
   // eslint-disable-next-line no-var
-  var __clyro_db: ClyroDatabaseState | undefined;
+  var __mirai_db: MiraiDatabaseState | undefined;
 }
 
-function getDatabase(): ClyroDatabaseState {
-  if (!globalThis.__clyro_db) {
-    globalThis.__clyro_db = {
+function getDatabase(): MiraiDatabaseState {
+  if (!globalThis.__mirai_db) {
+    globalThis.__mirai_db = {
       campuses: [INITIAL_CAMPUS],
       profiles: [...INITIAL_PROFILES],
-      clubs: [...INITIAL_TOP_CLUBS, ...INITIAL_SUB_CLUBS],
-      coordinators: [...INITIAL_COORDINATORS],
+      organizations: [...INITIAL_ORGANIZATIONS],
+      units: [...INITIAL_UNITS],
+      initiatives: [...INITIAL_INITIATIVES],
       memberships: [...INITIAL_MEMBERSHIPS],
+      unitAssignments: [...INITIAL_UNIT_ASSIGNMENTS],
       activities: [...INITIAL_ACTIVITIES],
       attendanceTokens: [...INITIAL_TOKENS],
       attendanceRecords: [...INITIAL_ATTENDANCE],
       submissions: [...INITIAL_SUBMISSIONS],
       evaluations: [...INITIAL_EVALUATIONS],
+      teams: [...INITIAL_TEAMS],
       certificates: [...INITIAL_CERTIFICATES],
-      activeUserId: "u0000000-0000-0000-0000-000000000001", // Default to College Admin
+      activeUserId: "u0000000-0000-0000-0000-000000000001", // College Admin
     };
   }
-  return globalThis.__clyro_db;
+  return globalThis.__mirai_db;
 }
 
 export const db = {
@@ -352,153 +576,136 @@ export const db = {
     return user;
   },
 
+  getUserById(userId: string): Profile | undefined {
+    return getDatabase().profiles.find((p) => p.id === userId);
+  },
+
   getAllProfiles(): Profile[] {
     return getDatabase().profiles;
   },
 
-  // --- Clubs Hierarchy ---
-  getAllClubs(): Club[] {
+  // --- Organizations & Units ---
+  getAllOrganizations(): Organization[] {
     const state = getDatabase();
-    return state.clubs.map((c) => {
-      const advisor = state.profiles.find((p) => p.id === c.facultyAdvisorId);
-      const subClubs = state.clubs.filter((sub) => sub.parentClubId === c.id);
+    return state.organizations.map((org) => {
+      const advisor = state.profiles.find((p) => p.id === org.facultyAdvisorId);
+      const units = state.units.filter((u) => u.organizationId === org.id);
+      const initiatives = state.initiatives.filter((i) => i.organizationId === org.id);
       const memberCount = state.memberships.filter(
-        (m) => m.clubId === c.id && m.status === "approved"
+        (m) => m.organizationId === org.id && m.status === "approved"
       ).length;
+
       return {
-        ...c,
+        ...org,
         advisorName: advisor?.fullName,
-        subClubs,
+        units,
+        initiatives,
         memberCount,
       };
     });
   },
 
-  getTopLevelClubs(): Club[] {
-    return this.getAllClubs().filter((c) => c.parentClubId === null);
+  getOrganizationById(orgId: string): Organization | undefined {
+    return this.getAllOrganizations().find((o) => o.id === orgId);
   },
 
-  getSociety(): Club | undefined {
-    return this.getAllClubs().find((c) => c.isSociety && c.parentClubId === null);
-  },
-
-  getSocietySubClubs(): Club[] {
-    const society = this.getSociety();
-    if (!society) return [];
-    return this.getAllClubs().filter((c) => c.parentClubId === society.id);
-  },
-
-  getClubById(clubId: string): Club | undefined {
-    return this.getAllClubs().find((c) => c.id === clubId);
-  },
-
-  // --- Coordinators ---
-  getClubCoordinators(clubId: string): ClubCoordinator[] {
+  getUnits(orgId?: string): OrganizationUnit[] {
     const state = getDatabase();
-    return state.coordinators
-      .filter((coord) => coord.clubId === clubId)
-      .map((coord) => {
-        const user = state.profiles.find((p) => p.id === coord.userId);
-        return {
-          ...coord,
-          userFullName: user?.fullName,
-          userEmail: user?.email,
-        };
-      });
+    let units = state.units;
+    if (orgId) {
+      units = units.filter((u) => u.organizationId === orgId);
+    }
+    return units.map((u) => {
+      const lead = state.profiles.find((p) => p.id === u.leadId);
+      const memberCount = state.unitAssignments.filter((ua) => ua.unitId === u.id).length;
+      return {
+        ...u,
+        leadName: lead?.fullName,
+        memberCount,
+      };
+    });
   },
 
-  assignCoordinator(clubId: string, userId: string): ClubCoordinator {
+  getInitiatives(orgId?: string): Initiative[] {
     const state = getDatabase();
-    const existing = state.coordinators.find(
-      (c) => c.clubId === clubId && c.userId === userId
-    );
-    if (existing) return existing;
-
-    const newCoord: ClubCoordinator = {
-      id: "coord_" + Math.random().toString(36).substring(2, 9),
-      clubId,
-      userId,
-      assignedAt: new Date().toISOString(),
-    };
-    state.coordinators.push(newCoord);
-    return newCoord;
+    if (orgId) {
+      return state.initiatives.filter((i) => i.organizationId === orgId);
+    }
+    return state.initiatives;
   },
 
-  // --- Memberships ---
-  getMembershipsByClub(clubId: string): ClubMembership[] {
+  // --- Memberships & Unit Allocations ---
+  getMembershipsByOrg(orgId: string): OrganizationMembership[] {
     const state = getDatabase();
     return state.memberships
-      .filter((m) => m.clubId === clubId)
+      .filter((m) => m.organizationId === orgId)
       .map((m) => {
         const user = state.profiles.find((p) => p.id === m.userId);
-        const club = state.clubs.find((c) => c.id === m.clubId);
+        const org = state.organizations.find((o) => o.id === m.organizationId);
         return {
           ...m,
           userFullName: user?.fullName,
           userEmail: user?.email,
           studentId: user?.studentId,
-          clubName: club?.name,
+          organizationName: org?.shortName,
         };
       });
   },
 
-  getMembershipsByUser(userId: string): ClubMembership[] {
+  getMembershipsByUser(userId: string): OrganizationMembership[] {
     const state = getDatabase();
     return state.memberships
       .filter((m) => m.userId === userId)
       .map((m) => {
-        const club = state.clubs.find((c) => c.id === m.clubId);
+        const org = state.organizations.find((o) => o.id === m.organizationId);
         return {
           ...m,
-          clubName: club?.name,
+          organizationName: org?.shortName,
         };
       });
   },
 
   requestMembership(
     userId: string,
-    clubId: string,
+    orgId: string,
     type: "primary" | "secondary"
-  ): ClubMembership {
+  ): OrganizationMembership {
     const state = getDatabase();
 
     // Check duplicate
     const existing = state.memberships.find(
-      (m) => m.userId === userId && m.clubId === clubId
+      (m) => m.userId === userId && m.organizationId === orgId
     );
     if (existing) {
-      throw new Error("Already enrolled or requested membership for this club");
+      throw new Error("Already enrolled or requested membership for this organization");
     }
 
-    // Limit check: 1 primary, 1 secondary
-    const userMemberships = state.memberships.filter(
+    // Configurable limit check: default max 2 organizations
+    const userActiveMems = state.memberships.filter(
       (m) => m.userId === userId && m.status !== "rejected"
     );
-    const existingType = userMemberships.find(
-      (m) => m.membershipType === type
-    );
-    if (existingType) {
-      throw new Error(`You already have a registered ${type} club.`);
+    if (userActiveMems.length >= 2) {
+      throw new Error("Institutional policy limits students to a maximum of 2 active club memberships.");
     }
 
-    const newMembership: ClubMembership = {
+    const newMem: OrganizationMembership = {
       id: "mem_" + Math.random().toString(36).substring(2, 9),
-      clubId,
+      organizationId: orgId,
       userId,
       membershipType: type,
       status: "pending",
       requestedAt: new Date().toISOString(),
     };
 
-    state.memberships.push(newMembership);
-    return newMembership;
+    state.memberships.push(newMem);
+    return newMem;
   },
 
   reviewMembership(
     membershipId: string,
     status: "approved" | "rejected",
     reviewerId: string
-  ): ClubMembership {
+  ): OrganizationMembership {
     const state = getDatabase();
     const mem = state.memberships.find((m) => m.id === membershipId);
     if (!mem) throw new Error("Membership request not found");
@@ -509,24 +716,47 @@ export const db = {
     return mem;
   },
 
+  assignUnit(userId: string, unitId: string, role: "lead" | "member" = "member"): UnitAssignment {
+    const state = getDatabase();
+    const existing = state.unitAssignments.find(
+      (ua) => ua.userId === userId && ua.unitId === unitId
+    );
+    if (existing) return existing;
+
+    const assignment: UnitAssignment = {
+      id: "ua_" + Math.random().toString(36).substring(2, 9),
+      unitId,
+      userId,
+      role,
+      assignedAt: new Date().toISOString(),
+    };
+    state.unitAssignments.push(assignment);
+    return assignment;
+  },
+
   // --- Activities ---
-  getActivities(clubId?: string): Activity[] {
+  getActivities(orgId?: string): Activity[] {
     const state = getDatabase();
     let acts = state.activities;
-    if (clubId) {
-      acts = acts.filter((a) => a.clubId === clubId);
+    if (orgId) {
+      acts = acts.filter((a) => a.organizationId === orgId);
     }
     return acts.map((a) => {
-      const club = state.clubs.find((c) => c.id === a.clubId);
+      const org = state.organizations.find((o) => o.id === a.organizationId);
+      const unit = state.units.find((u) => u.id === a.unitId);
+      const initiative = state.initiatives.find((i) => i.id === a.initiativeId);
       return {
         ...a,
-        clubName: club?.name,
+        organizationName: org?.shortName,
+        clubName: org?.shortName,
+        unitName: unit?.name,
+        initiativeName: initiative?.name,
       };
     });
   },
 
-  getActivityById(activityId: string): Activity | undefined {
-    return this.getActivities().find((a) => a.id === activityId);
+  getActivityById(id: string): Activity | undefined {
+    return this.getActivities().find((a) => a.id === id);
   },
 
   createActivity(data: Omit<Activity, "id" | "status" | "createdAt">): Activity {
@@ -558,10 +788,9 @@ export const db = {
     return act;
   },
 
-  // --- Attendance Tokens & Records ---
+  // --- Attendance Tokens & Check-In ---
   generateAttendanceToken(activityId: string, createdBy: string, minutes = 60): AttendanceToken {
     const state = getDatabase();
-    // Invalidate existing tokens for this activity
     state.attendanceTokens = state.attendanceTokens.filter(
       (t) => t.activityId !== activityId
     );
@@ -599,7 +828,7 @@ export const db = {
   ): AttendanceRecord {
     const state = getDatabase();
 
-    // 1. Check duplicate
+    // 1. Anti-duplicate constraint
     const duplicate = state.attendanceRecords.find(
       (r) => r.activityId === activityId && r.userId === userId
     );
@@ -607,12 +836,12 @@ export const db = {
       throw new Error("Attendance already recorded for this session!");
     }
 
-    // 2. Validate token
+    // 2. Validate token & window
     const token = state.attendanceTokens.find(
       (t) => t.activityId === activityId && t.tokenCode.toUpperCase() === code.trim().toUpperCase()
     );
     if (!token) {
-      throw new Error("Invalid check-in code. Please check with your coordinator.");
+      throw new Error("Invalid check-in code. Please verify with session coordinator.");
     }
 
     const now = new Date();
@@ -620,12 +849,16 @@ export const db = {
       throw new Error("Check-in window has expired.");
     }
 
-    // 3. Record attendance
+    // 3. Late arrival detection (e.g. 20+ mins into valid window)
+    const tokenStart = new Date(token.validFrom).getTime();
+    const elapsedMinutes = (now.getTime() - tokenStart) / (1000 * 60);
+    const status: AttendanceRecord["status"] = elapsedMinutes > 20 ? "late" : "present";
+
     const record: AttendanceRecord = {
       id: "rec_" + Math.random().toString(36).substring(2, 9),
       activityId,
       userId,
-      status: "present",
+      status,
       checkInTime: now.toISOString(),
       checkInMethod: method,
     };
@@ -664,7 +897,7 @@ export const db = {
       });
   },
 
-  // --- Submissions ---
+  // --- Submissions & Evaluations ---
   submitWork(
     activityId: string,
     userId: string,
@@ -714,40 +947,39 @@ export const db = {
     });
   },
 
-  // --- Evaluations ---
   evaluateSubmission(
     submissionId: string,
     evaluatorId: string,
-    rubric: {
-      scoreContent: number;
-      scorePresentation: number;
-      scoreParticipation: number;
-      feedback: string;
-    }
+    scoreBreakdown: { criteriaName: string; score: number; maxScore: number }[],
+    feedback: string
   ): Evaluation {
     const state = getDatabase();
+
     // Validate bounds
-    if (rubric.scoreContent < 0 || rubric.scoreContent > 40) {
-      throw new Error("Content score must be between 0 and 40");
-    }
-    if (rubric.scorePresentation < 0 || rubric.scorePresentation > 30) {
-      throw new Error("Presentation score must be between 0 and 30");
-    }
-    if (rubric.scoreParticipation < 0 || rubric.scoreParticipation > 30) {
-      throw new Error("Participation score must be between 0 and 30");
+    let totalScore = 0;
+    for (const item of scoreBreakdown) {
+      if (item.score < 0 || item.score > item.maxScore) {
+        throw new Error(`Score for ${item.criteriaName} must be between 0 and ${item.maxScore}`);
+      }
+      totalScore += item.score;
     }
 
-    const totalScore =
-      rubric.scoreContent + rubric.scorePresentation + rubric.scoreParticipation;
+    if (totalScore > 100) {
+      throw new Error("Total score cannot exceed 100 points");
+    }
 
-    // Check if already evaluated
+    const scoreContent = scoreBreakdown[0]?.score || 0;
+    const scorePresentation = scoreBreakdown[1]?.score || 0;
+    const scoreParticipation = scoreBreakdown[2]?.score || 0;
+
     let evaluation = state.evaluations.find((e) => e.submissionId === submissionId);
     if (evaluation) {
-      evaluation.scoreContent = rubric.scoreContent;
-      evaluation.scorePresentation = rubric.scorePresentation;
-      evaluation.scoreParticipation = rubric.scoreParticipation;
+      evaluation.scoreBreakdown = scoreBreakdown;
+      evaluation.scoreContent = scoreContent;
+      evaluation.scorePresentation = scorePresentation;
+      evaluation.scoreParticipation = scoreParticipation;
       evaluation.totalScore = totalScore;
-      evaluation.feedback = rubric.feedback;
+      evaluation.feedback = feedback;
       evaluation.evaluatedAt = new Date().toISOString();
       evaluation.evaluatorId = evaluatorId;
     } else {
@@ -755,11 +987,12 @@ export const db = {
         id: "eval_" + Math.random().toString(36).substring(2, 9),
         submissionId,
         evaluatorId,
-        scoreContent: rubric.scoreContent,
-        scorePresentation: rubric.scorePresentation,
-        scoreParticipation: rubric.scoreParticipation,
+        scoreBreakdown,
+        scoreContent,
+        scorePresentation,
+        scoreParticipation,
         totalScore,
-        feedback: rubric.feedback,
+        feedback,
         evaluatedAt: new Date().toISOString(),
       };
       state.evaluations.push(evaluation);
@@ -767,25 +1000,55 @@ export const db = {
     return evaluation;
   },
 
-  // --- Certificates ---
+  // --- Teams & Events ---
+  createTeam(activityId: string, name: string, leadUserId: string, memberUserIds: string[]): Team {
+    const state = getDatabase();
+    const newTeam: Team = {
+      id: "team_" + Math.random().toString(36).substring(2, 9),
+      activityId,
+      name,
+      leadUserId,
+      memberUserIds: Array.from(new Set([leadUserId, ...memberUserIds])),
+      createdAt: new Date().toISOString(),
+    };
+    state.teams.push(newTeam);
+    return newTeam;
+  },
+
+  getTeams(activityId?: string): Team[] {
+    const state = getDatabase();
+    if (activityId) {
+      return state.teams.filter((t) => t.activityId === activityId);
+    }
+    return state.teams;
+  },
+
+  // --- Certificates & Verifications ---
   issueCertificate(
     userId: string,
-    clubId: string,
+    organizationId: string,
     title: string,
     type: "participation" | "achievement" | "merit",
     activityId?: string
   ): Certificate {
     const state = getDatabase();
-    const verificationCode = `CLYRO-${type.substring(0, 3).toUpperCase()}-${Math.floor(
-      1000 + Math.random() * 9000
-    )}`;
-    const pdfHash =
-      "hash_" + Math.random().toString(36).substring(2, 15) + Date.now().toString(36);
+    const org = state.organizations.find((o) => o.id === organizationId);
+    const orgPrefix = org?.shortName.replace(/[^a-zA-Z]/g, "").substring(0, 3).toUpperCase() || "MST";
+    const verificationCode = `CLYRO-${orgPrefix}-${Math.floor(1000 + Math.random() * 9000)}`;
+    
+    // Deterministic cryptographic-style ledger digest
+    const rawPayload = `${userId}:${organizationId}:${title}:${type}:${Date.now()}`;
+    let hash = 0;
+    for (let i = 0; i < rawPayload.length; i++) {
+      hash = (hash << 5) - hash + rawPayload.charCodeAt(i);
+      hash |= 0;
+    }
+    const pdfHash = Math.abs(hash).toString(16).padStart(16, "0") + "a4f891b72e";
 
     const cert: Certificate = {
       id: "cert_" + Math.random().toString(36).substring(2, 9),
       userId,
-      clubId,
+      organizationId,
       activityId,
       certificateType: type,
       title,
@@ -806,12 +1069,12 @@ export const db = {
     }
     return certs.map((c) => {
       const user = state.profiles.find((p) => p.id === c.userId);
-      const club = state.clubs.find((cl) => cl.id === c.clubId);
+      const org = state.organizations.find((o) => o.id === c.organizationId);
       return {
         ...c,
         userFullName: user?.fullName,
         studentId: user?.studentId,
-        clubName: club?.name,
+        organizationName: org?.shortName,
       };
     });
   },
@@ -824,26 +1087,24 @@ export const db = {
     if (!cert) return undefined;
 
     const user = state.profiles.find((p) => p.id === cert.userId);
-    const club = state.clubs.find((cl) => cl.id === cert.clubId);
+    const org = state.organizations.find((o) => o.id === cert.organizationId);
     return {
       ...cert,
       userFullName: user?.fullName,
       studentId: user?.studentId,
-      clubName: club?.name,
+      organizationName: org?.shortName,
     };
   },
 
-  // --- Consolidated Analytics ---
-  getCollegeMetrics() {
+  // --- Institutional Metrics & Non-Double-Counting Aggregations ---
+  getInstitutionalMetrics() {
     const state = getDatabase();
-    const topClubs = state.clubs.filter((c) => c.parentClubId === null);
-    const society = topClubs.find((c) => c.isSociety);
-    const subClubs = society
-      ? state.clubs.filter((c) => c.parentClubId === society.id)
-      : [];
+    const organizations = state.organizations;
+    const units = state.units;
+    const initiatives = state.initiatives;
 
-    // Distinct participating students (no double-counting across clubs)
-    const uniqueStudents = new Set(
+    // Distinct participating students across all organizations
+    const uniqueStudentIds = new Set(
       state.memberships
         .filter((m) => m.status === "approved")
         .map((m) => m.userId)
@@ -851,65 +1112,34 @@ export const db = {
 
     const totalAttendance = state.attendanceRecords.length;
     const totalSubmissions = state.submissions.length;
+    const totalCertificates = state.certificates.length;
 
     return {
-      totalTopLevelClubs: topClubs.length, // 4
-      societySubClubsCount: subClubs.length, // 4
-      totalClubsAndWings: state.clubs.length, // 8 total entities
-      totalEnrolledStudents: uniqueStudents.size,
+      campusName: state.campuses[0]?.name || "Mirai School of Technology",
+      totalOrganizations: organizations.length, // 3: NEX-CELL, Kaizen Tech, MALHAR
+      totalUnits: units.length, // 11 units: 6 domains + 5 departments
+      totalInitiatives: initiatives.length, // 6 NEX-CELL initiatives
+      totalEnrolledStudents: uniqueStudentIds.size,
       totalAttendanceLogs: totalAttendance,
       totalSubmissions: totalSubmissions,
-      totalActivities: state.activities.length,
-    };
-  },
-
-  getSocietyConsolidatedMetrics() {
-    const state = getDatabase();
-    const society = this.getSociety();
-    if (!society) return null;
-
-    const subClubs = state.clubs.filter((c) => c.parentClubId === society.id);
-    const subClubIds = subClubs.map((s) => s.id);
-
-    // Filter memberships in society sub-clubs
-    const societyMemberships = state.memberships.filter(
-      (m) => subClubIds.includes(m.clubId) && m.status === "approved"
-    );
-
-    // Unique students enrolled across the 4 sub-clubs (ensuring no double-counting)
-    const uniqueStudents = new Set(societyMemberships.map((m) => m.userId));
-
-    // Activities conducted under society sub-clubs
-    const societyActivities = state.activities.filter((a) =>
-      subClubIds.includes(a.clubId)
-    );
-    const societyActIds = societyActivities.map((a) => a.id);
-
-    // Attendance across all sub-clubs
-    const societyAttendance = state.attendanceRecords.filter((r) =>
-      societyActIds.includes(r.activityId)
-    );
-
-    // Submissions
-    const societySubmissions = state.submissions.filter((s) =>
-      societyActIds.includes(s.activityId)
-    );
-
-    return {
-      societyName: society.name,
-      subClubsCount: subClubs.length,
-      subClubsList: subClubs.map((sc) => ({
-        id: sc.id,
-        name: sc.name,
-        membersCount: state.memberships.filter(
-          (m) => m.clubId === sc.id && m.status === "approved"
-        ).length,
-        activitiesCount: state.activities.filter((a) => a.clubId === sc.id).length,
-      })),
-      totalUniqueMembers: uniqueStudents.size,
-      totalActivities: societyActivities.length,
-      totalAttendanceRecorded: societyAttendance.length,
-      totalSubmissions: societySubmissions.length,
+      totalCertificatesIssued: totalCertificates,
+      organizationsBreakdown: organizations.map((org) => {
+        const orgUnits = units.filter((u) => u.organizationId === org.id);
+        const orgInitiatives = initiatives.filter((i) => i.organizationId === org.id);
+        const orgMembers = state.memberships.filter(
+          (m) => m.organizationId === org.id && m.status === "approved"
+        );
+        return {
+          id: org.id,
+          name: org.name,
+          shortName: org.shortName,
+          type: org.type,
+          unitsCount: orgUnits.length,
+          initiativesCount: orgInitiatives.length,
+          memberCount: orgMembers.length,
+          activitiesCount: state.activities.filter((a) => a.organizationId === org.id).length,
+        };
+      }),
     };
   },
 };

@@ -1,55 +1,58 @@
 "use client";
 
 import { useState } from "react";
-import { Club, Profile, ClubMembership } from "@/types/database";
+import { Organization, Profile, OrganizationMembership } from "@/types/database";
 import { requestMembershipAction, reviewMembershipAction } from "@/actions/memberships";
 import {
   Users,
   Building,
-  Shield,
-  Layers,
   Check,
   X,
   AlertCircle,
-  PlusCircle,
-  ChevronRight,
+  Rocket,
+  Code2,
+  Palette,
+  Shield,
+  Layers,
+  Sparkles,
 } from "lucide-react";
 
 interface ClubsHierarchyViewProps {
   currentUser: Profile;
-  topClubs: Club[];
-  societySubClubs: Club[];
-  myMemberships: ClubMembership[];
-  allMemberships: ClubMembership[];
+  topClubs: Organization[];
+  societySubClubs: any[];
+  myMemberships: OrganizationMembership[];
+  allMemberships: OrganizationMembership[];
   onRefresh: () => void;
 }
 
 export function ClubsHierarchyView({
   currentUser,
   topClubs,
-  societySubClubs,
   myMemberships,
   allMemberships,
   onRefresh,
 }: ClubsHierarchyViewProps) {
-  const [selectedClub, setSelectedClub] = useState<Club | null>(null);
+  const [selectedOrg, setSelectedOrg] = useState<Organization | null>(null);
   const [membershipType, setMembershipType] = useState<"primary" | "secondary">("primary");
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<{ text: string; type: "success" | "error" } | null>(null);
 
   const isStudent = currentUser.role === "student";
-  const isCoordinator = currentUser.role === "student_coordinator";
-  const isAdvisor = currentUser.role === "faculty_advisor";
-  const isAdmin = currentUser.role === "college_admin" || currentUser.role === "campus_manager";
+  const canReview =
+    currentUser.role === "student_coordinator" ||
+    currentUser.role === "society_admin" ||
+    currentUser.role === "faculty_advisor" ||
+    currentUser.role === "college_admin";
 
-  const handleRequestMembership = async (clubId: string) => {
+  const handleRequestMembership = async (orgId: string) => {
     setLoading(true);
     setMessage(null);
-    const res = await requestMembershipAction(clubId, membershipType);
+    const res = await requestMembershipAction(orgId, membershipType);
     setLoading(false);
     if (res.success) {
-      setMessage({ text: "Membership request submitted successfully!", type: "success" });
-      setSelectedClub(null);
+      setMessage({ text: "Membership request submitted for advisor/coordinator review!", type: "success" });
+      setSelectedOrg(null);
       onRefresh();
     } else {
       setMessage({ text: res.error || "Failed to submit request", type: "error" });
@@ -68,8 +71,9 @@ export function ClubsHierarchyView({
     }
   };
 
-  const society = topClubs.find((c) => c.isSociety);
-  const independentClubs = topClubs.filter((c) => !c.isSociety);
+  const nexcell = topClubs.find((o) => o.shortName === "NEX-CELL");
+  const kaizen = topClubs.find((o) => o.shortName === "Kaizen Tech");
+  const malhar = topClubs.find((o) => o.shortName === "MALHAR");
 
   return (
     <div className="space-y-8">
@@ -77,18 +81,17 @@ export function ClubsHierarchyView({
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200 pb-5">
         <div>
           <h2 className="text-2xl font-black tracking-tight text-slate-900">
-            College Club Hierarchy & Registry
+            Mirai Campus Organizations & Units
           </h2>
           <p className="text-sm text-slate-600 mt-1">
-            4 Top-Level Organizations &middot; 1 Apex Society &middot; 4 Dedicated Sub-Clubs
+            3 Primary Organizations &middot; 6 Technical Domains &middot; 5 Cultural Departments &middot; 6 Venture Initiatives
           </p>
         </div>
 
-        {/* Student Membership Summary Pill */}
         {isStudent && (
           <div className="flex items-center gap-2 bg-indigo-50 border border-indigo-200 px-3.5 py-1.5 rounded-xl text-xs">
-            <span className="font-semibold text-indigo-900">Enrolment Limits:</span>
-            <span className="text-indigo-700">Max 1 Primary + 1 Secondary</span>
+            <span className="font-semibold text-indigo-900">Institutional Policy:</span>
+            <span className="text-indigo-700">Max 2 Primary Organizations</span>
           </div>
         )}
       </div>
@@ -106,161 +109,214 @@ export function ClubsHierarchyView({
         </div>
       )}
 
-      {/* Top-Level Independent Clubs */}
-      <div>
-        <div className="flex items-center gap-2 mb-4">
-          <Building className="w-5 h-5 text-indigo-600" />
-          <h3 className="font-bold text-lg text-slate-900">
-            Top-Level Independent Clubs (3)
-          </h3>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {independentClubs.map((club) => {
-            const myMem = myMemberships.find((m) => m.clubId === club.id);
-            return (
-              <div
-                key={club.id}
-                className="p-5 rounded-2xl border border-slate-200 bg-white shadow-sm flex flex-col justify-between hover:border-indigo-300 transition"
-              >
-                <div>
-                  <div className="flex items-center justify-between mb-3">
-                    <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-slate-100 text-slate-700 border">
-                      {club.category}
-                    </span>
-                    <span className="text-xs text-slate-500 font-medium">
-                      Cap: {club.capacity}
-                    </span>
-                  </div>
-                  <h4 className="font-bold text-base text-slate-900 leading-snug">
-                    {club.name}
-                  </h4>
-                  <p className="text-xs text-slate-600 mt-2 line-clamp-2">
-                    {club.description}
-                  </p>
-                  <div className="mt-3 text-[11px] text-slate-500 space-y-1 border-t pt-2.5">
-                    <div><strong>Rules:</strong> {club.meetingRules}</div>
-                    <div><strong>Advisor:</strong> {club.advisorName || "Faculty Assigned"}</div>
-                  </div>
-                </div>
-
-                <div className="mt-4 pt-3 border-t">
-                  {isStudent && (
-                    myMem ? (
-                      <span className={`inline-block text-xs font-semibold px-2.5 py-1 rounded-lg ${
-                        myMem.status === "approved" ? "bg-emerald-100 text-emerald-800" : "bg-amber-100 text-amber-800"
-                      }`}>
-                        {myMem.membershipType.toUpperCase()} &middot; {myMem.status.toUpperCase()}
-                      </span>
-                    ) : (
-                      <button
-                        onClick={() => setSelectedClub(club)}
-                        className="w-full py-2 rounded-xl bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-semibold text-xs transition"
-                      >
-                        Join Club
-                      </button>
-                    )
-                  )}
-                </div>
+      {/* 1. NEX-CELL: Entrepreneurship Club */}
+      {nexcell && (
+        <div className="p-6 rounded-2xl border-2 border-amber-200 bg-gradient-to-b from-amber-50/20 via-white to-white shadow-sm space-y-5">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-amber-100 pb-4">
+            <div className="flex items-start gap-3">
+              <div className="w-12 h-12 rounded-2xl bg-amber-100 text-amber-800 flex items-center justify-center shrink-0">
+                <Rocket className="w-6 h-6" />
               </div>
-            );
-          })}
-        </div>
-      </div>
-
-      {/* Apex Society with Nested Sub-Clubs */}
-      {society && (
-        <div className="p-6 rounded-2xl border-2 border-indigo-200 bg-gradient-to-b from-indigo-50/40 via-white to-white shadow-md space-y-6">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-indigo-100 pb-4">
-            <div>
-              <div className="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full bg-indigo-600 text-white text-xs font-bold uppercase tracking-wider mb-2">
-                <Shield className="w-3.5 h-3.5" />
-                Apex Parent Organization
+              <div>
+                <div className="flex items-center gap-2">
+                  <h3 className="text-xl font-black text-slate-900">{nexcell.name}</h3>
+                  <span className="text-[10px] font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-900">
+                    Entrepreneurship
+                  </span>
+                </div>
+                <p className="text-xs text-slate-600 mt-1 max-w-3xl">{nexcell.description}</p>
               </div>
-              <h3 className="text-xl sm:text-2xl font-black text-slate-900">
-                {society.name}
-              </h3>
-              <p className="text-xs sm:text-sm text-slate-600 mt-1 max-w-3xl">
-                {society.description}
-              </p>
             </div>
 
             <div className="flex items-center gap-3">
-              <div className="text-right">
-                <div className="text-xs text-slate-500 font-medium">Sub-Clubs Governed</div>
-                <div className="text-lg font-black text-indigo-700">4 Wings</div>
-              </div>
+              {isStudent && (
+                (() => {
+                  const mem = myMemberships.find((m) => m.organizationId === nexcell.id);
+                  return mem ? (
+                    <span className="px-3 py-1.5 rounded-xl text-xs font-bold uppercase bg-emerald-100 text-emerald-800">
+                      {mem.membershipType} &middot; {mem.status}
+                    </span>
+                  ) : (
+                    <button
+                      onClick={() => setSelectedOrg(nexcell)}
+                      className="px-4 py-2 rounded-xl text-xs font-bold bg-amber-600 hover:bg-amber-700 text-white shadow-xs transition"
+                    >
+                      Join NEX-CELL
+                    </button>
+                  );
+                })()
+              )}
             </div>
           </div>
 
+          {/* NEX-CELL 6 Flagship Initiatives */}
           <div>
             <div className="flex items-center gap-2 mb-3">
-              <Layers className="w-4 h-4 text-indigo-600" />
-              <h4 className="font-extrabold text-sm uppercase tracking-wider text-slate-700">
-                Governed Sub-Clubs (4 Managed Independently)
+              <Sparkles className="w-4 h-4 text-amber-600" />
+              <h4 className="text-xs font-extrabold uppercase tracking-wider text-slate-700">
+                Flagship Venture Initiatives (6 Recurring Programmes)
               </h4>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-              {societySubClubs.map((subClub) => {
-                const myMem = myMemberships.find((m) => m.clubId === subClub.id);
-                return (
-                  <div
-                    key={subClub.id}
-                    className="p-4 rounded-xl border border-indigo-100 bg-white hover:border-indigo-400 shadow-xs flex flex-col justify-between transition"
-                  >
-                    <div>
-                      <div className="flex items-center justify-between text-xs mb-2">
-                        <span className="font-bold text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded-md">
-                          Parent: Society
-                        </span>
-                        <span className="text-slate-400 font-medium">Cap: {subClub.capacity}</span>
-                      </div>
-                      <h5 className="font-bold text-sm text-slate-900">{subClub.name}</h5>
-                      <p className="text-xs text-slate-600 mt-1.5 line-clamp-3">
-                        {subClub.description}
-                      </p>
-                      <div className="text-[11px] text-slate-500 mt-2 border-t pt-2">
-                        <strong>Meeting:</strong> {subClub.meetingRules}
-                      </div>
-                    </div>
-
-                    <div className="mt-3 pt-2.5 border-t">
-                      {isStudent && (
-                        myMem ? (
-                          <span className={`inline-block text-xs font-semibold px-2 py-1 rounded-md ${
-                            myMem.status === "approved" ? "bg-emerald-100 text-emerald-800" : "bg-amber-100 text-amber-800"
-                          }`}>
-                            {myMem.membershipType.toUpperCase()} &middot; {myMem.status.toUpperCase()}
-                          </span>
-                        ) : (
-                          <button
-                            onClick={() => setSelectedClub(subClub)}
-                            className="w-full py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-xs transition shadow-xs"
-                          >
-                            Join Sub-Club
-                          </button>
-                        )
-                      )}
-                    </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+              {nexcell.initiatives?.map((init) => (
+                <div key={init.id} className="p-3.5 rounded-xl border border-amber-100 bg-amber-50/30">
+                  <div className="flex items-center justify-between text-xs font-bold text-slate-900">
+                    <span>{init.name}</span>
+                    <span className="font-mono text-[10px] text-amber-700 bg-amber-100 px-1.5 py-0.5 rounded">
+                      {init.format}
+                    </span>
                   </div>
-                );
-              })}
+                  <p className="text-[11px] text-slate-600 mt-1">{init.description}</p>
+                </div>
+              ))}
             </div>
           </div>
         </div>
       )}
 
-      {/* Coordinator Membership Approval Section */}
-      {(isCoordinator || isAdvisor || isAdmin) && (
+      {/* 2. Kaizen Tech: Technical Club */}
+      {kaizen && (
+        <div className="p-6 rounded-2xl border-2 border-indigo-200 bg-gradient-to-b from-indigo-50/20 via-white to-white shadow-sm space-y-5">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-indigo-100 pb-4">
+            <div className="flex items-start gap-3">
+              <div className="w-12 h-12 rounded-2xl bg-indigo-100 text-indigo-800 flex items-center justify-center shrink-0">
+                <Code2 className="w-6 h-6" />
+              </div>
+              <div>
+                <div className="flex items-center gap-2">
+                  <h3 className="text-xl font-black text-slate-900">{kaizen.name}</h3>
+                  <span className="text-[10px] font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-indigo-100 text-indigo-900">
+                    Technical
+                  </span>
+                </div>
+                <p className="text-xs text-slate-600 mt-1 max-w-3xl">{kaizen.description}</p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-3">
+              {isStudent && (
+                (() => {
+                  const mem = myMemberships.find((m) => m.organizationId === kaizen.id);
+                  return mem ? (
+                    <span className="px-3 py-1.5 rounded-xl text-xs font-bold uppercase bg-emerald-100 text-emerald-800">
+                      {mem.membershipType} &middot; {mem.status}
+                    </span>
+                  ) : (
+                    <button
+                      onClick={() => setSelectedOrg(kaizen)}
+                      className="px-4 py-2 rounded-xl text-xs font-bold bg-indigo-600 hover:bg-indigo-700 text-white shadow-xs transition"
+                    >
+                      Join Kaizen Tech
+                    </button>
+                  );
+                })()
+              )}
+            </div>
+          </div>
+
+          {/* Kaizen Tech 6 Technical Domains */}
+          <div>
+            <div className="flex items-center gap-2 mb-3">
+              <Layers className="w-4 h-4 text-indigo-600" />
+              <h4 className="text-xs font-extrabold uppercase tracking-wider text-slate-700">
+                Configured Technical Domains (6 Specialized Tracks)
+              </h4>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+              {kaizen.units?.map((domain) => (
+                <div key={domain.id} className="p-3.5 rounded-xl border border-indigo-100 bg-indigo-50/30">
+                  <div className="flex items-center justify-between text-xs font-bold text-slate-900">
+                    <span>{domain.name}</span>
+                    <span className="font-mono text-[10px] text-indigo-700 bg-indigo-100 px-1.5 py-0.5 rounded">
+                      {domain.code}
+                    </span>
+                  </div>
+                  <p className="text-[11px] text-slate-600 mt-1">{domain.description}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 3. MALHAR: Cultural Society */}
+      {malhar && (
+        <div className="p-6 rounded-2xl border-2 border-rose-200 bg-gradient-to-b from-rose-50/20 via-white to-white shadow-sm space-y-5">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-rose-100 pb-4">
+            <div className="flex items-start gap-3">
+              <div className="w-12 h-12 rounded-2xl bg-rose-100 text-rose-800 flex items-center justify-center shrink-0">
+                <Palette className="w-6 h-6" />
+              </div>
+              <div>
+                <div className="flex items-center gap-2">
+                  <h3 className="text-xl font-black text-slate-900">{malhar.name}</h3>
+                  <span className="text-[10px] font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-rose-100 text-rose-900">
+                    Cultural Society
+                  </span>
+                </div>
+                <p className="text-xs text-slate-600 mt-1 max-w-3xl">{malhar.description}</p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-3">
+              {isStudent && (
+                (() => {
+                  const mem = myMemberships.find((m) => m.organizationId === malhar.id);
+                  return mem ? (
+                    <span className="px-3 py-1.5 rounded-xl text-xs font-bold uppercase bg-emerald-100 text-emerald-800">
+                      {mem.membershipType} &middot; {mem.status}
+                    </span>
+                  ) : (
+                    <button
+                      onClick={() => setSelectedOrg(malhar)}
+                      className="px-4 py-2 rounded-xl text-xs font-bold bg-rose-600 hover:bg-rose-700 text-white shadow-xs transition"
+                    >
+                      Join MALHAR
+                    </button>
+                  );
+                })()
+              )}
+            </div>
+          </div>
+
+          {/* MALHAR 5 Departments */}
+          <div>
+            <div className="flex items-center gap-2 mb-3">
+              <Building className="w-4 h-4 text-rose-600" />
+              <h4 className="text-xs font-extrabold uppercase tracking-wider text-slate-700">
+                Operating Departments (5 Specialized Production Units)
+              </h4>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+              {malhar.units?.map((dept) => (
+                <div key={dept.id} className="p-3.5 rounded-xl border border-rose-100 bg-rose-50/30">
+                  <div className="flex items-center justify-between text-xs font-bold text-slate-900">
+                    <span>{dept.name}</span>
+                    <span className="font-mono text-[10px] text-rose-700 bg-rose-100 px-1.5 py-0.5 rounded">
+                      {dept.code}
+                    </span>
+                  </div>
+                  <p className="text-[11px] text-slate-600 mt-1">{dept.description}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Membership Review Section (Coordinators, Advisors, Admins) */}
+      {canReview && (
         <div className="p-6 rounded-2xl border border-slate-200 bg-white shadow-sm space-y-4">
           <div className="flex items-center justify-between">
-            <h3 className="font-bold text-lg text-slate-900 flex items-center gap-2">
-              <Users className="w-5 h-5 text-indigo-600" />
-              Membership Requests & Enrolment Management
+            <h3 className="font-bold text-base text-slate-900 flex items-center gap-2">
+              <Users className="w-4 h-4 text-indigo-600" />
+              Organization Membership Queue ({allMemberships.length})
             </h3>
             <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-slate-100 text-slate-700">
-              {allMemberships.length} Enrolled / Pending Records
+              Authorized Review
             </span>
           </div>
 
@@ -268,9 +324,9 @@ export function ClubsHierarchyView({
             <table className="w-full text-left text-xs">
               <thead className="bg-slate-50 border-b text-slate-500 uppercase font-semibold">
                 <tr>
-                  <th className="py-2.5 px-3">Student Name</th>
-                  <th className="py-2.5 px-3">Club / Sub-Club</th>
-                  <th className="py-2.5 px-3">Type</th>
+                  <th className="py-2.5 px-3">Student</th>
+                  <th className="py-2.5 px-3">Organization</th>
+                  <th className="py-2.5 px-3">Tier</th>
                   <th className="py-2.5 px-3">Status</th>
                   <th className="py-2.5 px-3">Date</th>
                   <th className="py-2.5 px-3 text-right">Actions</th>
@@ -282,12 +338,8 @@ export function ClubsHierarchyView({
                     <td className="py-2.5 px-3 font-semibold text-slate-900">
                       {m.userFullName} ({m.studentId || "Student"})
                     </td>
-                    <td className="py-2.5 px-3 text-slate-700">{m.clubName}</td>
-                    <td className="py-2.5 px-3">
-                      <span className="font-semibold text-indigo-700 uppercase">
-                        {m.membershipType}
-                      </span>
-                    </td>
+                    <td className="py-2.5 px-3 text-slate-700 font-bold">{m.organizationName}</td>
+                    <td className="py-2.5 px-3 font-semibold uppercase text-indigo-700">{m.membershipType}</td>
                     <td className="py-2.5 px-3">
                       <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase ${
                         m.status === "approved"
@@ -308,7 +360,7 @@ export function ClubsHierarchyView({
                           <button
                             onClick={() => handleReviewMembership(m.id, "approved")}
                             disabled={loading}
-                            className="p-1 rounded-md bg-emerald-50 text-emerald-700 hover:bg-emerald-100"
+                            className="p-1 rounded bg-emerald-50 text-emerald-700 hover:bg-emerald-100"
                             title="Approve"
                           >
                             <Check className="w-4 h-4" />
@@ -316,7 +368,7 @@ export function ClubsHierarchyView({
                           <button
                             onClick={() => handleReviewMembership(m.id, "rejected")}
                             disabled={loading}
-                            className="p-1 rounded-md bg-rose-50 text-rose-700 hover:bg-rose-100"
+                            className="p-1 rounded bg-rose-50 text-rose-700 hover:bg-rose-100"
                             title="Reject"
                           >
                             <X className="w-4 h-4" />
@@ -333,14 +385,14 @@ export function ClubsHierarchyView({
       )}
 
       {/* Membership Request Modal */}
-      {selectedClub && (
+      {selectedOrg && (
         <div className="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4">
           <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4">
             <h4 className="font-black text-lg text-slate-900">
-              Join {selectedClub.name}
+              Join {selectedOrg.name}
             </h4>
             <p className="text-xs text-slate-600">
-              Select your membership tier for this organization. You can join at most 1 primary club and 1 secondary club across the campus.
+              Select your membership tier for this organization. Mirai policy allows students to join up to 2 primary organizations.
             </p>
 
             <div className="space-y-2">
@@ -377,13 +429,13 @@ export function ClubsHierarchyView({
 
             <div className="flex justify-end gap-2 pt-2">
               <button
-                onClick={() => setSelectedClub(null)}
+                onClick={() => setSelectedOrg(null)}
                 className="px-4 py-2 rounded-xl text-xs font-semibold text-slate-600 hover:bg-slate-100"
               >
                 Cancel
               </button>
               <button
-                onClick={() => handleRequestMembership(selectedClub.id)}
+                onClick={() => handleRequestMembership(selectedOrg.id)}
                 disabled={loading}
                 className="px-4 py-2 rounded-xl text-xs font-bold bg-indigo-600 hover:bg-indigo-700 text-white shadow-xs"
               >

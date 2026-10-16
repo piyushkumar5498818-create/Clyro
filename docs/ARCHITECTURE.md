@@ -1,35 +1,64 @@
-# Clyro Architecture Specification
+# Clyro Architecture Specification: Mirai School of Technology
 
 ## 1. System Overview
-Clyro is a unified college Club Activities Tracker engineered to manage multi-tier club hierarchies, session planning, time-limited attendance check-in, submission evaluation rubrics, and tamper-evident certificate issuance.
+Clyro is a unified college Club Activities Tracker engineered to manage multi-tenant club organizations, specialized units (domains & departments), recurring initiatives, session planning, time-limited QR attendance check-in, dynamic rubric evaluations, and tamper-evident certificate issuance for **Mirai School of Technology (MSOT)**.
 
-## 2. Multi-Tier Hierarchy Architecture
-Clyro models campus organizations as a relational tree:
-- **Top-Level Clubs:** Independent campus organizations (e.g., Club 1, Club 2, Club 3).
-- **Society:** Top-level parent organization possessing its own administrative overview and consolidated metrics.
-- **Society Sub-Clubs:** 4 independently manageable sub-clubs (e.g., Sub-club 1, Sub-club 2, Sub-club 3, Sub-club 4) linked via `parent_club_id`.
-  - Independent memberships, coordinators, activities, attendance records, and evaluations.
-  - Consolidated reporting at the Society level without double-counting student records.
+---
+
+## 2. Institutional Organization Hierarchy
 
 ```
-       +-----------------------------------------------+
-       |             College Administration            |
-       +-----------------------------------------------+
-           |               |               |
-   +---------------+---------------+---------------+---------------+
-   |    Club 1     |    Club 2     |    Club 3     |    Society    |
-   +---------------+---------------+---------------+---------------+
-                                                           |
-                           +---------------+---------------+---------------+---------------+
-                           |  Sub-Club 1   |  Sub-Club 2   |  Sub-Club 3   |  Sub-Club 4   |
-                           +---------------+---------------+---------------+---------------+
+                            +-----------------------------------------------+
+                            |             College Administration            |
+                            |           (Mirai School of Technology)        |
+                            +-----------------------------------------------+
+                                                    |
+            +---------------------------------------+---------------------------------------+
+            |                                       |                                       |
++-----------------------+               +-----------------------+               +-----------------------+
+|       NEX-CELL        |               |      Kaizen Tech      |               |        MALHAR         |
+| (Entrepreneurship)    |               |   (Technical Club)    |               |   (Cultural Society)  |
++-----------------------+               +-----------------------+               +-----------------------+
+            |                                       |                                       |
+  [Flagship Initiatives]                  [6 Technical Domains]                   [5 Operating Depts]
+  1. Founders Fire                        1. Full-Stack Web Dev                   1. Management
+  2. Scrap to Scale                       2. Applied AI/ML                        2. Media
+  3. Masterminds                          3. Competitive Prog                     3. Tech
+  4. Founder Talks                        4. Mobile App Dev                       4. Designing
+  5. The Mirage Sprint                    5. Open Source (OSS)                    5. Public Relations (PR)
+  6. Open Build                           6. UI/UX Design
 ```
 
-## 3. Technology Stack
-- **Framework:** Next.js 14 (App Router)
-- **Language:** TypeScript 5.6
-- **Styling:** Tailwind CSS + Radix UI / shadcn design system
-- **Database / Backend:** Supabase PostgreSQL with Row Level Security (RLS) & local persistent fallback engine
-- **File Storage:** Supabase Storage / S3-compatible private upload storage
-- **Attendance Verification:** Cryptographic time-based rotating tokens & QR generation
-- **Document / Certificate Generation:** Client and Server PDF rendering with SHA-256 verification hash
+### Key Structural Principles
+1. **Explicit Entity Taxonomy:** Differentiates between primary *Organizations*, internal *Units* (domains/departments), recurring *Initiatives*, and scheduled *Activities*.
+2. **Double-Counting Prevention:** All aggregate institutional and cross-club reports utilize `COUNT(DISTINCT user_id)`, ensuring accurate student counts even when students participate across multiple organizations or units.
+3. **Multi-Tenant Scoping:** Coordinators and leads possess scoped authorization strictly limited to their assigned organization or unit.
+
+---
+
+## 3. Technology Stack & Request Flow
+
+- **Frontend:** Next.js 14 App Router, React 18, TypeScript 5.6, Tailwind CSS, Lucide Icons.
+- **Backend & Logic:** Next.js Server Actions with server-side authorization guards.
+- **Data Layer:** Supabase PostgreSQL with Row Level Security (RLS) & local persistent fallback engine.
+- **Attendance Verification:** Dynamic, time-limited, rotating token generator and QR rendering.
+- **Document & Certificate Generation:** Client and Server PDF rendering with SHA-256 cryptographic verification digest.
+
+### Request Pipeline
+```
+[Client / Mobile] 
+       │ 
+       ▼
+[Next.js Server Action]
+       │ 
+       ├─► 1. Identity & Session Verification
+       ├─► 2. RBAC Scope & Permission Check
+       ├─► 3. Relational Constraint & State Transition Validation
+       │ 
+       ▼
+[Database / Ledger Engine]
+       │ 
+       ├─► Anti-Duplicate Database Constraint
+       ├─► Audit Logging (Actor ID + Reason + Timestamp)
+       └─► Atomic Commit
+```

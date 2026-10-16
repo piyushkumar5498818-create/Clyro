@@ -11,10 +11,12 @@ export async function generateTokenAction(
     const activeUser = db.getActiveUser();
     if (
       activeUser.role !== "student_coordinator" &&
+      activeUser.role !== "society_admin" &&
+      activeUser.role !== "unit_lead" &&
       activeUser.role !== "faculty_advisor" &&
       activeUser.role !== "college_admin"
     ) {
-      return { success: false, error: "Only coordinators can open attendance check-in." };
+      return { success: false, error: "Only coordinators or leads can open attendance check-in." };
     }
 
     const token = db.generateAttendanceToken(activityId, activeUser.id, minutes);
@@ -55,17 +57,18 @@ export async function correctAttendanceAction(
     const activeUser = db.getActiveUser();
     if (
       activeUser.role !== "student_coordinator" &&
+      activeUser.role !== "society_admin" &&
       activeUser.role !== "faculty_advisor" &&
       activeUser.role !== "college_admin"
     ) {
-      return { success: false, error: "Only coordinators or advisors can correct attendance." };
+      return { success: false, error: "Only coordinators, advisors, or admins can correct attendance." };
     }
 
     if (!reason || reason.trim().length < 5) {
-      return { success: false, error: "A valid explanation reason (at least 5 chars) is mandatory." };
+      return { success: false, error: "A valid explanation reason (at least 5 characters) is mandatory for audit compliance." };
     }
 
-    const rec = db.correctAttendance(recordId, status, reason, activeUser.id);
+    const rec = db.correctAttendance(recordId, status, reason.trim(), activeUser.id);
     return { success: true, data: rec };
   } catch (err: unknown) {
     return { success: false, error: (err as Error).message };

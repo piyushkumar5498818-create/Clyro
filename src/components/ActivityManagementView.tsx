@@ -139,7 +139,7 @@ export function ActivityManagementView({
               >
                 {clubs.map((c) => (
                   <option key={c.id} value={c.id}>
-                    {c.name} {c.parentClubId ? "(Sub-Club)" : ""}
+                    {c.name}
                   </option>
                 ))}
               </select>

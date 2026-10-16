@@ -1,25 +1,41 @@
 export type UserRole =
   | "college_admin"
   | "campus_manager"
-  | "society_admin"
   | "faculty_advisor"
+  | "society_admin"
   | "student_coordinator"
+  | "unit_lead"
   | "student";
+
+export type OrganizationType =
+  | "entrepreneurship_club"
+  | "technical_club"
+  | "cultural_society";
+
+export type UnitType =
+  | "technical_domain" // Kaizen Tech domains
+  | "department"       // MALHAR departments
+  | "initiative_track";// NEX-CELL specialized tracks
 
 export type MembershipType = "primary" | "secondary";
 export type MembershipStatus = "pending" | "approved" | "rejected";
+
 export type ActivityFormat =
   | "presentation"
   | "workshop"
   | "hackathon"
+  | "pitch_session"
+  | "audition"
   | "competition"
   | "assignment";
+
 export type ActivityStatus =
   | "draft"
   | "submitted_for_approval"
   | "approved"
   | "rejected"
   | "completed";
+
 export type AttendanceStatus = "present" | "late" | "excused" | "absent";
 export type CheckInMethod = "qr_code" | "passcode" | "coordinator_manual";
 export type SubmissionType = "file" | "link" | "text";
@@ -41,54 +57,95 @@ export interface Profile {
   campusId: string;
   studentId?: string;
   avatarUrl?: string;
+  title?: string; // e.g. "President", "Media Head", "Domain Lead"
+  organizationId?: string; // Assigned organization if applicable
+  unitId?: string; // Assigned unit (domain or department) if applicable
   createdAt: string;
 }
 
-export interface Club {
+export interface Organization {
   id: string;
   campusId: string;
   name: string;
+  shortName: string; // e.g. "NEX-CELL", "Kaizen Tech", "MALHAR"
   description: string;
-  category: string;
-  isSociety: boolean;
-  parentClubId: string | null; // NULL for top-level, non-null for society sub-clubs
+  type: OrganizationType;
   facultyAdvisorId: string | null;
+  advisorName?: string;
   capacity: number;
   meetingRules: string;
   createdAt: string;
-  // Joined fields for display
-  advisorName?: string;
-  subClubs?: Club[];
+  // Joined stats
+  units?: OrganizationUnit[];
+  initiatives?: Initiative[];
   memberCount?: number;
 }
 
-export interface ClubCoordinator {
+export type Club = Organization;
+
+export interface OrganizationUnit {
   id: string;
-  clubId: string;
-  userId: string;
-  assignedAt: string;
-  userFullName?: string;
-  userEmail?: string;
+  organizationId: string;
+  name: string;
+  code: string;
+  type: UnitType;
+  description: string;
+  leadId?: string;
+  leadName?: string;
+  capacity?: number;
+  createdAt: string;
+  memberCount?: number;
 }
 
-export interface ClubMembership {
+export interface Initiative {
   id: string;
-  clubId: string;
+  organizationId: string;
+  name: string;
+  code: string;
+  description: string;
+  format: string; // e.g. "Pitch Sessions", "MVP Incubator", "Peer Groups"
+  status: "active" | "completed" | "upcoming";
+  createdAt: string;
+}
+
+export interface OrganizationMembership {
+  id: string;
+  organizationId: string;
   userId: string;
   membershipType: MembershipType;
   status: MembershipStatus;
   requestedAt: string;
   reviewedAt?: string;
   reviewedBy?: string;
-  clubName?: string;
+  organizationName?: string;
   userFullName?: string;
   userEmail?: string;
   studentId?: string;
 }
 
+export type ClubMembership = OrganizationMembership;
+
+export interface UnitAssignment {
+  id: string;
+  unitId: string;
+  userId: string;
+  role: "lead" | "member";
+  assignedAt: string;
+  unitName?: string;
+  userFullName?: string;
+}
+
+export interface RubricCriteria {
+  name: string;
+  maxScore: number;
+  description: string;
+}
+
 export interface Activity {
   id: string;
-  clubId: string;
+  organizationId: string;
+  unitId?: string; // Optional: specific domain or department
+  initiativeId?: string; // Optional: specific initiative (e.g. Founders Fire)
   title: string;
   topic: string;
   format: ActivityFormat;
@@ -104,15 +161,19 @@ export interface Activity {
   rejectionReason?: string;
   createdBy: string;
   createdAt: string;
+  // Custom rubric criteria (or defaults to standard 100pt rubric)
+  rubricCriteria?: RubricCriteria[];
   // Joined fields
+  organizationName?: string;
   clubName?: string;
-  isParentSociety?: boolean;
+  unitName?: string;
+  initiativeName?: string;
 }
 
 export interface AttendanceToken {
   id: string;
   activityId: string;
-  tokenCode: string; // 6-digit or rotating token
+  tokenCode: string;
   validFrom: string;
   validUntil: string;
   createdBy: string;
@@ -131,7 +192,7 @@ export interface AttendanceRecord {
   userFullName?: string;
   studentId?: string;
   activityTitle?: string;
-  clubName?: string;
+  organizationName?: string;
 }
 
 export interface Submission {
@@ -150,23 +211,41 @@ export interface Submission {
   evaluation?: Evaluation;
 }
 
+export interface EvaluationScoreItem {
+  criteriaName: string;
+  score: number;
+  maxScore: number;
+}
+
 export interface Evaluation {
   id: string;
   submissionId: string;
   evaluatorId: string;
-  scoreContent: number; // 0-40
-  scorePresentation: number; // 0-30
-  scoreParticipation: number; // 0-30
+  scoreBreakdown: EvaluationScoreItem[];
+  scoreContent?: number;
+  scorePresentation?: number;
+  scoreParticipation?: number;
   totalScore: number; // 0-100
   feedback: string;
   evaluatedAt: string;
   evaluatorName?: string;
 }
 
+export interface Team {
+  id: string;
+  activityId?: string;
+  name: string;
+  leadUserId: string;
+  memberUserIds: string[];
+  projectTitle?: string;
+  projectUrl?: string;
+  createdAt: string;
+}
+
 export interface Certificate {
   id: string;
   userId: string;
-  clubId: string;
+  organizationId: string;
   activityId?: string;
   certificateType: CertificateType;
   title: string;
@@ -174,6 +253,7 @@ export interface Certificate {
   verificationCode: string;
   pdfHash: string;
   userFullName?: string;
+  organizationName?: string;
   clubName?: string;
   studentId?: string;
 }

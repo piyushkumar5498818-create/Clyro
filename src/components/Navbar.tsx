@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { Profile, UserRole } from "@/types/database";
-import { ShieldCheck, UserCheck, Layers } from "lucide-react";
+import { ShieldCheck, UserCheck } from "lucide-react";
 
 interface NavbarProps {
   currentUser: Profile;
@@ -15,9 +15,10 @@ interface NavbarProps {
 const ROLE_LABELS: Record<UserRole, { label: string; badge: string }> = {
   college_admin: { label: "College Admin", badge: "bg-purple-100 text-purple-800 border-purple-300" },
   campus_manager: { label: "Campus Manager", badge: "bg-blue-100 text-blue-800 border-blue-300" },
-  society_admin: { label: "Society Admin", badge: "bg-indigo-100 text-indigo-800 border-indigo-300" },
   faculty_advisor: { label: "Faculty Advisor", badge: "bg-amber-100 text-amber-800 border-amber-300" },
-  student_coordinator: { label: "Student Coordinator", badge: "bg-emerald-100 text-emerald-800 border-emerald-300" },
+  society_admin: { label: "Society President", badge: "bg-indigo-100 text-indigo-800 border-indigo-300" },
+  student_coordinator: { label: "Student Lead", badge: "bg-emerald-100 text-emerald-800 border-emerald-300" },
+  unit_lead: { label: "Domain / Dept Lead", badge: "bg-teal-100 text-teal-800 border-teal-300" },
   student: { label: "Student", badge: "bg-sky-100 text-sky-800 border-sky-300" },
 };
 
@@ -47,8 +48,8 @@ export function Navbar({
                 <span className="font-extrabold text-lg tracking-tight text-slate-900 leading-none">
                   Clyro
                 </span>
-                <span className="text-[10px] text-slate-500 font-medium">
-                  MSOT Campus Platform
+                <span className="text-[10px] text-indigo-600 font-bold">
+                  Mirai School of Technology
                 </span>
               </div>
             </Link>
@@ -56,7 +57,7 @@ export function Navbar({
             <nav className="hidden md:flex items-center gap-1">
               {[
                 { id: "overview", label: "Dashboard" },
-                { id: "clubs", label: "Clubs & Society" },
+                { id: "clubs", label: "Organizations & Units" },
                 { id: "activities", label: "Club Day" },
                 { id: "attendance", label: "Attendance" },
                 { id: "submissions", label: "Submissions & Rubric" },
@@ -77,23 +78,23 @@ export function Navbar({
             </nav>
           </div>
 
-          {/* Persona / Role Switcher for Autonomous Evaluation */}
+          {/* Persona / Role Switcher */}
           <div className="flex items-center gap-3">
             <div className="hidden lg:flex items-center gap-1.5 text-xs text-slate-500 font-medium">
               <UserCheck className="w-3.5 h-3.5 text-indigo-600" />
-              <span>Simulated Persona:</span>
+              <span>Persona:</span>
             </div>
 
             <div className="relative inline-block">
               <select
-                aria-label="Simulated Persona Role Switcher"
+                aria-label="Persona Switcher"
                 value={currentUser.id}
                 onChange={(e) => onSwitchUser(e.target.value)}
                 className="text-xs sm:text-sm font-semibold rounded-lg border border-slate-300 bg-slate-50 py-1.5 pl-3 pr-8 text-slate-800 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 cursor-pointer"
               >
                 {profiles.map((p) => (
                   <option key={p.id} value={p.id}>
-                    {p.fullName} ({ROLE_LABELS[p.role]?.label || p.role})
+                    {p.fullName} — {p.title || ROLE_LABELS[p.role]?.label}
                   </option>
                 ))}
               </select>
@@ -102,7 +103,7 @@ export function Navbar({
             <span
               className={`hidden sm:inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold border ${roleInfo.badge}`}
             >
-              {roleInfo.label}
+              {currentUser.title || roleInfo.label}
             </span>
 
             <Link
@@ -119,7 +120,7 @@ export function Navbar({
         <div className="flex md:hidden overflow-x-auto py-2 gap-1 border-t border-slate-100 text-xs">
           {[
             { id: "overview", label: "Dashboard" },
-            { id: "clubs", label: "Clubs" },
+            { id: "clubs", label: "Orgs & Units" },
             { id: "activities", label: "Activities" },
             { id: "attendance", label: "Attendance" },
             { id: "submissions", label: "Submissions" },

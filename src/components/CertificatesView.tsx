@@ -187,7 +187,7 @@ export function CertificatesView({
             <div>
               <div className="flex items-center justify-between mb-3">
                 <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-200">
-                  {cert.clubName}
+                  {cert.organizationName || cert.clubName}
                 </span>
                 <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase bg-emerald-100 text-emerald-800">
                   {cert.certificateType}

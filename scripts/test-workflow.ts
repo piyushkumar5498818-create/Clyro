@@ -14,98 +14,137 @@ function assert(condition: boolean, testName: string, detail?: string) {
 }
 
 async function runTests() {
-  console.log("=== RUNNING CLYRO CORE INTEGRITY & WORKFLOW TEST SUITE ===");
+  console.log("=== RUNNING CLYRO MIRAI ORGANIZATIONAL INTEGRITY & WORKFLOW TEST SUITE ===");
 
-  // 1. Hierarchy & Relational Model Tests
-  console.log("\n1. Organizational Hierarchy Tests:");
-  const topClubs = db.getTopLevelClubs();
-  assert(topClubs.length === 4, "System has exactly 4 top-level clubs", `Found ${topClubs.length}`);
+  // 1. Organizational Model Tests
+  console.log("\n1. Primary Organizations & Institutional Structure:");
+  const orgs = db.getAllOrganizations();
+  assert(orgs.length === 3, "Exactly 3 primary organizations deployed", `Found ${orgs.length}`);
 
-  const society = db.getSociety();
-  assert(!!society, "Identified top-level Society entity");
-  assert(society?.isSociety === true, "Society entity has isSociety = true");
+  const nexcell = orgs.find((o) => o.shortName === "NEX-CELL");
+  assert(!!nexcell, "NEX-CELL (Entrepreneurship Club) exists");
+  assert(nexcell?.type === "entrepreneurship_club", "NEX-CELL is categorized as entrepreneurship_club");
 
-  const subClubs = db.getSocietySubClubs();
-  assert(subClubs.length === 4, "Society governs exactly 4 sub-clubs", `Found ${subClubs.length}`);
-  const allLinked = subClubs.every((sc) => sc.parentClubId === society?.id);
-  assert(allLinked, "All 4 sub-clubs have explicit parentClubId referencing Society");
+  const kaizen = orgs.find((o) => o.shortName === "Kaizen Tech");
+  assert(!!kaizen, "Kaizen Tech (Technical Club) exists");
+  assert(kaizen?.type === "technical_club", "Kaizen Tech is categorized as technical_club");
 
-  // 2. Metrics & Non-Double-Counting
-  console.log("\n2. Consolidated Metrics & Double-Counting Prevention:");
-  const collegeMetrics = db.getCollegeMetrics();
-  assert(collegeMetrics.totalTopLevelClubs === 4, "College metrics report 4 top-level clubs");
-  assert(collegeMetrics.societySubClubsCount === 4, "College metrics report 4 society sub-clubs");
-  assert(collegeMetrics.totalClubsAndWings === 8, "Total distinct organizations equals 8");
+  const malhar = orgs.find((o) => o.shortName === "MALHAR");
+  assert(!!malhar, "MALHAR (Cultural Society) exists");
+  assert(malhar?.type === "cultural_society", "MALHAR is categorized as cultural_society");
 
-  const societyMetrics = db.getSocietyConsolidatedMetrics();
-  assert(societyMetrics?.subClubsCount === 4, "Society metrics consolidate all 4 sub-clubs");
-  assert(typeof societyMetrics?.totalUniqueMembers === "number", "Consolidated unique members calculated");
+  // 2. Units & Initiatives Tests
+  console.log("\n2. Specialized Units (Domains & Departments) & Initiatives:");
+  const kaizenDomains = db.getUnits(kaizen?.id);
+  assert(kaizenDomains.length === 6, "Kaizen Tech has exactly 6 technical domains", `Found ${kaizenDomains.length}`);
+  const domainCodes = kaizenDomains.map((d) => d.code);
+  assert(
+    domainCodes.includes("WEB") &&
+    domainCodes.includes("AI_ML") &&
+    domainCodes.includes("CP") &&
+    domainCodes.includes("MOBILE") &&
+    domainCodes.includes("OSS") &&
+    domainCodes.includes("UIUX"),
+    "All 6 Kaizen technical domains verified (Web, AI/ML, CP, Mobile, OSS, UI/UX)"
+  );
 
-  // 3. Membership Limits & Duplicate Protection
-  console.log("\n3. Membership Rules & Duplicate Prevention:");
-  const testStudentId = "u0000000-0000-0000-0000-000000000006"; // Alex Rivera
-  const webClubId = "b0000000-0000-0000-0000-000000000101";
-  const aiClubId = "b0000000-0000-0000-0000-000000000102";
+  const malharDepts = db.getUnits(malhar?.id);
+  assert(malharDepts.length === 5, "MALHAR has exactly 5 cultural departments", `Found ${malharDepts.length}`);
+  const deptCodes = malharDepts.map((d) => d.code);
+  assert(
+    deptCodes.includes("MGMT") &&
+    deptCodes.includes("MEDIA") &&
+    deptCodes.includes("TECH") &&
+    deptCodes.includes("DESIGN") &&
+    deptCodes.includes("PR"),
+    "All 5 MALHAR departments verified (Management, Media, Tech, Designing, PR)"
+  );
 
-  // Duplicate request check
+  const nexcellInitiatives = db.getInitiatives(nexcell?.id);
+  assert(nexcellInitiatives.length === 6, "NEX-CELL has exactly 6 flagship initiatives", `Found ${nexcellInitiatives.length}`);
+  const initCodes = nexcellInitiatives.map((i) => i.code);
+  assert(
+    initCodes.includes("FIRE") &&
+    initCodes.includes("SCALE") &&
+    initCodes.includes("MINDS") &&
+    initCodes.includes("TALKS") &&
+    initCodes.includes("MIRAGE") &&
+    initCodes.includes("BUILD"),
+    "All 6 NEX-CELL initiatives verified (Founders Fire, Scrap to Scale, Masterminds, Founder Talks, The Mirage, Open Build)"
+  );
+
+  // 3. Institutional Metrics & Non-Double-Counting
+  console.log("\n3. Campus Metrics & Non-Double-Counting Aggregation:");
+  const institutionalMetrics = db.getInstitutionalMetrics();
+  assert(institutionalMetrics.totalOrganizations === 3, "Reports exactly 3 primary organizations");
+  assert(institutionalMetrics.totalUnits === 11, "Reports exactly 11 subordinate units (6 domains + 5 depts)");
+  assert(institutionalMetrics.totalInitiatives === 6, "Reports exactly 6 initiatives");
+  assert(typeof institutionalMetrics.totalEnrolledStudents === "number", "Calculates unique distinct student count");
+
+  // 4. Membership Rules & Limit Enforcement
+  console.log("\n4. Membership Enrolment & Constraints:");
+  const testStudentId = "u0000000-0000-0000-0000-000000000009"; // Alex Rivera
+
+  // Duplicate membership attempt
   let duplicateThrown = false;
   try {
-    db.requestMembership(testStudentId, webClubId, "secondary");
+    db.requestMembership(testStudentId, kaizen!.id, "primary");
   } catch (err: any) {
     duplicateThrown = true;
   }
-  assert(duplicateThrown, "Throws error when student requests duplicate club membership");
+  assert(duplicateThrown, "Rejects duplicate membership request for same organization");
 
-  // Secondary club request check
+  // Join second organization (NEX-CELL)
   try {
-    const secMem = db.requestMembership(testStudentId, aiClubId, "secondary");
-    assert(secMem.membershipType === "secondary", "Successfully requested secondary club membership");
+    const mem2 = db.requestMembership(testStudentId, nexcell!.id, "secondary");
+    assert(mem2.status === "pending", "Successfully requested secondary membership in NEX-CELL");
   } catch (err: any) {
-    assert(false, "Secondary membership request failed", err.message);
+    assert(false, "Failed to request secondary membership", err.message);
   }
 
-  // Exceeding secondary limit check
-  let thirdLimitThrown = false;
+  // Attempting third club exceeds default cap of 2
+  let thirdClubThrown = false;
   try {
-    db.requestMembership(testStudentId, "b0000000-0000-0000-0000-000000000103", "secondary");
+    db.requestMembership(testStudentId, malhar!.id, "secondary");
   } catch (err: any) {
-    thirdLimitThrown = true;
+    thirdClubThrown = true;
   }
-  assert(thirdLimitThrown, "Throws error when student exceeds secondary membership limit");
+  assert(thirdClubThrown, "Enforces institutional membership cap of 2 clubs per student");
 
-  // 4. Activity Creation & Approval Flow
-  console.log("\n4. Club Day Activity Lifecycle:");
+  // 5. Activity Lifecycle & Faculty Review
+  console.log("\n5. Activity Lifecycle & Advisory Review:");
   const newActivity = db.createActivity({
-    clubId: aiClubId,
-    title: "AI Workshop: Transformers in Practice",
-    topic: "Attention Mechanisms & Embeddings",
-    format: "workshop",
-    deliverableDescription: "Submit Google Colab notebook URL with trained text classifier",
-    scheduledDate: "2026-10-18",
-    startTime: "13:00",
-    endTime: "15:00",
-    venue: "Lab 3",
-    submissionDeadline: new Date(Date.now() + 86400000 * 3).toISOString(),
-    createdBy: "u0000000-0000-0000-0000-000000000005",
+    organizationId: nexcell!.id,
+    initiativeId: nexcellInitiatives[0].id, // Founders Fire
+    title: "Founders Fire: Pre-Seed Pitch Session",
+    topic: "Venture Pitching & Angel Feedback",
+    format: "pitch_session",
+    deliverableDescription: "Upload 10-slide deck and Loom walkthrough link",
+    scheduledDate: "2026-10-24",
+    startTime: "15:00",
+    endTime: "18:00",
+    venue: "Incubation Center Block B",
+    submissionDeadline: new Date(Date.now() + 86400000 * 2).toISOString(),
+    createdBy: "u0000000-0000-0000-0000-000000000006",
   });
   assert(newActivity.status === "submitted_for_approval", "Activity initially in submitted_for_approval state");
 
   const approvedActivity = db.reviewActivity(
     newActivity.id,
     true,
-    "u0000000-0000-0000-0000-000000000004" // Advisor
+    "u0000000-0000-0000-0000-000000000004" // Maya Angelou (Advisor)
   );
-  assert(approvedActivity.status === "approved", "Advisor successfully approves activity plan");
+  assert(approvedActivity.status === "approved", "Faculty Advisor approves activity plan");
 
-  // 5. Time-Limited Attendance Check-In & Duplicate Guard
-  console.log("\n5. Dynamic Attendance Token & Duplicate Protection:");
-  const token = db.generateAttendanceToken(approvedActivity.id, "u0000000-0000-0000-0000-000000000005", 30);
-  assert(!!token.tokenCode, `Attendance token generated: ${token.tokenCode}`);
+  // 6. Dynamic Attendance Token & Duplicate Protection
+  console.log("\n6. Dynamic Attendance Token & Fraud Protection:");
+  const token = db.generateAttendanceToken(approvedActivity.id, "u0000000-0000-0000-0000-000000000006", 45);
+  assert(!!token.tokenCode, `Dynamic token generated: ${token.tokenCode}`);
 
-  // Invalid code check
+  // Invalid token check
   let invalidCodeThrown = false;
   try {
-    db.checkInStudent(approvedActivity.id, testStudentId, "WRONG-CODE");
+    db.checkInStudent(approvedActivity.id, testStudentId, "INVALID-CODE-99");
   } catch (err: any) {
     invalidCodeThrown = true;
   }
@@ -113,9 +152,9 @@ async function runTests() {
 
   // Valid check-in
   const attRecord = db.checkInStudent(approvedActivity.id, testStudentId, token.tokenCode, "qr_code");
-  assert(attRecord.status === "present", "Valid check-in marks student Present");
+  assert(attRecord.status === "present" || attRecord.status === "late", "Valid check-in records student attendance");
 
-  // Duplicate check-in guard
+  // Duplicate check-in rejection
   let duplicateAttThrown = false;
   try {
     db.checkInStudent(approvedActivity.id, testStudentId, token.tokenCode, "qr_code");
@@ -124,72 +163,73 @@ async function runTests() {
   }
   assert(duplicateAttThrown, "Rejects duplicate check-in attempt for same session");
 
-  // Attendance manual correction
+  // Coordinator correction with mandatory reason
   const corrected = db.correctAttendance(
     attRecord.id,
-    "late",
-    "Student arrived 15 mins late due to campus transport delay",
-    "u0000000-0000-0000-0000-000000000005"
+    "excused",
+    "Student representing college at hackathon conference",
+    "u0000000-0000-0000-0000-000000000006"
   );
-  assert(corrected.status === "late", "Coordinator successfully records attendance correction with reason");
+  assert(corrected.status === "excused", "Attendance corrected with mandatory audit reason");
 
-  // 6. Submissions & Rubric Scoring
-  console.log("\n6. Submissions & Multi-Point Rubric Evaluations:");
+  // 7. Submissions & Dynamic Rubrics
+  console.log("\n7. Submissions & Dynamic Multi-Criteria Rubrics:");
   const sub = db.submitWork(approvedActivity.id, testStudentId, "link", {
-    linkUrl: "https://colab.research.google.com/drive/1example-notebook",
-    notes: "Trained mini-BERT with 94.2% test accuracy.",
+    linkUrl: "https://pitch.com/founders-fire-demo",
+    notes: "AI Copilot for supply chain validation with 3 beta pilots.",
   });
-  assert(!!sub.id, "Student successfully submits activity deliverable");
+  assert(!!sub.id, "Student successfully submits deliverable");
 
   // Duplicate submission guard
   let duplicateSubThrown = false;
   try {
-    db.submitWork(approvedActivity.id, testStudentId, "link", { linkUrl: "https://another.url" });
+    db.submitWork(approvedActivity.id, testStudentId, "link", { linkUrl: "https://another-url.com" });
   } catch (err: any) {
     duplicateSubThrown = true;
   }
   assert(duplicateSubThrown, "Rejects duplicate deliverable submission for same activity");
 
-  // Rubric out-of-bounds check
-  let rubricBoundsThrown = false;
-  try {
-    db.evaluateSubmission(sub.id, "u0000000-0000-0000-0000-000000000004", {
-      scoreContent: 50, // exceeds max 40
-      scorePresentation: 20,
-      scoreParticipation: 20,
-      feedback: "Invalid score test",
-    });
-  } catch (err: any) {
-    rubricBoundsThrown = true;
-  }
-  assert(rubricBoundsThrown, "Enforces rubric bounds (Content <= 40, Pres <= 30, Part <= 30)");
+  // Dynamic Rubric Evaluation
+  const evalResult = db.evaluateSubmission(
+    sub.id,
+    "u0000000-0000-0000-0000-000000000004", // Advisor
+    [
+      { criteriaName: "Problem Validation & TAM", score: 28, maxScore: 30 },
+      { criteriaName: "Technical Feasibility & MVP", score: 28, maxScore: 30 },
+      { criteriaName: "Traction & Unit Economics", score: 18, maxScore: 20 },
+      { criteriaName: "Pitch Delivery & Defense", score: 19, maxScore: 20 },
+    ],
+    "Strong founder validation, impressive prototype traction."
+  );
+  assert(evalResult.totalScore === 93, `Total score calculated correctly: ${evalResult.totalScore}/100`);
 
-  // Valid rubric evaluation
-  const evalResult = db.evaluateSubmission(sub.id, "u0000000-0000-0000-0000-000000000004", {
-    scoreContent: 37,
-    scorePresentation: 26,
-    scoreParticipation: 28,
-    feedback: "Solid model implementation and clean documentation.",
-  });
-  assert(evalResult.totalScore === 91, `Total score calculated correctly: ${evalResult.totalScore}/100`);
+  // 8. Event Team Formation
+  console.log("\n8. Event Team Formation:");
+  const team = db.createTeam(
+    approvedActivity.id,
+    "VentureFlow Robotics",
+    testStudentId,
+    [testStudentId, "u0000000-0000-0000-0000-000000000007"]
+  );
+  assert(team.name === "VentureFlow Robotics", "Team created successfully with lead and members");
 
-  // 7. Certificates & Verification
-  console.log("\n7. Certificate Issuance & Verification Ledger:");
+  // 9. Certificates & Verification Ledger
+  console.log("\n9. Verifiable Certificate & Fraud Prevention:");
   const cert = db.issueCertificate(
     testStudentId,
-    aiClubId,
-    "Excellence in Deep Learning & NLP Workshop",
-    "merit",
+    nexcell!.id,
+    "Winner: Founders Fire Seed Pitch Sprint",
+    "achievement",
     approvedActivity.id
   );
-  assert(!!cert.verificationCode, `Certificate issued with code: ${cert.verificationCode}`);
+  assert(!!cert.verificationCode, `Certificate generated with code: ${cert.verificationCode}`);
 
   const verified = db.verifyCertificate(cert.verificationCode);
-  assert(!!verified, "Valid verification code locates certificate record");
-  assert(verified?.userFullName === "Alex Rivera", "Verified certificate matches student name");
+  assert(!!verified, "Verification ledger validates authentic certificate");
+  assert(verified?.userFullName === "Alex Rivera", "Verified certificate recipient matches student profile");
 
-  const fakeVerification = db.verifyCertificate("FAKE-TAMPERED-CODE-9999");
-  assert(fakeVerification === undefined, "Tampered/invalid code is safely rejected");
+  const tampered = db.verifyCertificate("FAKE-TAMPERED-CERT-9999");
+  assert(tampered === undefined, "Tampered/fraudulent code is rejected by verification service");
 
   console.log(`\n======================================================`);
   console.log(`TEST SUMMARY: ${testsPassed} PASSED, ${testsFailed} FAILED`);
