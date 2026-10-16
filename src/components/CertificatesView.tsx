@@ -143,12 +143,12 @@ export function CertificatesView({
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200 pb-5">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-white/10 pb-5">
         <div>
-          <h2 className="text-2xl font-black tracking-tight text-slate-900">
+          <h2 className="text-2xl font-black tracking-tight text-white">
             Verifiable Certificates & Transcripts
           </h2>
-          <p className="text-sm text-slate-600 mt-1">
+          <p className="text-sm text-slate-300 mt-1">
             Tamper-Proof Ledger &middot; Public Verification &middot; Downloadable PDF Records
           </p>
         </div>
@@ -156,7 +156,7 @@ export function CertificatesView({
         {canIssue && (
           <button
             onClick={() => setShowIssueModal(true)}
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-indigo-600 text-white font-semibold text-xs hover:bg-indigo-700 transition shadow-xs"
+            className="glass-btn-primary inline-flex items-center gap-2 px-4 py-2.5 rounded-xl font-bold text-xs shadow-md transition"
           >
             <Plus className="w-4 h-4" />
             Issue New Certificate
@@ -166,13 +166,13 @@ export function CertificatesView({
 
       {message && (
         <div
-          className={`p-4 rounded-xl flex items-center gap-3 text-sm font-medium ${
+          className={`p-4 rounded-2xl flex items-center gap-3 text-sm font-semibold backdrop-blur-md border ${
             message.type === "success"
-              ? "bg-emerald-50 text-emerald-800 border border-emerald-200"
-              : "bg-rose-50 text-rose-800 border border-rose-200"
+              ? "bg-emerald-500/15 text-emerald-200 border-emerald-500/30"
+              : "bg-rose-500/15 text-rose-200 border-rose-500/30"
           }`}
         >
-          {message.type === "success" ? <CheckCircle className="w-5 h-5 text-emerald-600" /> : <AlertCircle className="w-5 h-5 text-rose-600" />}
+          {message.type === "success" ? <CheckCircle className="w-5 h-5 text-emerald-400" /> : <AlertCircle className="w-5 h-5 text-rose-400" />}
           {message.text}
         </div>
       )}
@@ -182,29 +182,29 @@ export function CertificatesView({
         {certificates.map((cert) => (
           <div
             key={cert.id}
-            className="p-6 rounded-2xl border border-slate-200 bg-white shadow-sm flex flex-col justify-between hover:border-indigo-300 transition"
+            className="glass-panel rounded-3xl p-6 flex flex-col justify-between hover:border-indigo-400/40 transition duration-300"
           >
             <div>
               <div className="flex items-center justify-between mb-3">
-                <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-200">
+                <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-indigo-500/15 text-indigo-300 border border-indigo-400/30">
                   {cert.organizationName || cert.clubName}
                 </span>
-                <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase bg-emerald-100 text-emerald-800">
+                <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
                   {cert.certificateType}
                 </span>
               </div>
 
-              <h4 className="font-extrabold text-base text-slate-900 leading-snug">
+              <h4 className="font-extrabold text-base text-white leading-snug">
                 {cert.title}
               </h4>
-              <p className="text-xs font-semibold text-slate-600 mt-1">
-                Recipient: <strong className="text-slate-900">{cert.userFullName}</strong>
+              <p className="text-xs font-semibold text-slate-300 mt-1">
+                Recipient: <strong className="text-white">{cert.userFullName}</strong>
               </p>
 
-              <div className="mt-3 p-3 rounded-xl bg-slate-50 text-xs font-mono text-slate-600 border space-y-1">
+              <div className="mt-3.5 p-3 rounded-2xl glass-card text-xs font-mono text-slate-300 space-y-1.5">
                 <div className="flex justify-between">
                   <span className="text-slate-400">Code:</span>
-                  <strong className="text-indigo-600">{cert.verificationCode}</strong>
+                  <strong className="text-indigo-400">{cert.verificationCode}</strong>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-slate-400">Date:</span>
@@ -213,14 +213,14 @@ export function CertificatesView({
               </div>
             </div>
 
-            <div className="mt-4 pt-3 border-t flex items-center justify-between">
-              <span className="text-[11px] text-emerald-600 font-semibold flex items-center gap-1">
-                <ShieldCheck className="w-3.5 h-3.5" />
+            <div className="mt-4 pt-3 border-t border-white/10 flex items-center justify-between">
+              <span className="text-xs text-emerald-400 font-semibold flex items-center gap-1.5">
+                <ShieldCheck className="w-4 h-4" />
                 Ledger Verified
               </span>
               <button
                 onClick={() => handleDownloadPDF(cert)}
-                className="px-3.5 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs flex items-center gap-1.5 shadow-xs transition"
+                className="glass-btn-primary px-3.5 py-2 rounded-xl font-bold text-xs flex items-center gap-1.5 shadow-md transition"
               >
                 <Download className="w-3.5 h-3.5" />
                 Download PDF
@@ -232,23 +232,23 @@ export function CertificatesView({
 
       {/* Issue Modal */}
       {showIssueModal && (
-        <div className="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4">
-          <form onSubmit={handleIssue} className="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4">
-            <h4 className="font-black text-base text-slate-900 flex items-center gap-2">
-              <Award className="w-5 h-5 text-indigo-600" />
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-md flex items-center justify-center p-4">
+          <form onSubmit={handleIssue} className="glass-panel bg-slate-900/90 rounded-3xl max-w-md w-full p-6 sm:p-8 shadow-2xl space-y-4 border border-white/15">
+            <h4 className="font-black text-base text-white flex items-center gap-2">
+              <Award className="w-5 h-5 text-indigo-400" />
               Issue Verifiable Student Certificate
             </h4>
 
             <div>
-              <label className="block text-xs font-semibold text-slate-700 mb-1">Select Organization</label>
+              <label className="block text-xs font-semibold text-slate-300 mb-1">Select Organization</label>
               <select
                 value={selectedClubId}
                 onChange={(e) => setSelectedClubId(e.target.value)}
-                className="w-full text-xs rounded-xl border border-slate-300 p-2.5 bg-white"
+                className="w-full text-xs rounded-xl border border-white/15 p-2.5 bg-slate-900/80 text-white backdrop-blur-md focus:border-indigo-400 focus:outline-none"
                 required
               >
                 {clubs.map((c) => (
-                  <option key={c.id} value={c.id}>
+                  <option key={c.id} value={c.id} className="bg-slate-900 text-white">
                     {c.name}
                   </option>
                 ))}
@@ -256,52 +256,52 @@ export function CertificatesView({
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-slate-700 mb-1">Student Recipient</label>
+              <label className="block text-xs font-semibold text-slate-300 mb-1">Student Recipient</label>
               <input
                 type="email"
                 value={studentEmail}
                 onChange={(e) => setStudentEmail(e.target.value)}
-                className="w-full text-xs rounded-xl border border-slate-300 p-2.5 bg-white font-mono"
+                className="w-full text-xs rounded-xl border border-white/15 p-2.5 bg-slate-900/80 text-white font-mono placeholder-slate-500 focus:border-indigo-400 focus:outline-none"
                 required
               />
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-slate-700 mb-1">Achievement Title</label>
+              <label className="block text-xs font-semibold text-slate-300 mb-1">Achievement Title</label>
               <input
                 type="text"
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
-                className="w-full text-xs rounded-xl border border-slate-300 p-2.5 bg-white"
+                className="w-full text-xs rounded-xl border border-white/15 p-2.5 bg-slate-900/80 text-white placeholder-slate-500 focus:border-indigo-400 focus:outline-none"
                 required
               />
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-slate-700 mb-1">Certificate Type</label>
+              <label className="block text-xs font-semibold text-slate-300 mb-1">Certificate Type</label>
               <select
                 value={certType}
                 onChange={(e) => setCertType(e.target.value as any)}
-                className="w-full text-xs rounded-xl border border-slate-300 p-2.5 bg-white"
+                className="w-full text-xs rounded-xl border border-white/15 p-2.5 bg-slate-900/80 text-white backdrop-blur-md focus:border-indigo-400 focus:outline-none"
               >
-                <option value="achievement">Achievement</option>
-                <option value="participation">Participation</option>
-                <option value="merit">Merit & Honor</option>
+                <option value="achievement" className="bg-slate-900 text-white">Achievement</option>
+                <option value="participation" className="bg-slate-900 text-white">Participation</option>
+                <option value="merit" className="bg-slate-900 text-white">Merit & Honor</option>
               </select>
             </div>
 
-            <div className="flex justify-end gap-2 pt-2 border-t">
+            <div className="flex justify-end gap-2.5 pt-3 border-t border-white/10">
               <button
                 type="button"
                 onClick={() => setShowIssueModal(false)}
-                className="px-4 py-2 rounded-xl text-xs font-semibold text-slate-600 hover:bg-slate-100"
+                className="px-4 py-2 rounded-xl text-xs font-semibold text-slate-300 hover:bg-white/10 transition"
               >
                 Cancel
               </button>
               <button
                 type="submit"
                 disabled={loading}
-                className="px-5 py-2 rounded-xl text-xs font-bold bg-indigo-600 hover:bg-indigo-700 text-white shadow-xs"
+                className="glass-btn-primary px-5 py-2 rounded-xl text-xs font-bold shadow-md"
               >
                 {loading ? "Generating..." : "Issue & Record"}
               </button>

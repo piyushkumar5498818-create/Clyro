@@ -61,6 +61,27 @@ const config: Config = {
         md: "calc(var(--radius) - 2px)",
         sm: "calc(var(--radius) - 4px)",
       },
+      animation: {
+        blob: "blob 14s infinite alternate cubic-bezier(0.4, 0, 0.2, 1)",
+        "blob-slow": "blob 20s infinite alternate-reverse cubic-bezier(0.4, 0, 0.2, 1)",
+        glow: "glow 6s ease-in-out infinite alternate",
+      },
+      keyframes: {
+        blob: {
+          "0%": { transform: "translate(0px, 0px) scale(1)" },
+          "33%": { transform: "translate(40px, -50px) scale(1.15)" },
+          "66%": { transform: "translate(-30px, 35px) scale(0.92)" },
+          "100%": { transform: "translate(0px, 0px) scale(1)" },
+        },
+        glow: {
+          "0%": { opacity: "0.55", transform: "scale(1)" },
+          "100%": { opacity: "0.85", transform: "scale(1.08)" },
+        },
+      },
+      backdropBlur: {
+        xs: "2px",
+        "3xl": "64px",
+      },
     },
   },
   plugins: [],

@@ -91,16 +91,20 @@ export default function DashboardPage() {
 
   if (loading || !currentUser) {
     return (
-      <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center p-4">
-        <Loader2 className="w-8 h-8 text-indigo-600 animate-spin mb-3" />
-        <div className="text-sm font-bold text-slate-700">Loading Mirai School of Technology Platform...</div>
-        <div className="text-xs text-slate-400 mt-1">Connecting to authenticated campus ledger</div>
+      <div className="min-h-screen flex flex-col items-center justify-center p-4">
+        <div className="glass-panel p-8 rounded-3xl flex flex-col items-center text-center max-w-sm shadow-2xl border border-white/10">
+          <div className="w-14 h-14 rounded-2xl bg-indigo-500/20 border border-indigo-400/30 flex items-center justify-center mb-4 shadow-lg shadow-indigo-500/20">
+            <Loader2 className="w-7 h-7 text-indigo-400 animate-spin" />
+          </div>
+          <div className="text-base font-bold text-white tracking-tight">Loading Clyro Platform...</div>
+          <div className="text-xs text-slate-400 mt-1.5">Connecting to Mirai authenticated campus ledger</div>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-slate-50/60 flex flex-col">
+    <div className="min-h-screen flex flex-col">
       <Navbar
         currentUser={currentUser}
         profiles={profiles}
@@ -170,9 +174,9 @@ export default function DashboardPage() {
         )}
       </main>
 
-      <footer className="border-t border-slate-200 bg-white py-6 text-center text-xs text-slate-500">
+      <footer className="border-t border-white/10 bg-slate-900/40 backdrop-blur-2xl py-6 text-center text-xs text-slate-400">
         <div className="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-2">
-          <span>&copy; {new Date().getFullYear()} Clyro — Mirai School of Technology</span>
+          <span className="text-slate-300 font-medium">&copy; {new Date().getFullYear()} Clyro — Mirai School of Technology</span>
           <span className="font-mono text-[11px] text-slate-400">
             NEX-CELL &middot; Kaizen Tech &middot; MALHAR &middot; Verified Activity Ledger
           </span>
