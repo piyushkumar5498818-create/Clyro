@@ -284,6 +284,73 @@ const INITIAL_PROFILES: Profile[] = [
     unitId: "u0000000-0000-0000-0002-000000000001",
     createdAt: new Date().toISOString(),
   },
+  // NEX-CELL Leadership & Startup Founder Members
+  {
+    id: "u0000000-0000-0000-0000-000000000021",
+    email: "rohan.vp@mirai.edu",
+    fullName: "Rohan Varma",
+    role: "vice_president",
+    campusId: INITIAL_CAMPUS.id,
+    studentId: "STU-2024-NEX-02",
+    title: "Vice President — NEX-CELL",
+    organizationId: "o0000000-0000-0000-0000-000000000001",
+    createdAt: new Date().toISOString(),
+  },
+  {
+    id: "u0000000-0000-0000-0000-000000000022",
+    email: "tanya.incubation@mirai.edu",
+    fullName: "Tanya Kapoor",
+    role: "lead",
+    campusId: INITIAL_CAMPUS.id,
+    studentId: "STU-2024-NEX-03",
+    title: "Incubation & Venture Lead — NEX-CELL",
+    organizationId: "o0000000-0000-0000-0000-000000000001",
+    createdAt: new Date().toISOString(),
+  },
+  {
+    id: "u0000000-0000-0000-0000-000000000023",
+    email: "kabir.pitch@mirai.edu",
+    fullName: "Kabir Joshi",
+    role: "lead",
+    campusId: INITIAL_CAMPUS.id,
+    studentId: "STU-2024-NEX-04",
+    title: "Pitch & Demo Day Lead — NEX-CELL",
+    organizationId: "o0000000-0000-0000-0000-000000000001",
+    createdAt: new Date().toISOString(),
+  },
+  {
+    id: "u0000000-0000-0000-0000-000000000024",
+    email: "devansh.hack@mirai.edu",
+    fullName: "Devansh Soni",
+    role: "lead",
+    campusId: INITIAL_CAMPUS.id,
+    studentId: "STU-2024-NEX-05",
+    title: "Hackathon & Mirage Lead — NEX-CELL",
+    organizationId: "o0000000-0000-0000-0000-000000000001",
+    createdAt: new Date().toISOString(),
+  },
+  {
+    id: "u0000000-0000-0000-0000-000000000025",
+    email: "meera.founder@mirai.edu",
+    fullName: "Meera Nair",
+    role: "member",
+    campusId: INITIAL_CAMPUS.id,
+    studentId: "STU-2024-NEX-06",
+    title: "Student Founder — NEX-CELL",
+    organizationId: "o0000000-0000-0000-0000-000000000001",
+    createdAt: new Date().toISOString(),
+  },
+  {
+    id: "u0000000-0000-0000-0000-000000000026",
+    email: "ishaan.founder@mirai.edu",
+    fullName: "Ishaan Verma",
+    role: "member",
+    campusId: INITIAL_CAMPUS.id,
+    studentId: "STU-2024-NEX-07",
+    title: "Student Founder — NEX-CELL",
+    organizationId: "o0000000-0000-0000-0000-000000000001",
+    createdAt: new Date().toISOString(),
+  },
 ];
 
 const INITIAL_ORGANIZATIONS: Organization[] = [
@@ -704,6 +771,128 @@ const INITIAL_MEMBERSHIPS: OrganizationMembership[] = [
     requestedAt: new Date(Date.now() - 86400000 * 15).toISOString(),
     reviewedAt: new Date(Date.now() - 86400000 * 14).toISOString(),
     reviewedBy: "u0000000-0000-0000-0000-000000000004",
+  },
+  // Kaizen Tech Leadership Memberships
+  {
+    id: "m0000000-0000-0000-0000-000000000014",
+    organizationId: "o0000000-0000-0000-0000-000000000002",
+    userId: "u0000000-0000-0000-0000-000000000001", // Rishav Raj (President)
+    membershipType: "primary",
+    status: "approved",
+    requestedAt: new Date(Date.now() - 86400000 * 60).toISOString(),
+    reviewedAt: new Date(Date.now() - 86400000 * 59).toISOString(),
+    reviewedBy: "u0000000-0000-0000-0000-000000000009",
+  },
+  {
+    id: "m0000000-0000-0000-0000-000000000015",
+    organizationId: "o0000000-0000-0000-0000-000000000002",
+    userId: "u0000000-0000-0000-0000-000000000002", // Aarav Pathak (VP)
+    membershipType: "primary",
+    status: "approved",
+    requestedAt: new Date(Date.now() - 86400000 * 60).toISOString(),
+    reviewedAt: new Date(Date.now() - 86400000 * 59).toISOString(),
+    reviewedBy: "u0000000-0000-0000-0000-000000000001",
+  },
+  {
+    id: "m0000000-0000-0000-0000-000000000016",
+    organizationId: "o0000000-0000-0000-0000-000000000002",
+    userId: "u0000000-0000-0000-0000-000000000005", // Sagar Kumar (Programming Head)
+    membershipType: "primary",
+    status: "approved",
+    requestedAt: new Date(Date.now() - 86400000 * 50).toISOString(),
+    reviewedAt: new Date(Date.now() - 86400000 * 49).toISOString(),
+    reviewedBy: "u0000000-0000-0000-0000-000000000001",
+  },
+  {
+    id: "m0000000-0000-0000-0000-000000000017",
+    organizationId: "o0000000-0000-0000-0000-000000000002",
+    userId: "u0000000-0000-0000-0000-000000000006", // Saurav Kumar (Design Head)
+    membershipType: "primary",
+    status: "approved",
+    requestedAt: new Date(Date.now() - 86400000 * 50).toISOString(),
+    reviewedAt: new Date(Date.now() - 86400000 * 49).toISOString(),
+    reviewedBy: "u0000000-0000-0000-0000-000000000001",
+  },
+  {
+    id: "m0000000-0000-0000-0000-000000000018",
+    organizationId: "o0000000-0000-0000-0000-000000000002",
+    userId: "u0000000-0000-0000-0000-000000000007", // Siya Bhardwaj (Treasurer)
+    membershipType: "primary",
+    status: "approved",
+    requestedAt: new Date(Date.now() - 86400000 * 50).toISOString(),
+    reviewedAt: new Date(Date.now() - 86400000 * 49).toISOString(),
+    reviewedBy: "u0000000-0000-0000-0000-000000000001",
+  },
+  // NEX-CELL Leadership & Memberships
+  {
+    id: "m0000000-0000-0000-0000-000000000019",
+    organizationId: "o0000000-0000-0000-0000-000000000001",
+    userId: "u0000000-0000-0000-0000-000000000003", // Arman Mehta (President)
+    membershipType: "primary",
+    status: "approved",
+    requestedAt: new Date(Date.now() - 86400000 * 60).toISOString(),
+    reviewedAt: new Date(Date.now() - 86400000 * 59).toISOString(),
+    reviewedBy: "u0000000-0000-0000-0000-000000000009",
+  },
+  {
+    id: "m0000000-0000-0000-0000-000000000020",
+    organizationId: "o0000000-0000-0000-0000-000000000001",
+    userId: "u0000000-0000-0000-0000-000000000021", // Rohan Varma (VP)
+    membershipType: "primary",
+    status: "approved",
+    requestedAt: new Date(Date.now() - 86400000 * 60).toISOString(),
+    reviewedAt: new Date(Date.now() - 86400000 * 59).toISOString(),
+    reviewedBy: "u0000000-0000-0000-0000-000000000003",
+  },
+  {
+    id: "m0000000-0000-0000-0000-000000000021",
+    organizationId: "o0000000-0000-0000-0000-000000000001",
+    userId: "u0000000-0000-0000-0000-000000000022", // Tanya Kapoor (Incubation Lead)
+    membershipType: "primary",
+    status: "approved",
+    requestedAt: new Date(Date.now() - 86400000 * 45).toISOString(),
+    reviewedAt: new Date(Date.now() - 86400000 * 44).toISOString(),
+    reviewedBy: "u0000000-0000-0000-0000-000000000003",
+  },
+  {
+    id: "m0000000-0000-0000-0000-000000000022",
+    organizationId: "o0000000-0000-0000-0000-000000000001",
+    userId: "u0000000-0000-0000-0000-000000000023", // Kabir Joshi (Pitch Lead)
+    membershipType: "primary",
+    status: "approved",
+    requestedAt: new Date(Date.now() - 86400000 * 45).toISOString(),
+    reviewedAt: new Date(Date.now() - 86400000 * 44).toISOString(),
+    reviewedBy: "u0000000-0000-0000-0000-000000000003",
+  },
+  {
+    id: "m0000000-0000-0000-0000-000000000023",
+    organizationId: "o0000000-0000-0000-0000-000000000001",
+    userId: "u0000000-0000-0000-0000-000000000024", // Devansh Soni (Hackathon Lead)
+    membershipType: "primary",
+    status: "approved",
+    requestedAt: new Date(Date.now() - 86400000 * 45).toISOString(),
+    reviewedAt: new Date(Date.now() - 86400000 * 44).toISOString(),
+    reviewedBy: "u0000000-0000-0000-0000-000000000003",
+  },
+  {
+    id: "m0000000-0000-0000-0000-000000000024",
+    organizationId: "o0000000-0000-0000-0000-000000000001",
+    userId: "u0000000-0000-0000-0000-000000000025", // Meera Nair (Student Founder)
+    membershipType: "primary",
+    status: "approved",
+    requestedAt: new Date(Date.now() - 86400000 * 30).toISOString(),
+    reviewedAt: new Date(Date.now() - 86400000 * 29).toISOString(),
+    reviewedBy: "u0000000-0000-0000-0000-000000000003",
+  },
+  {
+    id: "m0000000-0000-0000-0000-000000000025",
+    organizationId: "o0000000-0000-0000-0000-000000000001",
+    userId: "u0000000-0000-0000-0000-000000000026", // Ishaan Verma (Student Founder)
+    membershipType: "primary",
+    status: "approved",
+    requestedAt: new Date(Date.now() - 86400000 * 30).toISOString(),
+    reviewedAt: new Date(Date.now() - 86400000 * 29).toISOString(),
+    reviewedBy: "u0000000-0000-0000-0000-000000000003",
   },
 ];
 

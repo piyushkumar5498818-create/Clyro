@@ -5,7 +5,6 @@ import { Organization, Profile, OrganizationMembership } from "@/types/database"
 import { requestMembershipAction, reviewMembershipAction } from "@/actions/memberships";
 import {
   Users,
-  Building,
   Check,
   X,
   AlertCircle,
@@ -13,12 +12,15 @@ import {
   Code2,
   Palette,
   Layers,
-  Sparkles,
   BookOpen,
   GraduationCap,
   Terminal,
   Cpu,
   Laptop,
+  ChevronDown,
+  Sparkles,
+  ShieldCheck,
+  Award,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -31,6 +33,158 @@ interface ClubsHierarchyViewProps {
   onRefresh: () => void;
 }
 
+// Subcomponent: Club-specific Members & Leadership Grid
+function ClubMembersGrid({
+  members,
+  clubTheme,
+  canReview,
+  onReview,
+  loading,
+}: {
+  members: OrganizationMembership[];
+  clubTheme: "indigo" | "amber" | "rose";
+  canReview: boolean;
+  onReview: (id: string, status: "approved" | "rejected") => void;
+  loading: boolean;
+}) {
+  if (members.length === 0) {
+    return (
+      <div className="py-8 text-center text-slate-400 space-y-2 border border-white/5 rounded-2xl bg-white/[0.02]">
+        <Users className="w-8 h-8 mx-auto text-slate-500 opacity-60" />
+        <div className="text-xs font-semibold">No registered members found for this club.</div>
+      </div>
+    );
+  }
+
+  const borderHoverClass =
+    clubTheme === "indigo"
+      ? "hover:border-indigo-400/50 hover:shadow-indigo-500/10"
+      : clubTheme === "amber"
+      ? "hover:border-amber-400/50 hover:shadow-amber-500/10"
+      : "hover:border-rose-400/50 hover:shadow-rose-500/10";
+
+  const titleColorClass =
+    clubTheme === "indigo"
+      ? "text-indigo-300"
+      : clubTheme === "amber"
+      ? "text-amber-300"
+      : "text-rose-300";
+
+  const avatarGradientClass =
+    clubTheme === "indigo"
+      ? "from-indigo-600 via-blue-600 to-cyan-400"
+      : clubTheme === "amber"
+      ? "from-amber-600 via-orange-500 to-yellow-400"
+      : "from-rose-600 via-pink-600 to-purple-400";
+
+  return (
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
+      {members.map((m) => (
+        <div
+          key={m.id}
+          className={`glass-card p-3.5 rounded-2xl border border-white/10 ${borderHoverClass} hover:bg-white/[0.06] hover:shadow-xl transition-all duration-500 ease-out group cursor-default`}
+        >
+          {/* Always Visible Low-Profile Summary */}
+          <div className="flex items-center justify-between gap-2.5">
+            <div className="flex items-center gap-2.5 min-w-0">
+              <div
+                className={`w-9 h-9 rounded-xl bg-gradient-to-tr ${avatarGradientClass} p-[1.5px] shadow-sm shrink-0 overflow-hidden`}
+              >
+                <div className="w-full h-full bg-[#0a1124] rounded-[9px] flex items-center justify-center text-white text-xs font-black overflow-hidden">
+                  {m.userAvatarUrl ? (
+                    <img
+                      src={m.userAvatarUrl}
+                      alt={m.userFullName || "Avatar"}
+                      className="w-full h-full object-cover rounded-[9px]"
+                      onError={(e) => {
+                        (e.target as HTMLElement).style.display = "none";
+                      }}
+                    />
+                  ) : (
+                    (m.userFullName || "M")
+                      .split(" ")
+                      .map((n) => n[0])
+                      .join("")
+                      .slice(0, 2)
+                  )}
+                </div>
+              </div>
+
+              <div className="min-w-0">
+                <div className="text-xs font-bold text-white group-hover:text-white transition-colors duration-300 truncate">
+                  {m.userFullName || "Club Member"}
+                </div>
+                <div className={`text-[11px] font-semibold truncate ${titleColorClass}`}>
+                  {m.userTitle || "Member"}
+                </div>
+              </div>
+            </div>
+
+            <span
+              className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase border shrink-0 ${
+                m.status === "approved"
+                  ? "bg-emerald-500/20 text-emerald-300 border-emerald-500/30"
+                  : m.status === "rejected"
+                  ? "bg-rose-500/20 text-rose-300 border-rose-500/30"
+                  : "bg-amber-500/20 text-amber-300 border-amber-500/30"
+              }`}
+            >
+              {m.status}
+            </span>
+          </div>
+
+          {/* Progressive Disclosure on Hover with 500ms Smooth Cooldown */}
+          <div className="overflow-hidden max-h-0 opacity-0 group-hover:max-h-32 group-hover:opacity-100 group-hover:mt-2.5 group-hover:pt-2.5 group-hover:border-t group-hover:border-white/10 transition-all duration-500 ease-out space-y-1.5 text-[11px]">
+            <div className="flex items-center justify-between text-slate-400">
+              <span className="font-mono uppercase text-slate-300 font-semibold">
+                {m.membershipType} TIER
+              </span>
+              {m.studentId && (
+                <span className="font-mono text-slate-400">
+                  {m.studentId}
+                </span>
+              )}
+            </div>
+
+            {m.userEmail && (
+              <div className="text-slate-400 font-mono truncate text-[10px]">
+                {m.userEmail}
+              </div>
+            )}
+
+            {canReview && m.status === "pending" && (
+              <div className="flex items-center gap-1.5 pt-1">
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onReview(m.id, "approved");
+                  }}
+                  disabled={loading}
+                  className="flex-1 py-1 px-2 rounded-xl bg-emerald-600/25 hover:bg-emerald-600/40 text-emerald-300 border border-emerald-500/40 text-[10px] font-bold transition flex items-center justify-center gap-1"
+                >
+                  <Check className="w-3 h-3" />
+                  <span>Approve</span>
+                </button>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onReview(m.id, "rejected");
+                  }}
+                  disabled={loading}
+                  className="flex-1 py-1 px-2 rounded-xl bg-rose-600/25 hover:bg-rose-600/40 text-rose-300 border border-rose-500/40 text-[10px] font-bold transition flex items-center justify-center gap-1"
+                >
+                  <X className="w-3 h-3" />
+                  <span>Reject</span>
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 export function ClubsHierarchyView({
   currentUser,
   topClubs,
@@ -38,11 +192,17 @@ export function ClubsHierarchyView({
   allMemberships,
   onRefresh,
 }: ClubsHierarchyViewProps) {
+  // Collapsed by default: all clubs are low-profile and clickable
+  const [expandedClubId, setExpandedClubId] = useState<string | null>(null);
   const [selectedOrg, setSelectedOrg] = useState<Organization | null>(null);
   const [selectedDomainCode, setSelectedDomainCode] = useState<string>("CP");
   const [membershipType, setMembershipType] = useState<"primary" | "secondary">("primary");
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<{ text: string; type: "success" | "error" } | null>(null);
+
+  const toggleClub = (id: string) => {
+    setExpandedClubId((prev) => (prev === id ? null : id));
+  };
 
   const isStudent = currentUser.role === "member" || currentUser.role === "student";
   const canReview =
@@ -85,16 +245,23 @@ export function ClubsHierarchyView({
   const kaizen = topClubs.find((o) => o.shortName === "Kaizen Tech");
   const malhar = topClubs.find((o) => o.shortName === "MALHAR");
 
+  const kaizenMembers = allMemberships.filter((m) => m.organizationId === kaizen?.id);
+  const nexcellMembers = allMemberships.filter((m) => m.organizationId === nexcell?.id);
+  const malharMembers = allMemberships.filter((m) => m.organizationId === malhar?.id);
+
   return (
     <div className="space-y-6">
-      {/* Minimal Header */}
+      {/* Top Banner / Guidelines */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-white/10 pb-4">
         <div>
-          <h2 className="text-xl sm:text-2xl font-black tracking-tight text-white">
-            Campus Organizations
+          <h2 className="text-xl sm:text-2xl font-black tracking-tight text-white flex items-center gap-2">
+            <span>Campus Organizations</span>
+            <span className="text-[11px] font-mono font-bold px-2 py-0.5 rounded-full bg-cyan-500/15 text-cyan-300 border border-cyan-500/30">
+              Interactive Hub
+            </span>
           </h2>
           <p className="text-xs text-slate-400 mt-0.5">
-            3 Clubs &bull; 8 Specialized Units
+            Click any club to explore technical domains, flagship initiatives, cultural departments, and enrolled leadership teams.
           </p>
         </div>
 
@@ -120,361 +287,639 @@ export function ClubsHierarchyView({
         </motion.div>
       )}
 
-      {/* 1. Kaizen Tech: 3 Technical Domains with Roadmaps & Mentors */}
+      {/* ========================================================
+          1. KAIZEN TECH (Clickable Accordion Card)
+         ======================================================== */}
       {kaizen && (
-        <div className="glass-panel rounded-3xl p-5 sm:p-6 space-y-5">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-white/10 pb-4">
-            <div className="flex items-center gap-3">
-              <div className="w-11 h-11 rounded-xl bg-indigo-500/20 border border-indigo-400/30 text-indigo-400 flex items-center justify-center shrink-0">
-                <Code2 className="w-6 h-6" />
-              </div>
-              <div>
-                <div className="flex items-center gap-2">
-                  <h3 className="text-lg sm:text-xl font-black text-white">{kaizen.name}</h3>
-                  <span className="text-[10px] font-bold uppercase px-2 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
-                    3 Tech Domains
-                  </span>
-                </div>
-                <p className="text-xs text-slate-400 mt-0.5">{kaizen.description}</p>
-              </div>
-            </div>
-
-            <div className="shrink-0">
-              {isStudent && (
-                (() => {
-                  const mem = myMemberships.find((m) => m.organizationId === kaizen.id);
-                  return mem ? (
-                    <span className="px-3 py-1 rounded-xl text-xs font-bold uppercase bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
-                      {mem.membershipType} &bull; {mem.status}
-                    </span>
-                  ) : (
-                    <button
-                      onClick={() => setSelectedOrg(kaizen)}
-                      className="glass-btn-primary px-3.5 py-1.5 rounded-xl text-xs font-bold shadow"
-                    >
-                      Join Kaizen Tech
-                    </button>
-                  );
-                })()
-              )}
-            </div>
-          </div>
-
-          {/* 3 Domain Selector Tabs */}
-          <div>
-            <div className="flex items-center gap-2 mb-3">
-              <Layers className="w-4 h-4 text-indigo-400" />
-              <span className="text-xs font-bold uppercase tracking-wider text-slate-300">
-                Technical Domains
-              </span>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
-              {kaizen.units?.map((domain) => {
-                const isSelected = selectedDomainCode === domain.code;
-                return (
-                  <motion.button
-                    key={domain.id}
-                    whileHover={{ scale: 1.01 }}
-                    whileTap={{ scale: 0.99 }}
-                    onClick={() => setSelectedDomainCode(domain.code)}
-                    className={`p-3.5 rounded-2xl text-left transition border backdrop-blur-md ${
-                      isSelected
-                        ? "bg-indigo-600/30 border-indigo-400/60 shadow-lg shadow-indigo-500/10"
-                        : "bg-white/[0.04] border-white/10 hover:bg-white/[0.07]"
-                    }`}
-                  >
-                    <div className="flex items-center justify-between mb-1">
-                      <div className="flex items-center gap-2">
-                        {domain.code === "CP" && <Terminal className="w-4 h-4 text-indigo-400" />}
-                        {domain.code === "WEB" && <Laptop className="w-4 h-4 text-indigo-400" />}
-                        {domain.code === "AI_DS" && <Cpu className="w-4 h-4 text-indigo-400" />}
-                        <span className="font-bold text-xs text-white">{domain.name}</span>
-                      </div>
-                      <span className="font-mono text-[10px] text-indigo-300 bg-indigo-500/20 px-2 py-0.2 rounded-full">
-                        {domain.code}
+        (() => {
+          const isExpanded = expandedClubId === kaizen.id;
+          return (
+            <div
+              className={`glass-panel rounded-3xl transition-all duration-300 border ${
+                isExpanded
+                  ? "p-5 sm:p-6 border-indigo-500/40 shadow-2xl shadow-indigo-500/5 ring-1 ring-indigo-500/20"
+                  : "p-4 sm:p-5 border-white/10 hover:border-indigo-400/40 hover:bg-white/[0.04]"
+              }`}
+            >
+              {/* Clickable Header */}
+              <div
+                onClick={() => toggleClub(kaizen.id)}
+                className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 cursor-pointer select-none group"
+              >
+                <div className="flex items-center gap-3.5 min-w-0">
+                  <div className="w-12 h-12 rounded-2xl bg-indigo-500/20 border border-indigo-400/30 text-indigo-400 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform duration-300">
+                    <Code2 className="w-6 h-6" />
+                  </div>
+                  <div className="min-w-0">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <h3 className="text-lg sm:text-xl font-black text-white group-hover:text-indigo-200 transition-colors">
+                        {kaizen.name}
+                      </h3>
+                      <span className="text-[10px] font-bold uppercase px-2 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
+                        3 Tech Domains
+                      </span>
+                      <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-blue-500/15 text-cyan-300 border border-blue-400/25">
+                        {kaizenMembers.length} Members
                       </span>
                     </div>
-                    {domain.subtitle && (
-                      <div className="text-[11px] text-indigo-300/80 font-medium">{domain.subtitle}</div>
-                    )}
-                  </motion.button>
-                );
-              })}
-            </div>
-          </div>
+                    <p className="text-xs text-slate-400 mt-0.5 line-clamp-1 group-hover:text-slate-300 transition-colors">
+                      {kaizen.description}
+                    </p>
+                  </div>
+                </div>
 
-          {/* Selected Domain Deep View (Roadmap & Mentors) with Swipe Transition */}
-          <AnimatePresence mode="wait">
-            {(() => {
-              const activeDomain =
-                kaizen.units?.find((d) => d.code === selectedDomainCode) || kaizen.units?.[0];
-              if (!activeDomain) return null;
+                {/* Right Actions & Expand Pill */}
+                <div className="flex items-center gap-2.5 shrink-0 self-end sm:self-auto">
+                  {isStudent && (
+                    (() => {
+                      const mem = myMemberships.find((m) => m.organizationId === kaizen.id);
+                      return mem ? (
+                        <span
+                          onClick={(e) => e.stopPropagation()}
+                          className="px-3 py-1 rounded-xl text-xs font-bold uppercase bg-emerald-500/20 text-emerald-300 border border-emerald-500/30"
+                        >
+                          {mem.membershipType} &bull; {mem.status}
+                        </span>
+                      ) : (
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setSelectedOrg(kaizen);
+                          }}
+                          className="glass-btn-primary px-3.5 py-1.5 rounded-xl text-xs font-bold shadow"
+                        >
+                          Join Kaizen
+                        </button>
+                      );
+                    })()
+                  )}
 
-              return (
-                <motion.div
-                  key={activeDomain.code}
-                  initial={{ opacity: 0, x: 18 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: -18 }}
-                  transition={{ duration: 0.22, ease: "easeOut" }}
-                  className="glass-card-static rounded-2xl p-4 sm:p-5 border border-white/10 space-y-4"
-                >
-                  <div className="flex items-center justify-between pb-3 border-b border-white/10">
+                  <div
+                    className={`px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all duration-300 border ${
+                      isExpanded
+                        ? "bg-indigo-600/30 text-indigo-200 border-indigo-400/50"
+                        : "bg-white/[0.05] text-slate-300 border-white/10 group-hover:bg-white/[0.09] group-hover:text-white"
+                    }`}
+                  >
+                    <span>{isExpanded ? "Close" : "Explore Club & Members"}</span>
+                    <motion.div
+                      animate={{ rotate: isExpanded ? 180 : 0 }}
+                      transition={{ duration: 0.25 }}
+                    >
+                      <ChevronDown className="w-4 h-4 text-indigo-400" />
+                    </motion.div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Expandable Body */}
+              <AnimatePresence initial={false}>
+                {isExpanded && (
+                  <motion.div
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: "auto" }}
+                    exit={{ opacity: 0, height: 0 }}
+                    transition={{ duration: 0.35, ease: "easeInOut" }}
+                    className="overflow-hidden space-y-6 pt-5 mt-5 border-t border-white/10"
+                  >
+                    {/* 3 Domain Selector Tabs */}
                     <div>
-                      <div className="flex items-center gap-2">
-                        <h4 className="font-black text-base text-white">{activeDomain.name}</h4>
-                        <span className="text-[10px] font-mono text-indigo-300 bg-indigo-500/20 px-2 py-0.5 rounded-full">
-                          {activeDomain.code}
+                      <div className="flex items-center gap-2 mb-3">
+                        <Layers className="w-4 h-4 text-indigo-400" />
+                        <span className="text-xs font-bold uppercase tracking-wider text-slate-300">
+                          Technical Domains
                         </span>
                       </div>
-                      {activeDomain.subtitle && (
-                        <p className="text-xs text-indigo-300 font-medium mt-0.5">{activeDomain.subtitle}</p>
-                      )}
-                    </div>
-                  </div>
 
-                  <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
-                    {/* Left: 4-Phase Roadmap */}
-                    <div className="lg:col-span-7 space-y-3">
-                      <div className="flex items-center gap-1.5 text-xs font-bold uppercase text-slate-300">
-                        <BookOpen className="w-3.5 h-3.5 text-indigo-400" />
-                        <span>Roadmap (4 Phases)</span>
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+                        {kaizen.units?.map((domain) => {
+                          const isSelected = selectedDomainCode === domain.code;
+                          return (
+                            <motion.button
+                              key={domain.id}
+                              whileHover={{ scale: 1.01 }}
+                              whileTap={{ scale: 0.99 }}
+                              onClick={() => setSelectedDomainCode(domain.code)}
+                              className={`p-3.5 rounded-2xl text-left transition border backdrop-blur-md ${
+                                isSelected
+                                  ? "bg-indigo-600/30 border-indigo-400/60 shadow-lg shadow-indigo-500/10"
+                                  : "bg-white/[0.04] border-white/10 hover:bg-white/[0.07]"
+                              }`}
+                            >
+                              <div className="flex items-center justify-between mb-1">
+                                <div className="flex items-center gap-2">
+                                  {domain.code === "CP" && <Terminal className="w-4 h-4 text-indigo-400" />}
+                                  {domain.code === "WEB" && <Laptop className="w-4 h-4 text-indigo-400" />}
+                                  {domain.code === "AI_DS" && <Cpu className="w-4 h-4 text-indigo-400" />}
+                                  <span className="font-bold text-xs text-white">{domain.name}</span>
+                                </div>
+                                <span className="font-mono text-[10px] text-indigo-300 bg-indigo-500/20 px-2 py-0.2 rounded-full">
+                                  {domain.code}
+                                </span>
+                              </div>
+                              {domain.subtitle && (
+                                <div className="text-[11px] text-indigo-300/80 font-medium">{domain.subtitle}</div>
+                              )}
+                            </motion.button>
+                          );
+                        })}
+                      </div>
+                    </div>
+
+                    {/* Selected Domain Deep View (Roadmap & Mentors) */}
+                    <AnimatePresence mode="wait">
+                      {(() => {
+                        const activeDomain =
+                          kaizen.units?.find((d) => d.code === selectedDomainCode) || kaizen.units?.[0];
+                        if (!activeDomain) return null;
+
+                        return (
+                          <motion.div
+                            key={activeDomain.code}
+                            initial={{ opacity: 0, x: 18 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            exit={{ opacity: 0, x: -18 }}
+                            transition={{ duration: 0.22, ease: "easeOut" }}
+                            className="glass-card-static rounded-2xl p-4 sm:p-5 border border-white/10 space-y-4"
+                          >
+                            <div className="flex items-center justify-between pb-3 border-b border-white/10">
+                              <div>
+                                <div className="flex items-center gap-2">
+                                  <h4 className="font-black text-base text-white">{activeDomain.name}</h4>
+                                  <span className="text-[10px] font-mono text-indigo-300 bg-indigo-500/20 px-2 py-0.5 rounded-full">
+                                    {activeDomain.code}
+                                  </span>
+                                </div>
+                                {activeDomain.subtitle && (
+                                  <p className="text-xs text-indigo-300 font-medium mt-0.5">{activeDomain.subtitle}</p>
+                                )}
+                              </div>
+                            </div>
+
+                            <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
+                              {/* Left: 4-Phase Roadmap */}
+                              <div className="lg:col-span-7 space-y-3">
+                                <div className="flex items-center gap-1.5 text-xs font-bold uppercase text-slate-300">
+                                  <BookOpen className="w-3.5 h-3.5 text-indigo-400" />
+                                  <span>Roadmap (4 Phases)</span>
+                                </div>
+
+                                <div className="space-y-2.5">
+                                  {activeDomain.roadmap?.map((phase, idx) => (
+                                    <div key={idx} className="flex items-start gap-3">
+                                      <div className="w-5 h-5 rounded-full bg-indigo-500/20 border border-indigo-400 text-indigo-300 flex items-center justify-center text-[10px] font-black shrink-0 mt-0.5">
+                                        {idx + 1}
+                                      </div>
+                                      <div className="flex-1 glass-card p-2.5 rounded-xl border border-white/10 text-xs">
+                                        <span className="font-bold text-white">
+                                          {phase.phase}: {phase.title}
+                                        </span>
+                                        <p className="text-[11px] text-slate-300 mt-0.5 leading-relaxed">
+                                          {phase.description}
+                                        </p>
+                                      </div>
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+
+                              {/* Right: Domain Leads & Mentors */}
+                              <div className="lg:col-span-5 space-y-3">
+                                <div className="flex items-center gap-1.5 text-xs font-bold uppercase text-slate-300">
+                                  <Users className="w-3.5 h-3.5 text-indigo-400" />
+                                  <span>Domain Leads & Mentors</span>
+                                </div>
+
+                                <div className="glass-card-static rounded-2xl p-3 border border-white/10 space-y-2 max-h-[380px] overflow-y-auto">
+                                  {activeDomain.mentors && activeDomain.mentors.length > 0 ? (
+                                    activeDomain.mentors.map((m, idx) => (
+                                      <div
+                                        key={idx}
+                                        className="flex items-center justify-between p-2 rounded-xl bg-white/[0.03] text-xs border border-white/5"
+                                      >
+                                        <div className="flex items-center gap-2">
+                                          <div className="w-7 h-7 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-400/30 flex items-center justify-center text-[10px] font-bold">
+                                            {m.name
+                                              .split(" ")
+                                              .map((n) => n[0])
+                                              .join("")}
+                                          </div>
+                                          <div>
+                                            <div className="font-bold text-white">{m.name}</div>
+                                            <div className="text-[10px] text-slate-400">{m.role}</div>
+                                          </div>
+                                        </div>
+                                        <span className="text-[9px] font-semibold px-2 py-0.5 rounded-full bg-indigo-500/15 text-indigo-300">
+                                          Mentor
+                                        </span>
+                                      </div>
+                                    ))
+                                  ) : (
+                                    <div className="py-6 text-center text-slate-400 space-y-1 text-xs">
+                                      <GraduationCap className="w-6 h-6 mx-auto text-slate-500 opacity-60" />
+                                      <div>Mentors currently unassigned.</div>
+                                    </div>
+                                  )}
+                                </div>
+                              </div>
+                            </div>
+                          </motion.div>
+                        );
+                      })()}
+                    </AnimatePresence>
+
+                    {/* Dedicated Kaizen Tech Leadership & Enrolled Members */}
+                    <div className="pt-5 border-t border-white/10 space-y-3">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <Users className="w-4 h-4 text-indigo-400" />
+                          <h4 className="text-sm font-black text-white uppercase tracking-wider">
+                            Kaizen Tech Leadership & Enrolled Members
+                          </h4>
+                        </div>
+                        <span className="text-[11px] font-mono font-bold px-2.5 py-0.5 rounded-full bg-indigo-500/15 text-indigo-300 border border-indigo-500/30">
+                          {kaizenMembers.length} Members
+                        </span>
                       </div>
 
-                      <div className="space-y-2.5">
-                        {activeDomain.roadmap?.map((phase, idx) => (
-                          <div key={idx} className="flex items-start gap-3">
-                            <div className="w-5 h-5 rounded-full bg-indigo-500/20 border border-indigo-400 text-indigo-300 flex items-center justify-center text-[10px] font-black shrink-0 mt-0.5">
-                              {idx + 1}
-                            </div>
-                            <div className="flex-1 glass-card p-2.5 rounded-xl border border-white/10 text-xs">
-                              <span className="font-bold text-white">
-                                {phase.phase}: {phase.title}
+                      <ClubMembersGrid
+                        members={kaizenMembers}
+                        clubTheme="indigo"
+                        canReview={canReview}
+                        onReview={handleReviewMembership}
+                        loading={loading}
+                      />
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+          );
+        })()
+      )}
+
+      {/* ========================================================
+          2. NEX-CELL: Entrepreneurship Club (Clickable Accordion)
+         ======================================================== */}
+      {nexcell && (
+        (() => {
+          const isExpanded = expandedClubId === nexcell.id;
+          return (
+            <div
+              className={`glass-panel rounded-3xl transition-all duration-300 border ${
+                isExpanded
+                  ? "p-5 sm:p-6 border-amber-500/40 shadow-2xl shadow-amber-500/5 ring-1 ring-amber-500/20"
+                  : "p-4 sm:p-5 border-white/10 hover:border-amber-400/40 hover:bg-white/[0.04]"
+              }`}
+            >
+              {/* Clickable Header */}
+              <div
+                onClick={() => toggleClub(nexcell.id)}
+                className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 cursor-pointer select-none group"
+              >
+                <div className="flex items-center gap-3.5 min-w-0">
+                  <div className="w-12 h-12 rounded-2xl bg-amber-500/20 border border-amber-400/30 text-amber-400 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform duration-300">
+                    <Rocket className="w-6 h-6" />
+                  </div>
+                  <div className="min-w-0">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <h3 className="text-lg sm:text-xl font-black text-white group-hover:text-amber-200 transition-colors">
+                        {nexcell.name}
+                      </h3>
+                      <span className="text-[10px] font-bold uppercase px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30">
+                        6 Initiatives
+                      </span>
+                      <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-blue-500/15 text-cyan-300 border border-blue-400/25">
+                        {nexcellMembers.length} Members
+                      </span>
+                    </div>
+                    <p className="text-xs text-slate-400 mt-0.5 line-clamp-1 group-hover:text-slate-300 transition-colors">
+                      {nexcell.description}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Right Actions & Expand Pill */}
+                <div className="flex items-center gap-2.5 shrink-0 self-end sm:self-auto">
+                  {isStudent && (
+                    (() => {
+                      const mem = myMemberships.find((m) => m.organizationId === nexcell.id);
+                      return mem ? (
+                        <span
+                          onClick={(e) => e.stopPropagation()}
+                          className="px-3 py-1 rounded-xl text-xs font-bold uppercase bg-emerald-500/20 text-emerald-300 border border-emerald-500/30"
+                        >
+                          {mem.membershipType} &bull; {mem.status}
+                        </span>
+                      ) : (
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setSelectedOrg(nexcell);
+                          }}
+                          className="glass-btn-primary px-3.5 py-1.5 rounded-xl text-xs font-bold shadow"
+                        >
+                          Join NEX-CELL
+                        </button>
+                      );
+                    })()
+                  )}
+
+                  <div
+                    className={`px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all duration-300 border ${
+                      isExpanded
+                        ? "bg-amber-600/30 text-amber-200 border-amber-400/50"
+                        : "bg-white/[0.05] text-slate-300 border-white/10 group-hover:bg-white/[0.09] group-hover:text-white"
+                    }`}
+                  >
+                    <span>{isExpanded ? "Close" : "Explore Club & Members"}</span>
+                    <motion.div
+                      animate={{ rotate: isExpanded ? 180 : 0 }}
+                      transition={{ duration: 0.25 }}
+                    >
+                      <ChevronDown className="w-4 h-4 text-amber-400" />
+                    </motion.div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Expandable Body */}
+              <AnimatePresence initial={false}>
+                {isExpanded && (
+                  <motion.div
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: "auto" }}
+                    exit={{ opacity: 0, height: 0 }}
+                    transition={{ duration: 0.35, ease: "easeInOut" }}
+                    className="overflow-hidden space-y-6 pt-5 mt-5 border-t border-white/10"
+                  >
+                    {/* 6 Flagship Initiatives Grid */}
+                    <div className="space-y-3">
+                      <div className="flex items-center gap-2">
+                        <Sparkles className="w-4 h-4 text-amber-400" />
+                        <span className="text-xs font-bold uppercase tracking-wider text-slate-300">
+                          Flagship Entrepreneurship Tracks
+                        </span>
+                      </div>
+
+                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                        {nexcell.initiatives?.map((init) => (
+                          <div
+                            key={init.id}
+                            className="glass-card p-4 rounded-2xl border border-white/10 hover:border-amber-400/40 hover:bg-white/[0.06] transition-all duration-500 ease-out group cursor-default"
+                          >
+                            <div className="flex items-center justify-between text-sm font-bold text-white">
+                              <span className="group-hover:text-amber-300 transition-colors duration-300 truncate pr-2">
+                                {init.name}
                               </span>
-                              <p className="text-[11px] text-slate-300 mt-0.5 leading-relaxed">
-                                {phase.description}
-                              </p>
+                              <span className="text-[10px] font-mono text-amber-300 bg-amber-500/20 px-2 py-0.5 rounded-full border border-amber-500/30 shrink-0">
+                                {init.format}
+                              </span>
+                            </div>
+                            {/* Full info revealed on hover with 500ms cooldown */}
+                            <div className="overflow-hidden max-h-0 opacity-0 group-hover:max-h-24 group-hover:opacity-100 group-hover:mt-2.5 group-hover:pt-2.5 group-hover:border-t group-hover:border-white/10 transition-all duration-500 ease-out">
+                              <p className="text-xs text-slate-300 leading-relaxed">{init.description}</p>
                             </div>
                           </div>
                         ))}
                       </div>
                     </div>
 
-                    {/* Right: Domain Leads & Mentors */}
-                    <div className="lg:col-span-5 space-y-3">
-                      <div className="flex items-center gap-1.5 text-xs font-bold uppercase text-slate-300">
-                        <Users className="w-3.5 h-3.5 text-indigo-400" />
-                        <span>Leads & Mentors</span>
+                    {/* Dedicated NEX-CELL Leadership & Fellows */}
+                    <div className="pt-5 border-t border-white/10 space-y-3">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <Users className="w-4 h-4 text-amber-400" />
+                          <h4 className="text-sm font-black text-white uppercase tracking-wider">
+                            NEX-CELL Leadership & Student Founders
+                          </h4>
+                        </div>
+                        <span className="text-[11px] font-mono font-bold px-2.5 py-0.5 rounded-full bg-amber-500/15 text-amber-300 border border-amber-500/30">
+                          {nexcellMembers.length} Members
+                        </span>
                       </div>
 
-                      <div className="glass-card-static rounded-2xl p-3 border border-white/10 space-y-2 max-h-[380px] overflow-y-auto">
-                        {activeDomain.mentors && activeDomain.mentors.length > 0 ? (
-                          activeDomain.mentors.map((m, idx) => (
-                            <div
-                              key={idx}
-                              className="flex items-center justify-between p-2 rounded-xl bg-white/[0.03] text-xs border border-white/5"
-                            >
-                              <div className="flex items-center gap-2">
-                                <div className="w-7 h-7 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-400/30 flex items-center justify-center text-[10px] font-bold">
-                                  {m.name
-                                    .split(" ")
-                                    .map((n) => n[0])
-                                    .join("")}
-                                </div>
-                                <div>
-                                  <div className="font-bold text-white">{m.name}</div>
-                                  <div className="text-[10px] text-slate-400">{m.role}</div>
-                                </div>
-                              </div>
-                              <span className="text-[9px] font-semibold px-2 py-0.5 rounded-full bg-indigo-500/15 text-indigo-300">
-                                Mentor
+                      <ClubMembersGrid
+                        members={nexcellMembers}
+                        clubTheme="amber"
+                        canReview={canReview}
+                        onReview={handleReviewMembership}
+                        loading={loading}
+                      />
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+          );
+        })()
+      )}
+
+      {/* ========================================================
+          3. MALHAR: Cultural Society (Clickable Accordion)
+         ======================================================== */}
+      {malhar && (
+        (() => {
+          const isExpanded = expandedClubId === malhar.id;
+          return (
+            <div
+              className={`glass-panel rounded-3xl transition-all duration-300 border ${
+                isExpanded
+                  ? "p-5 sm:p-6 border-rose-500/40 shadow-2xl shadow-rose-500/5 ring-1 ring-rose-500/20"
+                  : "p-4 sm:p-5 border-white/10 hover:border-rose-400/40 hover:bg-white/[0.04]"
+              }`}
+            >
+              {/* Clickable Header */}
+              <div
+                onClick={() => toggleClub(malhar.id)}
+                className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 cursor-pointer select-none group"
+              >
+                <div className="flex items-center gap-3.5 min-w-0">
+                  <div className="w-12 h-12 rounded-2xl bg-rose-500/20 border border-rose-400/30 text-rose-400 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform duration-300">
+                    <Palette className="w-6 h-6" />
+                  </div>
+                  <div className="min-w-0">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <h3 className="text-lg sm:text-xl font-black text-white group-hover:text-rose-200 transition-colors">
+                        {malhar.name}
+                      </h3>
+                      <span className="text-[10px] font-bold uppercase px-2 py-0.5 rounded-full bg-rose-500/20 text-rose-300 border border-rose-500/30">
+                        5 Departments
+                      </span>
+                      <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-blue-500/15 text-cyan-300 border border-blue-400/25">
+                        {malharMembers.length} Members
+                      </span>
+                    </div>
+                    <p className="text-xs text-slate-400 mt-0.5 line-clamp-1 group-hover:text-slate-300 transition-colors">
+                      {malhar.description}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Right Actions & Expand Pill */}
+                <div className="flex items-center gap-2.5 shrink-0 self-end sm:self-auto">
+                  {isStudent && (
+                    (() => {
+                      const mem = myMemberships.find((m) => m.organizationId === malhar.id);
+                      return mem ? (
+                        <span
+                          onClick={(e) => e.stopPropagation()}
+                          className="px-3 py-1 rounded-xl text-xs font-bold uppercase bg-emerald-500/20 text-emerald-300 border border-emerald-500/30"
+                        >
+                          {mem.membershipType} &bull; {mem.status}
+                        </span>
+                      ) : (
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setSelectedOrg(malhar);
+                          }}
+                          className="glass-btn-primary px-3.5 py-1.5 rounded-xl text-xs font-bold shadow"
+                        >
+                          Join MALHAR
+                        </button>
+                      );
+                    })()
+                  )}
+
+                  <div
+                    className={`px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all duration-300 border ${
+                      isExpanded
+                        ? "bg-rose-600/30 text-rose-200 border-rose-400/50"
+                        : "bg-white/[0.05] text-slate-300 border-white/10 group-hover:bg-white/[0.09] group-hover:text-white"
+                    }`}
+                  >
+                    <span>{isExpanded ? "Close" : "Explore Club & Members"}</span>
+                    <motion.div
+                      animate={{ rotate: isExpanded ? 180 : 0 }}
+                      transition={{ duration: 0.25 }}
+                    >
+                      <ChevronDown className="w-4 h-4 text-rose-400" />
+                    </motion.div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Expandable Body */}
+              <AnimatePresence initial={false}>
+                {isExpanded && (
+                  <motion.div
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: "auto" }}
+                    exit={{ opacity: 0, height: 0 }}
+                    transition={{ duration: 0.35, ease: "easeInOut" }}
+                    className="overflow-hidden space-y-6 pt-5 mt-5 border-t border-white/10"
+                  >
+                    {/* 5 Departments Grid */}
+                    <div className="space-y-3">
+                      <div className="flex items-center gap-2">
+                        <Sparkles className="w-4 h-4 text-rose-400" />
+                        <span className="text-xs font-bold uppercase tracking-wider text-slate-300">
+                          Cultural Departments
+                        </span>
+                      </div>
+
+                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                        {malhar.units?.map((dept) => (
+                          <div
+                            key={dept.id}
+                            className="glass-card p-4 rounded-2xl border border-white/10 hover:border-rose-400/40 hover:bg-white/[0.06] transition-all duration-500 ease-out group cursor-default"
+                          >
+                            <div className="flex items-center justify-between text-sm font-bold text-white">
+                              <span className="group-hover:text-rose-300 transition-colors duration-300 truncate pr-2">
+                                {dept.name}
+                              </span>
+                              <span className="text-[10px] font-mono text-rose-300 bg-rose-500/20 px-2 py-0.5 rounded-full border border-rose-500/30 shrink-0">
+                                {dept.code}
                               </span>
                             </div>
-                          ))
-                        ) : (
-                          <div className="py-6 text-center text-slate-400 space-y-1 text-xs">
-                            <GraduationCap className="w-6 h-6 mx-auto text-slate-500 opacity-60" />
-                            <div>Mentors currently unassigned.</div>
+                            {/* Full info revealed on hover with 500ms cooldown */}
+                            <div className="overflow-hidden max-h-0 opacity-0 group-hover:max-h-24 group-hover:opacity-100 group-hover:mt-2.5 group-hover:pt-2.5 group-hover:border-t group-hover:border-white/10 transition-all duration-500 ease-out">
+                              <p className="text-xs text-slate-300 leading-relaxed">{dept.description}</p>
+                            </div>
                           </div>
-                        )}
+                        ))}
                       </div>
                     </div>
-                  </div>
-                </motion.div>
-              );
-            })()}
-          </AnimatePresence>
-        </div>
+
+                    {/* Dedicated MALHAR Core Committee & Department Members */}
+                    <div className="pt-5 border-t border-white/10 space-y-3">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <Users className="w-4 h-4 text-rose-400" />
+                          <h4 className="text-sm font-black text-white uppercase tracking-wider">
+                            MALHAR Core Committee & Department Members
+                          </h4>
+                        </div>
+                        <span className="text-[11px] font-mono font-bold px-2.5 py-0.5 rounded-full bg-rose-500/15 text-rose-300 border border-rose-500/30">
+                          {malharMembers.length} Members
+                        </span>
+                      </div>
+
+                      <ClubMembersGrid
+                        members={malharMembers}
+                        clubTheme="rose"
+                        canReview={canReview}
+                        onReview={handleReviewMembership}
+                        loading={loading}
+                      />
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+          );
+        })()
       )}
 
-      {/* 2. NEX-CELL: Entrepreneurship Club */}
-      {nexcell && (
-        <div className="glass-panel rounded-3xl p-5 sm:p-6 space-y-4">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-white/10 pb-4">
-            <div className="flex items-center gap-3">
-              <div className="w-11 h-11 rounded-xl bg-amber-500/20 border border-amber-400/30 text-amber-400 flex items-center justify-center shrink-0">
-                <Rocket className="w-6 h-6" />
-              </div>
-              <div>
-                <div className="flex items-center gap-2">
-                  <h3 className="text-lg sm:text-xl font-black text-white">{nexcell.name}</h3>
-                  <span className="text-[10px] font-bold uppercase px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30">
-                    6 Initiatives
-                  </span>
-                </div>
-                <p className="text-xs text-slate-400 mt-0.5">{nexcell.description}</p>
-              </div>
-            </div>
-
-            <div className="shrink-0">
-              {isStudent && (
-                (() => {
-                  const mem = myMemberships.find((m) => m.organizationId === nexcell.id);
-                  return mem ? (
-                    <span className="px-3 py-1 rounded-xl text-xs font-bold uppercase bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
-                      {mem.membershipType} &bull; {mem.status}
-                    </span>
-                  ) : (
-                    <button
-                      onClick={() => setSelectedOrg(nexcell)}
-                      className="glass-btn-primary px-3.5 py-1.5 rounded-xl text-xs font-bold shadow"
-                    >
-                      Join NEX-CELL
-                    </button>
-                  );
-                })()
-              )}
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-            {nexcell.initiatives?.map((init) => (
-              <div
-                key={init.id}
-                className="glass-card p-4 rounded-2xl border border-white/10 hover:border-amber-400/40 hover:bg-white/[0.06] transition-all duration-500 ease-out group cursor-default"
-              >
-                <div className="flex items-center justify-between text-sm font-bold text-white">
-                  <span className="group-hover:text-amber-300 transition-colors duration-300 truncate pr-2">{init.name}</span>
-                  <span className="text-[10px] font-mono text-amber-300 bg-amber-500/20 px-2 py-0.5 rounded-full border border-amber-500/30 shrink-0">
-                    {init.format}
-                  </span>
-                </div>
-                {/* Full info revealed on hover with smooth cooldown */}
-                <div className="overflow-hidden max-h-0 opacity-0 group-hover:max-h-24 group-hover:opacity-100 group-hover:mt-2.5 group-hover:pt-2.5 group-hover:border-t group-hover:border-white/10 transition-all duration-500 ease-out">
-                  <p className="text-xs text-slate-300 leading-relaxed">{init.description}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* 3. MALHAR: Cultural Society */}
-      {malhar && (
-        <div className="glass-panel rounded-3xl p-5 sm:p-6 space-y-4">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-white/10 pb-4">
-            <div className="flex items-center gap-3">
-              <div className="w-11 h-11 rounded-xl bg-rose-500/20 border border-rose-400/30 text-rose-400 flex items-center justify-center shrink-0">
-                <Palette className="w-6 h-6" />
-              </div>
-              <div>
-                <div className="flex items-center gap-2">
-                  <h3 className="text-lg sm:text-xl font-black text-white">{malhar.name}</h3>
-                  <span className="text-[10px] font-bold uppercase px-2 py-0.5 rounded-full bg-rose-500/20 text-rose-300 border border-rose-500/30">
-                    5 Departments
-                  </span>
-                </div>
-                <p className="text-xs text-slate-400 mt-0.5">Cultural Society of Mirai</p>
-              </div>
-            </div>
-
-            <div className="shrink-0">
-              {isStudent && (
-                (() => {
-                  const mem = myMemberships.find((m) => m.organizationId === malhar.id);
-                  return mem ? (
-                    <span className="px-3 py-1 rounded-xl text-xs font-bold uppercase bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
-                      {mem.membershipType} &bull; {mem.status}
-                    </span>
-                  ) : (
-                    <button
-                      onClick={() => setSelectedOrg(malhar)}
-                      className="glass-btn-primary px-3.5 py-1.5 rounded-xl text-xs font-bold shadow"
-                    >
-                      Join MALHAR
-                    </button>
-                  );
-                })()
-              )}
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-            {malhar.units?.map((dept) => (
-              <div
-                key={dept.id}
-                className="glass-card p-4 rounded-2xl border border-white/10 hover:border-rose-400/40 hover:bg-white/[0.06] transition-all duration-500 ease-out group cursor-default"
-              >
-                <div className="flex items-center justify-between text-sm font-bold text-white">
-                  <span className="group-hover:text-rose-300 transition-colors duration-300 truncate pr-2">{dept.name}</span>
-                  <span className="text-[10px] font-mono text-rose-300 bg-rose-500/20 px-2 py-0.5 rounded-full border border-rose-500/30 shrink-0">
-                    {dept.code}
-                  </span>
-                </div>
-                {/* Full info revealed on hover with smooth cooldown */}
-                <div className="overflow-hidden max-h-0 opacity-0 group-hover:max-h-24 group-hover:opacity-100 group-hover:mt-2.5 group-hover:pt-2.5 group-hover:border-t group-hover:border-white/10 transition-all duration-500 ease-out">
-                  <p className="text-xs text-slate-300 leading-relaxed">{dept.description}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* Member Section: Low Profile, instant solid rendering, full info on hover */}
-      <div className="glass-panel rounded-3xl p-6 sm:p-7 space-y-5">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-white/10">
+      {/* ========================================================
+          4. ALL CAMPUS STUDENT DIRECTORY
+         ======================================================== */}
+      <div className="glass-panel rounded-3xl p-5 sm:p-6 space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-white/10">
           <div>
-            <h3 className="text-xl sm:text-2xl font-black text-white flex items-center gap-2.5">
-              <Users className="w-6 h-6 text-cyan-400" />
-              Student Members Directory
+            <h3 className="text-lg sm:text-xl font-black text-white flex items-center gap-2">
+              <Users className="w-5 h-5 text-cyan-400" />
+              <span>Campus-Wide Student Directory</span>
             </h3>
             <p className="text-xs text-slate-400 mt-0.5">
-              Verified memberships across active clubs.
+              Unified ledger of all verified club memberships across Mirai School of Technology.
             </p>
           </div>
 
           <div className="flex items-center gap-2">
             <span className="px-3 py-1 rounded-xl bg-blue-500/15 text-cyan-300 text-xs font-mono font-bold border border-blue-400/30">
-              {allMemberships.length} ENROLLED
+              {allMemberships.length} ENROLLED TOTAL
             </span>
           </div>
         </div>
 
         {/* Member Cards Grid: Low Profile, Reveal details on hover */}
         {allMemberships.length === 0 ? (
-          <div className="py-12 text-center text-slate-400 space-y-2">
-            <Users className="w-10 h-10 mx-auto text-slate-500 opacity-60" />
+          <div className="py-8 text-center text-slate-400 space-y-2">
+            <Users className="w-8 h-8 mx-auto text-slate-500 opacity-60" />
             <div className="text-sm font-semibold">No membership records found.</div>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3.5">
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3">
             {allMemberships.map((m) => (
               <div
                 key={m.id}
-                className="glass-card p-4 rounded-2xl border border-white/10 hover:border-blue-400/50 hover:bg-white/[0.06] hover:shadow-xl hover:shadow-blue-500/10 transition-all duration-500 ease-out group cursor-default"
+                className="glass-card p-3.5 rounded-2xl border border-white/10 hover:border-blue-400/50 hover:bg-white/[0.06] hover:shadow-xl hover:shadow-blue-500/10 transition-all duration-500 ease-out group cursor-default"
               >
                 {/* Low-Profile Primary Header (Always Visible) */}
-                <div className="flex items-center justify-between">
+                <div className="flex items-center justify-between gap-2.5">
                   <div className="flex items-center gap-3 min-w-0">
-                    <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-700 via-indigo-600 to-cyan-400 p-[1.5px] shadow-sm shrink-0 overflow-hidden">
-                      <div className="w-full h-full bg-[#0a1124] rounded-[9px] flex items-center justify-center text-white text-sm font-black overflow-hidden">
+                    <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-blue-700 via-indigo-600 to-cyan-400 p-[1.5px] shadow-sm shrink-0 overflow-hidden">
+                      <div className="w-full h-full bg-[#0a1124] rounded-[9px] flex items-center justify-center text-white text-xs font-black overflow-hidden">
                         {m.userAvatarUrl ? (
                           <img
                             src={m.userAvatarUrl}
                             alt={m.userFullName || "Avatar"}
                             className="w-full h-full object-cover rounded-[9px]"
+                            onError={(e) => {
+                              (e.target as HTMLElement).style.display = "none";
+                            }}
                           />
                         ) : (
                           m.userFullName?.charAt(0) || "M"
@@ -482,10 +927,10 @@ export function ClubsHierarchyView({
                       </div>
                     </div>
                     <div className="min-w-0">
-                      <div className="text-sm font-bold text-white group-hover:text-cyan-300 transition-colors duration-300 truncate">
+                      <div className="text-xs font-bold text-white group-hover:text-cyan-300 transition-colors duration-300 truncate">
                         {m.userFullName || "Student Member"}
                       </div>
-                      <div className="text-xs text-slate-400 truncate font-mono">
+                      <div className="text-[11px] text-slate-400 truncate font-mono">
                         {m.userTitle ? (
                           <span className="text-cyan-300 font-semibold">{m.userTitle} &bull; </span>
                         ) : null}
@@ -495,7 +940,7 @@ export function ClubsHierarchyView({
                   </div>
 
                   <span
-                    className={`px-2.5 py-0.5 rounded-full text-[11px] font-bold uppercase border shrink-0 ${
+                    className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase border shrink-0 ${
                       m.status === "approved"
                         ? "bg-emerald-500/20 text-emerald-300 border-emerald-500/30"
                         : m.status === "rejected"
@@ -508,32 +953,32 @@ export function ClubsHierarchyView({
                 </div>
 
                 {/* Progressive Disclosure: Full details reveal on cursor hover with smooth cooldown */}
-                <div className="overflow-hidden max-h-0 opacity-0 group-hover:max-h-28 group-hover:opacity-100 group-hover:mt-3 group-hover:pt-3 group-hover:border-t group-hover:border-white/10 transition-all duration-500 ease-out space-y-2.5">
-                  <div className="flex items-center justify-between text-xs">
-                    <span className="font-mono text-cyan-300 font-semibold uppercase px-2 py-0.5 rounded-md bg-blue-500/15 border border-blue-400/25">
+                <div className="overflow-hidden max-h-0 opacity-0 group-hover:max-h-28 group-hover:opacity-100 group-hover:mt-2.5 group-hover:pt-2.5 group-hover:border-t group-hover:border-white/10 transition-all duration-500 ease-out space-y-2">
+                  <div className="flex items-center justify-between text-[11px]">
+                    <span className="font-mono text-cyan-300 font-semibold uppercase px-2 py-0.5 rounded-md bg-blue-500/15 border border-blue-400/25 text-[10px]">
                       {m.membershipType} TIER
                     </span>
-                    <span className="text-slate-400 font-mono text-[11px]">
+                    <span className="text-slate-400 font-mono text-[10px]">
                       Joined {new Date(m.requestedAt).toLocaleDateString()}
                     </span>
                   </div>
 
                   {canReview && m.status === "pending" && (
-                    <div className="flex items-center gap-2 pt-1">
+                    <div className="flex items-center gap-1.5 pt-1">
                       <button
                         onClick={() => handleReviewMembership(m.id, "approved")}
                         disabled={loading}
-                        className="flex-1 py-1.5 px-3 rounded-xl bg-emerald-600/25 hover:bg-emerald-600/40 text-emerald-300 border border-emerald-500/40 text-xs font-bold transition flex items-center justify-center gap-1.5"
+                        className="flex-1 py-1 px-2.5 rounded-xl bg-emerald-600/25 hover:bg-emerald-600/40 text-emerald-300 border border-emerald-500/40 text-[10px] font-bold transition flex items-center justify-center gap-1"
                       >
-                        <Check className="w-3.5 h-3.5" />
+                        <Check className="w-3 h-3" />
                         <span>Approve</span>
                       </button>
                       <button
                         onClick={() => handleReviewMembership(m.id, "rejected")}
                         disabled={loading}
-                        className="flex-1 py-1.5 px-3 rounded-xl bg-rose-600/25 hover:bg-rose-600/40 text-rose-300 border border-rose-500/40 text-xs font-bold transition flex items-center justify-center gap-1.5"
+                        className="flex-1 py-1 px-2.5 rounded-xl bg-rose-600/25 hover:bg-rose-600/40 text-rose-300 border border-rose-500/40 text-[10px] font-bold transition flex items-center justify-center gap-1"
                       >
-                        <X className="w-3.5 h-3.5" />
+                        <X className="w-3 h-3" />
                         <span>Reject</span>
                       </button>
                     </div>
