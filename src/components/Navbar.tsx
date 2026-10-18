@@ -63,11 +63,10 @@ export function Navbar({
   };
 
   const sectionLinks = [
-    { id: "explore", label: "Explore", tag: "00" },
     { id: "overview", label: "Overview", tag: "01" },
-    { id: "clubs", label: "Clubs", tag: "02" },
-    { id: "attendance", label: "Attendance", tag: "03" },
-    { id: "activities", label: "Activities", tag: "04" },
+    { id: "clubs", label: "Clubs & Units", tag: "02" },
+    { id: "attendance", label: "Sessions & QR", tag: "03" },
+    { id: "activities", label: "Approvals", tag: "04" },
     { id: "submissions", label: "Submissions", tag: "05" },
     { id: "certificates", label: "Transcripts", tag: "06" },
   ];

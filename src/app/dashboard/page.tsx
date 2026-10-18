@@ -27,7 +27,6 @@ import {
 } from "@/actions/memberships";
 import { Navbar } from "@/components/Navbar";
 import { Sidebar } from "@/components/Sidebar";
-import { ExploreSection } from "@/components/ExploreSection";
 import { OverviewView } from "@/components/OverviewView";
 import { ClubsHierarchyView } from "@/components/ClubsHierarchyView";
 import { ActivityManagementView } from "@/components/ActivityManagementView";
@@ -35,13 +34,24 @@ import { AttendanceView } from "@/components/AttendanceView";
 import { SubmissionsView } from "@/components/SubmissionsView";
 import { CertificatesView } from "@/components/CertificatesView";
 import { GitclubLogo } from "@/components/GitclubLogo";
-import { Loader2 } from "lucide-react";
+import { scrollToSection } from "@/components/SmoothScroll";
+import {
+  Users,
+  QrCode,
+  CheckCircle2,
+  FileSpreadsheet,
+  Award,
+  Loader2,
+  Sparkles,
+  ArrowRight,
+  ShieldCheck,
+} from "lucide-react";
 import { motion } from "framer-motion";
 
 export default function DashboardPage() {
   const [currentUser, setCurrentUser] = useState<Profile | null>(null);
   const [profiles, setProfiles] = useState<Profile[]>([]);
-  const [activeSection, setActiveSection] = useState("explore");
+  const [activeSection, setActiveSection] = useState("overview");
 
   // Data states
   const [organizations, setOrganizations] = useState<Organization[]>([]);
@@ -100,10 +110,9 @@ export default function DashboardPage() {
     loadAllData();
   }, []);
 
-  // Track active section for Lenis smooth scroll indicators
+  // Track active section for Lenis smooth scroll indicators & sidebar sync
   useEffect(() => {
     const sectionIds = [
-      "explore",
       "overview",
       "clubs",
       "attendance",
@@ -149,16 +158,18 @@ export default function DashboardPage() {
             Loading Gitclub...
           </div>
           <p className="text-xs text-slate-400 font-mono mt-1">
-            MIRAI CAMPUS OPERATIONS
+            CLUB LEVEL OPERATIONS
           </p>
         </motion.div>
       </div>
     );
   }
 
+  const isStudent = currentUser.role === "member" || currentUser.role === "student";
+
   return (
     <div className="min-h-screen bg-[#070b16] text-slate-100 flex flex-col selection:bg-blue-600 selection:text-white">
-      {/* Royal Cobalt Sidebar (Matching user's uploaded reference image) */}
+      {/* Royal Cobalt Sidebar (Club Work Navigation) */}
       <Sidebar currentUser={currentUser} activeSection={activeSection} />
 
       {/* Main Single Scrollable Canvas */}
@@ -171,22 +182,56 @@ export default function DashboardPage() {
           activeSection={activeSection}
         />
 
-        {/* Continuous Single Page Flow (Inspired by lenis.dev smooth scroll) */}
+        {/* Continuous Single Page Flow (lenis.dev smooth scroll) */}
         <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-16">
-          {/* Section 00: Explore / Live Curriculum / Radial 97% Attendance Ring / Highlights */}
-          <ExploreSection currentUser={currentUser} activities={activities} />
+          {/* Club Telemetry & Quick Action Dock */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-3 border-b border-white/10 gap-3">
+            <div className="flex items-center gap-2">
+              <span className="font-mono text-xs font-bold text-blue-400 uppercase tracking-widest">
+                [CLUB OPERATIONS MATRIX]
+              </span>
+              <span className="text-slate-600">&bull;</span>
+              <span className="text-xs text-slate-300 font-semibold">
+                Mirai Campus &bull; NEX-CELL &bull; Kaizen Tech &bull; MALHAR
+              </span>
+            </div>
 
-          {/* Section 01: [01] / OVERVIEW & CAMPUS PULSE */}
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => scrollToSection("clubs")}
+                className="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl bg-blue-500/15 text-cyan-300 text-xs font-semibold border border-blue-400/30 hover:bg-blue-500/25 transition"
+              >
+                <Users className="w-3.5 h-3.5" />
+                <span>3 Clubs &amp; 8 Units</span>
+              </button>
+              <button
+                onClick={() => scrollToSection("attendance")}
+                className="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl bg-emerald-500/15 text-emerald-300 text-xs font-semibold border border-emerald-400/30 hover:bg-emerald-500/25 transition"
+              >
+                <QrCode className="w-3.5 h-3.5" />
+                <span>Session QR</span>
+              </button>
+              <button
+                onClick={() => scrollToSection("certificates")}
+                className="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl bg-amber-500/15 text-amber-300 text-xs font-semibold border border-amber-400/30 hover:bg-amber-500/25 transition"
+              >
+                <Award className="w-3.5 h-3.5" />
+                <span>Transcripts</span>
+              </button>
+            </div>
+          </div>
+
+          {/* Section 01: [01] / OVERVIEW & CAMPUS CLUBS METRICS */}
           <section id="overview" className="scroll-mt-24 space-y-4">
             <div className="flex items-center gap-3 pb-3 border-b border-white/10 font-mono">
               <span className="text-xs font-bold text-blue-400 tracking-widest">
                 [01]
               </span>
               <span className="text-xs font-bold text-white tracking-widest uppercase">
-                Overview & Institutional Metrics
+                Club Overview & Institutional Aggregations
               </span>
               <span className="text-[10px] text-slate-500 font-normal ml-auto hidden sm:inline">
-                NON-DOUBLE-COUNTED CAMPUS AGGREGATION
+                NON-DOUBLE-COUNTED STUDENT ENROLMENTS
               </span>
             </div>
             <OverviewView
@@ -230,10 +275,10 @@ export default function DashboardPage() {
                 [03]
               </span>
               <span className="text-xs font-bold text-white tracking-widest uppercase">
-                Live Sessions & Smart Anti-Fraud Attendance
+                Club Sessions & Anti-Fraud Dynamic Attendance
               </span>
               <span className="text-[10px] text-emerald-400 font-semibold ml-auto hidden sm:inline">
-                DYNAMIC 60-MIN TOTP CHECK-IN
+                DYNAMIC 60-MIN TOTP &amp; QR CHECK-IN
               </span>
             </div>
             <AttendanceView
@@ -253,7 +298,7 @@ export default function DashboardPage() {
                 Activity Proposals & Student Leadership Governance
               </span>
               <span className="text-[10px] text-indigo-400 font-semibold ml-auto hidden sm:inline">
-                PRESIDENT & VP EXECUTIVE APPROVAL DESK
+                PRESIDENT &amp; VP EXECUTIVE APPROVAL DESK
               </span>
             </div>
             <ActivityManagementView
@@ -271,10 +316,10 @@ export default function DashboardPage() {
                 [05]
               </span>
               <span className="text-xs font-bold text-white tracking-widest uppercase">
-                Deliverables & Rubric Evaluation Engine
+                Deliverables &amp; 100-Point Rubric Evaluation Engine
               </span>
               <span className="text-[10px] text-purple-400 font-semibold ml-auto hidden sm:inline">
-                100-POINT MULTI-CRITERIA SCORING
+                DYNAMIC MULTI-CRITERIA SCORING
               </span>
             </div>
             <SubmissionsView
@@ -292,7 +337,7 @@ export default function DashboardPage() {
                 [06]
               </span>
               <span className="text-xs font-bold text-white tracking-widest uppercase">
-                Verified Transcripts & Cryptographic Credentials
+                Verified Club Transcripts &amp; Cryptographic Credentials
               </span>
               <span className="text-[10px] text-amber-400 font-semibold ml-auto hidden sm:inline">
                 PUBLIC VERIFICATION LEDGER (/VERIFY)
@@ -314,7 +359,7 @@ export default function DashboardPage() {
               <GitclubLogo size="sm" showText={true} />
             </div>
             <div className="flex flex-col sm:items-end text-center sm:text-right font-mono text-[11px] text-slate-400 space-y-0.5">
-              <span>&copy; {new Date().getFullYear()} Gitclub &bull; Mirai School of Technology</span>
+              <span>&copy; {new Date().getFullYear()} Gitclub &bull; Mirai School of Technology Club Platform</span>
               <span className="text-slate-500">
                 NEX-CELL &middot; Kaizen Tech (CP, Web, AI/DS) &middot; MALHAR &middot; Verified Ledger
               </span>
