@@ -9,8 +9,8 @@ export async function requestMembershipAction(
 ): Promise<{ success: boolean; data?: OrganizationMembership; error?: string }> {
   try {
     const activeUser = db.getActiveUser();
-    if (activeUser.role !== "student") {
-      return { success: false, error: "Only students can request organization memberships." };
+    if (activeUser.role !== "student" && activeUser.role !== "member") {
+      return { success: false, error: "Only student members can request organization memberships." };
     }
     const mem = db.requestMembership(activeUser.id, orgId, type);
     return { success: true, data: mem };
@@ -34,13 +34,18 @@ export async function reviewMembershipAction(
 ): Promise<{ success: boolean; data?: OrganizationMembership; error?: string }> {
   try {
     const activeUser = db.getActiveUser();
-    if (
-      activeUser.role !== "student_coordinator" &&
-      activeUser.role !== "faculty_advisor" &&
-      activeUser.role !== "society_admin" &&
-      activeUser.role !== "college_admin"
-    ) {
-      return { success: false, error: "Unauthorized: only coordinators, advisors, or society leadership can review." };
+    const canReview = [
+      "president",
+      "vice_president",
+      "lead",
+      "admin",
+      "student_coordinator",
+      "faculty_advisor",
+      "society_admin",
+      "college_admin",
+    ].includes(activeUser.role);
+    if (!canReview) {
+      return { success: false, error: "Unauthorized: only club presidents, vice presidents, leads, or campus admins can review memberships." };
     }
     const mem = db.reviewMembership(membershipId, status, activeUser.id);
     return { success: true, data: mem };

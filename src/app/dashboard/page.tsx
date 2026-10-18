@@ -19,6 +19,7 @@ import { AttendanceView } from "@/components/AttendanceView";
 import { SubmissionsView } from "@/components/SubmissionsView";
 import { CertificatesView } from "@/components/CertificatesView";
 import { Loader2 } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 
 export default function DashboardPage() {
   const [currentUser, setCurrentUser] = useState<Profile | null>(null);
@@ -92,13 +93,16 @@ export default function DashboardPage() {
   if (loading || !currentUser) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center p-4">
-        <div className="glass-panel p-8 rounded-3xl flex flex-col items-center text-center max-w-sm shadow-2xl border border-white/10">
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="glass-panel p-8 rounded-3xl flex flex-col items-center text-center max-w-sm shadow-2xl border border-white/10"
+        >
           <div className="w-14 h-14 rounded-2xl bg-indigo-500/20 border border-indigo-400/30 flex items-center justify-center mb-4 shadow-lg shadow-indigo-500/20">
             <Loader2 className="w-7 h-7 text-indigo-400 animate-spin" />
           </div>
-          <div className="text-base font-bold text-white tracking-tight">Loading Clyro Platform...</div>
-          <div className="text-xs text-slate-400 mt-1.5">Connecting to Mirai authenticated campus ledger</div>
-        </div>
+          <div className="text-base font-bold text-white tracking-tight">Loading Clyro...</div>
+        </motion.div>
       </div>
     );
   }
@@ -113,65 +117,75 @@ export default function DashboardPage() {
         setActiveTab={setActiveTab}
       />
 
-      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {activeTab === "overview" && (
-          <OverviewView
-            currentUser={currentUser}
-            organizations={organizations}
-            institutionalMetrics={institutionalMetrics}
-            activities={activities}
-            attendanceRecords={[]}
-            submissions={submissions}
-            certificates={certificates}
-            setActiveTab={setActiveTab}
-          />
-        )}
+      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 overflow-hidden">
+        <AnimatePresence mode="wait" initial={false}>
+          <motion.div
+            key={activeTab}
+            initial={{ opacity: 0, y: 14, filter: "blur(4px)" }}
+            animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+            exit={{ opacity: 0, y: -14, filter: "blur(4px)" }}
+            transition={{ duration: 0.22, ease: "easeOut" }}
+          >
+            {activeTab === "overview" && (
+              <OverviewView
+                currentUser={currentUser}
+                organizations={organizations}
+                institutionalMetrics={institutionalMetrics}
+                activities={activities}
+                attendanceRecords={[]}
+                submissions={submissions}
+                certificates={certificates}
+                setActiveTab={setActiveTab}
+              />
+            )}
 
-        {activeTab === "clubs" && (
-          <ClubsHierarchyView
-            currentUser={currentUser}
-            topClubs={organizations}
-            societySubClubs={[]}
-            myMemberships={myMemberships}
-            allMemberships={allMemberships}
-            onRefresh={loadAllData}
-          />
-        )}
+            {activeTab === "clubs" && (
+              <ClubsHierarchyView
+                currentUser={currentUser}
+                topClubs={organizations}
+                societySubClubs={[]}
+                myMemberships={myMemberships}
+                allMemberships={allMemberships}
+                onRefresh={loadAllData}
+              />
+            )}
 
-        {activeTab === "activities" && (
-          <ActivityManagementView
-            currentUser={currentUser}
-            clubs={organizations as any}
-            activities={activities}
-            onRefresh={loadAllData}
-          />
-        )}
+            {activeTab === "activities" && (
+              <ActivityManagementView
+                currentUser={currentUser}
+                clubs={organizations as any}
+                activities={activities}
+                onRefresh={loadAllData}
+              />
+            )}
 
-        {activeTab === "attendance" && (
-          <AttendanceView
-            currentUser={currentUser}
-            activities={activities}
-            onRefresh={loadAllData}
-          />
-        )}
+            {activeTab === "attendance" && (
+              <AttendanceView
+                currentUser={currentUser}
+                activities={activities}
+                onRefresh={loadAllData}
+              />
+            )}
 
-        {activeTab === "submissions" && (
-          <SubmissionsView
-            currentUser={currentUser}
-            activities={activities}
-            submissions={submissions}
-            onRefresh={loadAllData}
-          />
-        )}
+            {activeTab === "submissions" && (
+              <SubmissionsView
+                currentUser={currentUser}
+                activities={activities}
+                submissions={submissions}
+                onRefresh={loadAllData}
+              />
+            )}
 
-        {activeTab === "certificates" && (
-          <CertificatesView
-            currentUser={currentUser}
-            clubs={organizations as any}
-            certificates={certificates}
-            onRefresh={loadAllData}
-          />
-        )}
+            {activeTab === "certificates" && (
+              <CertificatesView
+                currentUser={currentUser}
+                clubs={organizations as any}
+                certificates={certificates}
+                onRefresh={loadAllData}
+              />
+            )}
+          </motion.div>
+        </AnimatePresence>
       </main>
 
       <footer className="border-t border-white/10 bg-slate-900/40 backdrop-blur-2xl py-6 text-center text-xs text-slate-400">

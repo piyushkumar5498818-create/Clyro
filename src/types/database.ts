@@ -1,4 +1,10 @@
 export type UserRole =
+  | "president"
+  | "vice_president"
+  | "lead"
+  | "member"
+  | "admin"
+  // Backward compatibility aliases
   | "college_admin"
   | "campus_manager"
   | "faculty_advisor"
@@ -57,7 +63,7 @@ export interface Profile {
   campusId: string;
   studentId?: string;
   avatarUrl?: string;
-  title?: string; // e.g. "President", "Media Head", "Domain Lead"
+  title?: string; // e.g. "President", "Vice President", "Programming Head", "Member"
   organizationId?: string; // Assigned organization if applicable
   unitId?: string; // Assigned unit (domain or department) if applicable
   createdAt: string;
@@ -70,7 +76,9 @@ export interface Organization {
   shortName: string; // e.g. "NEX-CELL", "Kaizen Tech", "MALHAR"
   description: string;
   type: OrganizationType;
-  facultyAdvisorId: string | null;
+  presidentId?: string | null;
+  presidentName?: string;
+  facultyAdvisorId?: string | null;
   advisorName?: string;
   capacity: number;
   meetingRules: string;
@@ -83,6 +91,12 @@ export interface Organization {
 
 export type Club = Organization;
 
+export interface LearningPhase {
+  phase: string;
+  title: string;
+  description: string;
+}
+
 export interface OrganizationUnit {
   id: string;
   organizationId: string;
@@ -90,6 +104,9 @@ export interface OrganizationUnit {
   code: string;
   type: UnitType;
   description: string;
+  subtitle?: string; // e.g. "Master algorithms in C++", "React, Tailwind, Node", "Python & Machine Learning"
+  roadmap?: LearningPhase[];
+  mentors?: { name: string; role: string }[];
   leadId?: string;
   leadName?: string;
   capacity?: number;

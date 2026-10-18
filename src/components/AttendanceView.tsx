@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { Activity, Profile, AttendanceRecord, AttendanceToken } from "@/types/database";
 import {
   generateTokenAction,
@@ -47,8 +48,12 @@ export function AttendanceView({
   const [newStatus, setNewStatus] = useState<AttendanceRecord["status"]>("present");
   const [correctionReason, setCorrectionReason] = useState("");
 
-  const isStudent = currentUser.role === "student";
+  const isStudent = currentUser.role === "member" || currentUser.role === "student";
   const canManage =
+    currentUser.role === "president" ||
+    currentUser.role === "vice_president" ||
+    currentUser.role === "lead" ||
+    currentUser.role === "admin" ||
     currentUser.role === "student_coordinator" ||
     currentUser.role === "faculty_advisor" ||
     currentUser.role === "college_admin";
@@ -128,10 +133,10 @@ export function AttendanceView({
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-white/10 pb-5">
         <div>
           <h2 className="text-2xl font-black tracking-tight text-white">
-            Club Day Check-In & Attendance
+            Attendance & Check-In
           </h2>
           <p className="text-sm text-slate-300 mt-1">
-            Dynamic QR Authentication &middot; Anti-Screenshot Time Limit &middot; Duplicate Prevention
+            Dynamic QR verification, one-time session passcodes, and real-time attendance ledger.
           </p>
         </div>
 
@@ -152,29 +157,43 @@ export function AttendanceView({
         </div>
       </div>
 
-      {message && (
-        <div
-          className={`p-4 rounded-2xl flex items-center gap-3 text-sm font-semibold backdrop-blur-md border ${
-            message.type === "success"
-              ? "bg-emerald-500/15 text-emerald-200 border-emerald-500/30"
-              : "bg-rose-500/15 text-rose-200 border-rose-500/30"
-          }`}
-        >
-          {message.type === "success" ? <CheckCircle className="w-5 h-5 text-emerald-400" /> : <AlertTriangle className="w-5 h-5 text-rose-400" />}
-          {message.text}
-        </div>
-      )}
+      <AnimatePresence>
+        {message && (
+          <motion.div
+            initial={{ opacity: 0, y: -8 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -8 }}
+            className={`p-4 rounded-2xl flex items-center gap-3 text-sm font-semibold backdrop-blur-md border ${
+              message.type === "success"
+                ? "bg-emerald-500/15 text-emerald-200 border-emerald-500/30"
+                : "bg-rose-500/15 text-rose-200 border-rose-500/30"
+            }`}
+          >
+            {message.type === "success" ? <CheckCircle className="w-5 h-5 text-emerald-400" /> : <AlertTriangle className="w-5 h-5 text-rose-400" />}
+            {message.text}
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Left Column: QR Code / Token Display (Coordinator view or Student scan target) */}
-        <div className="lg:col-span-1 glass-panel rounded-3xl p-6 flex flex-col items-center text-center space-y-4">
+        {/* Left Column: QR Code / Token Display */}
+        <motion.div
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3 }}
+          className="lg:col-span-1 glass-panel rounded-3xl p-6 flex flex-col items-center text-center space-y-4"
+        >
           <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/10 text-indigo-300 text-xs font-bold uppercase tracking-wider border border-white/15">
             <QrCode className="w-3.5 h-3.5 text-indigo-400" />
             Live Check-in Code
           </div>
 
           {activeToken ? (
-            <div className="space-y-3 w-full flex flex-col items-center">
+            <motion.div
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              className="space-y-3 w-full flex flex-col items-center"
+            >
               {qrDataUrl && (
                 <div className="p-3 bg-white border-2 border-indigo-500/60 rounded-2xl shadow-xl shadow-black/40">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -182,16 +201,16 @@ export function AttendanceView({
                 </div>
               )}
               <div className="p-3.5 rounded-2xl bg-slate-950/80 border border-white/10 text-white w-full backdrop-blur-md">
-                <div className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">One-Time Passcode</div>
+                <div className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Passcode</div>
                 <div className="text-2xl font-mono font-black tracking-widest text-indigo-400 mt-0.5">
                   {activeToken.tokenCode}
                 </div>
               </div>
               <div className="text-xs text-slate-400 flex items-center gap-1.5 font-medium">
                 <Clock className="w-3.5 h-3.5 text-slate-400" />
-                Expires: {new Date(activeToken.validUntil).toLocaleTimeString()}
+                Valid until {new Date(activeToken.validUntil).toLocaleTimeString()}
               </div>
-            </div>
+            </motion.div>
           ) : (
             <div className="py-12 px-4 rounded-2xl border border-dashed border-white/15 text-slate-400 text-xs">
               No active attendance window. Coordinators can generate a new session code below.
@@ -205,10 +224,10 @@ export function AttendanceView({
               className="w-full glass-btn-primary py-2.5 rounded-xl font-bold text-xs flex items-center justify-center gap-2 shadow-lg transition"
             >
               <RefreshCw className="w-3.5 h-3.5" />
-              {activeToken ? "Rotate / Regenerate Code" : "Open Attendance Window"}
+              {activeToken ? "Rotate Code" : "Open Attendance Window"}
             </button>
           )}
-        </div>
+        </motion.div>
 
         {/* Right Columns: Student Check-In Form & Real-Time Roster */}
         <div className="lg:col-span-2 space-y-6">
@@ -327,62 +346,75 @@ export function AttendanceView({
       </div>
 
       {/* Manual Correction Modal */}
-      {correctingRecord && (
-        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-md flex items-center justify-center p-4">
-          <form onSubmit={handleCorrection} className="glass-panel bg-slate-900/90 rounded-3xl max-w-md w-full p-6 shadow-2xl space-y-4 border border-white/15">
-            <h4 className="font-black text-base text-white flex items-center gap-2">
-              <ShieldAlert className="w-5 h-5 text-indigo-400" />
-              Audit Correction for {correctingRecord.userFullName}
-            </h4>
-            <p className="text-xs text-slate-300">
-              Coordinators must state a valid reason when modifying an attendance record.
-            </p>
+      <AnimatePresence>
+        {correctingRecord && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 bg-black/60 backdrop-blur-md flex items-center justify-center p-4"
+          >
+            <motion.form
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.95, opacity: 0 }}
+              onSubmit={handleCorrection}
+              className="glass-panel bg-slate-900/95 rounded-3xl max-w-md w-full p-6 shadow-2xl space-y-4 border border-white/15"
+            >
+              <h4 className="font-black text-base text-white flex items-center gap-2">
+                <ShieldAlert className="w-5 h-5 text-indigo-400" />
+                Audit Correction: {correctingRecord.userFullName}
+              </h4>
+              <p className="text-xs text-slate-300">
+                Provide an audit justification for modifying this attendance record.
+              </p>
 
-            <div>
-              <label className="block text-xs font-semibold text-slate-300 mb-1">Status Override</label>
-              <select
-                value={newStatus}
-                onChange={(e) => setNewStatus(e.target.value as any)}
-                className="w-full text-xs rounded-xl border border-white/15 p-2.5 bg-slate-800 text-white"
-              >
-                <option value="present">Present</option>
-                <option value="late">Late Arrival</option>
-                <option value="excused">Excused Absence</option>
-                <option value="absent">Absent</option>
-              </select>
-            </div>
+              <div>
+                <label className="block text-xs font-semibold text-slate-300 mb-1">Status Override</label>
+                <select
+                  value={newStatus}
+                  onChange={(e) => setNewStatus(e.target.value as any)}
+                  className="w-full text-xs rounded-xl border border-white/15 p-2.5 bg-slate-800 text-white"
+                >
+                  <option value="present">Present</option>
+                  <option value="late">Late Arrival</option>
+                  <option value="excused">Excused Absence</option>
+                  <option value="absent">Absent</option>
+                </select>
+              </div>
 
-            <div>
-              <label className="block text-xs font-semibold text-slate-300 mb-1">Mandatory Audit Reason</label>
-              <textarea
-                rows={2}
-                placeholder="Reason for override (e.g. medical note, lab equipment delay)..."
-                value={correctionReason}
-                onChange={(e) => setCorrectionReason(e.target.value)}
-                className="w-full text-xs rounded-xl border border-white/15 p-2.5 bg-slate-800 text-white placeholder-slate-500"
-                required
-              />
-            </div>
+              <div>
+                <label className="block text-xs font-semibold text-slate-300 mb-1">Reason</label>
+                <textarea
+                  rows={2}
+                  placeholder="Reason for override..."
+                  value={correctionReason}
+                  onChange={(e) => setCorrectionReason(e.target.value)}
+                  className="w-full text-xs rounded-xl border border-white/15 p-2.5 bg-slate-800 text-white placeholder-slate-500"
+                  required
+                />
+              </div>
 
-            <div className="flex justify-end gap-2 pt-2">
-              <button
-                type="button"
-                onClick={() => setCorrectingRecord(null)}
-                className="px-4 py-2 rounded-xl text-xs font-semibold text-slate-300 hover:bg-white/10 transition"
-              >
-                Cancel
-              </button>
-              <button
-                type="submit"
-                disabled={loading}
-                className="glass-btn-primary px-4 py-2 rounded-xl text-xs font-bold shadow-md"
-              >
-                Save Correction
-              </button>
-            </div>
-          </form>
-        </div>
-      )}
+              <div className="flex justify-end gap-2 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setCorrectingRecord(null)}
+                  className="px-4 py-2 rounded-xl text-xs font-semibold text-slate-300 hover:bg-white/10 transition"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="glass-btn-primary px-4 py-2 rounded-xl text-xs font-bold shadow-md"
+                >
+                  Save Correction
+                </button>
+              </div>
+            </motion.form>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

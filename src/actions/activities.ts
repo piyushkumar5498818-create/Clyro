@@ -29,14 +29,19 @@ export async function createActivityAction(formData: {
 }): Promise<{ success: boolean; data?: Activity; error?: string }> {
   try {
     const activeUser = db.getActiveUser();
-    if (
-      activeUser.role !== "student_coordinator" &&
-      activeUser.role !== "society_admin" &&
-      activeUser.role !== "unit_lead" &&
-      activeUser.role !== "faculty_advisor" &&
-      activeUser.role !== "college_admin"
-    ) {
-      return { success: false, error: "Only coordinators, unit leads, or admins can propose activity plans." };
+    const canCreate = [
+      "president",
+      "vice_president",
+      "lead",
+      "admin",
+      "student_coordinator",
+      "society_admin",
+      "unit_lead",
+      "faculty_advisor",
+      "college_admin",
+    ].includes(activeUser.role);
+    if (!canCreate) {
+      return { success: false, error: "Only presidents, vice presidents, leads, or campus admins can propose activity plans." };
     }
 
     const orgId = formData.organizationId || formData.clubId;
@@ -78,12 +83,16 @@ export async function reviewActivityAction(
 ): Promise<{ success: boolean; data?: Activity; error?: string }> {
   try {
     const activeUser = db.getActiveUser();
-    if (
-      activeUser.role !== "faculty_advisor" &&
-      activeUser.role !== "college_admin" &&
-      activeUser.role !== "campus_manager"
-    ) {
-      return { success: false, error: "Only faculty advisors or campus managers can approve activities." };
+    const canApprove = [
+      "president",
+      "vice_president",
+      "admin",
+      "faculty_advisor",
+      "college_admin",
+      "campus_manager",
+    ].includes(activeUser.role);
+    if (!canApprove) {
+      return { success: false, error: "Only presidents, vice presidents, or campus admins can approve activities." };
     }
 
     const reviewed = db.reviewActivity(activityId, approved, activeUser.id, reason);

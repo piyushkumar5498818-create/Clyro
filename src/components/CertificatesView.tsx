@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { Certificate, Club, Profile, CertificateType } from "@/types/database";
 import { issueCertificateAction } from "@/actions/certificates";
 import {
@@ -36,6 +37,9 @@ export function CertificatesView({
   const [message, setMessage] = useState<{ text: string; type: "success" | "error" } | null>(null);
 
   const canIssue =
+    currentUser.role === "president" ||
+    currentUser.role === "vice_president" ||
+    currentUser.role === "admin" ||
     currentUser.role === "faculty_advisor" ||
     currentUser.role === "college_admin" ||
     currentUser.role === "campus_manager";
@@ -46,7 +50,7 @@ export function CertificatesView({
     setMessage(null);
 
     // Default to the test student Alex Rivera for simplicity
-    const targetUserId = "u0000000-0000-0000-0000-000000000006";
+    const targetUserId = "u0000000-0000-0000-0000-000000000008";
     const res = await issueCertificateAction(targetUserId, selectedClubId, title, certType);
     setLoading(false);
     if (res.success) {
@@ -146,10 +150,10 @@ export function CertificatesView({
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-white/10 pb-5">
         <div>
           <h2 className="text-2xl font-black tracking-tight text-white">
-            Verifiable Certificates & Transcripts
+            Certificates & Ledger
           </h2>
           <p className="text-sm text-slate-300 mt-1">
-            Tamper-Proof Ledger &middot; Public Verification &middot; Downloadable PDF Records
+            Verifiable student credentials, cryptographic hashes, and PDF records.
           </p>
         </div>
 
@@ -159,29 +163,50 @@ export function CertificatesView({
             className="glass-btn-primary inline-flex items-center gap-2 px-4 py-2.5 rounded-xl font-bold text-xs shadow-md transition"
           >
             <Plus className="w-4 h-4" />
-            Issue New Certificate
+            Issue Certificate
           </button>
         )}
       </div>
 
-      {message && (
-        <div
-          className={`p-4 rounded-2xl flex items-center gap-3 text-sm font-semibold backdrop-blur-md border ${
-            message.type === "success"
-              ? "bg-emerald-500/15 text-emerald-200 border-emerald-500/30"
-              : "bg-rose-500/15 text-rose-200 border-rose-500/30"
-          }`}
-        >
-          {message.type === "success" ? <CheckCircle className="w-5 h-5 text-emerald-400" /> : <AlertCircle className="w-5 h-5 text-rose-400" />}
-          {message.text}
-        </div>
-      )}
+      <AnimatePresence>
+        {message && (
+          <motion.div
+            initial={{ opacity: 0, y: -8 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -8 }}
+            className={`p-4 rounded-2xl flex items-center gap-3 text-sm font-semibold backdrop-blur-md border ${
+              message.type === "success"
+                ? "bg-emerald-500/15 text-emerald-200 border-emerald-500/30"
+                : "bg-rose-500/15 text-rose-200 border-rose-500/30"
+            }`}
+          >
+            {message.type === "success" ? <CheckCircle className="w-5 h-5 text-emerald-400" /> : <AlertCircle className="w-5 h-5 text-rose-400" />}
+            {message.text}
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Certificates Roster */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <motion.div
+        initial="hidden"
+        animate="show"
+        variants={{
+          hidden: { opacity: 0 },
+          show: {
+            opacity: 1,
+            transition: { staggerChildren: 0.08 },
+          },
+        }}
+        className="grid grid-cols-1 md:grid-cols-2 gap-6"
+      >
         {certificates.map((cert) => (
-          <div
+          <motion.div
             key={cert.id}
+            variants={{
+              hidden: { opacity: 0, y: 16 },
+              show: { opacity: 1, y: 0, transition: { duration: 0.3 } },
+            }}
+            whileHover={{ y: -3, transition: { duration: 0.2 } }}
             className="glass-panel rounded-3xl p-6 flex flex-col justify-between hover:border-indigo-400/40 transition duration-300"
           >
             <div>
@@ -226,89 +251,102 @@ export function CertificatesView({
                 Download PDF
               </button>
             </div>
-          </div>
+          </motion.div>
         ))}
-      </div>
+      </motion.div>
 
       {/* Issue Modal */}
-      {showIssueModal && (
-        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-md flex items-center justify-center p-4">
-          <form onSubmit={handleIssue} className="glass-panel bg-slate-900/90 rounded-3xl max-w-md w-full p-6 sm:p-8 shadow-2xl space-y-4 border border-white/15">
-            <h4 className="font-black text-base text-white flex items-center gap-2">
-              <Award className="w-5 h-5 text-indigo-400" />
-              Issue Verifiable Student Certificate
-            </h4>
+      <AnimatePresence>
+        {showIssueModal && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 bg-black/60 backdrop-blur-md flex items-center justify-center p-4"
+          >
+            <motion.form
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.95, opacity: 0 }}
+              onSubmit={handleIssue}
+              className="glass-panel bg-slate-900/95 rounded-3xl max-w-md w-full p-6 sm:p-8 shadow-2xl space-y-4 border border-white/15"
+            >
+              <h4 className="font-black text-base text-white flex items-center gap-2">
+                <Award className="w-5 h-5 text-indigo-400" />
+                Issue Verified Certificate
+              </h4>
 
-            <div>
-              <label className="block text-xs font-semibold text-slate-300 mb-1">Select Organization</label>
-              <select
-                value={selectedClubId}
-                onChange={(e) => setSelectedClubId(e.target.value)}
-                className="w-full text-xs rounded-xl border border-white/15 p-2.5 bg-slate-900/80 text-white backdrop-blur-md focus:border-indigo-400 focus:outline-none"
-                required
-              >
-                {clubs.map((c) => (
-                  <option key={c.id} value={c.id} className="bg-slate-900 text-white">
-                    {c.name}
-                  </option>
-                ))}
-              </select>
-            </div>
+              <div>
+                <label className="block text-xs font-semibold text-slate-300 mb-1">Select Organization</label>
+                <select
+                  value={selectedClubId}
+                  onChange={(e) => setSelectedClubId(e.target.value)}
+                  className="w-full text-xs rounded-xl border border-white/15 p-2.5 bg-slate-900/80 text-white backdrop-blur-md focus:border-indigo-400 focus:outline-none"
+                  required
+                >
+                  {clubs.map((c) => (
+                    <option key={c.id} value={c.id} className="bg-slate-900 text-white">
+                      {c.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
 
-            <div>
-              <label className="block text-xs font-semibold text-slate-300 mb-1">Student Recipient</label>
-              <input
-                type="email"
-                value={studentEmail}
-                onChange={(e) => setStudentEmail(e.target.value)}
-                className="w-full text-xs rounded-xl border border-white/15 p-2.5 bg-slate-900/80 text-white font-mono placeholder-slate-500 focus:border-indigo-400 focus:outline-none"
-                required
-              />
-            </div>
+              <div>
+                <label className="block text-xs font-semibold text-slate-300 mb-1">Student Recipient</label>
+                <input
+                  type="email"
+                  value={studentEmail}
+                  onChange={(e) => setStudentEmail(e.target.value)}
+                  className="w-full text-xs rounded-xl border border-white/15 p-2.5 bg-slate-900/80 text-white font-mono placeholder-slate-500 focus:border-indigo-400 focus:outline-none"
+                  required
+                />
+              </div>
 
-            <div>
-              <label className="block text-xs font-semibold text-slate-300 mb-1">Achievement Title</label>
-              <input
-                type="text"
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                className="w-full text-xs rounded-xl border border-white/15 p-2.5 bg-slate-900/80 text-white placeholder-slate-500 focus:border-indigo-400 focus:outline-none"
-                required
-              />
-            </div>
+              <div>
+                <label className="block text-xs font-semibold text-slate-300 mb-1">Achievement Title</label>
+                <input
+                  type="text"
+                  value={title}
+                  onChange={(e) => setTitle(e.target.value)}
+                  className="w-full text-xs rounded-xl border border-white/15 p-2.5 bg-slate-900/80 text-white placeholder-slate-500 focus:border-indigo-400 focus:outline-none"
+                  required
+                />
+              </div>
 
-            <div>
-              <label className="block text-xs font-semibold text-slate-300 mb-1">Certificate Type</label>
-              <select
-                value={certType}
-                onChange={(e) => setCertType(e.target.value as any)}
-                className="w-full text-xs rounded-xl border border-white/15 p-2.5 bg-slate-900/80 text-white backdrop-blur-md focus:border-indigo-400 focus:outline-none"
-              >
-                <option value="achievement" className="bg-slate-900 text-white">Achievement</option>
-                <option value="participation" className="bg-slate-900 text-white">Participation</option>
-                <option value="merit" className="bg-slate-900 text-white">Merit & Honor</option>
-              </select>
-            </div>
+              <div>
+                <label className="block text-xs font-semibold text-slate-300 mb-1">Certificate Type</label>
+                <select
+                  value={certType}
+                  onChange={(e) => setCertType(e.target.value as any)}
+                  className="w-full text-xs rounded-xl border border-white/15 p-2.5 bg-slate-900/80 text-white backdrop-blur-md focus:border-indigo-400 focus:outline-none"
+                >
+                  <option value="achievement" className="bg-slate-900 text-white">Achievement</option>
+                  <option value="participation" className="bg-slate-900 text-white">Participation</option>
+                  <option value="merit" className="bg-slate-900 text-white">Merit & Honor</option>
+                </select>
+              </div>
 
-            <div className="flex justify-end gap-2.5 pt-3 border-t border-white/10">
-              <button
-                type="button"
-                onClick={() => setShowIssueModal(false)}
-                className="px-4 py-2 rounded-xl text-xs font-semibold text-slate-300 hover:bg-white/10 transition"
-              >
-                Cancel
-              </button>
-              <button
-                type="submit"
-                disabled={loading}
-                className="glass-btn-primary px-5 py-2 rounded-xl text-xs font-bold shadow-md"
-              >
-                {loading ? "Generating..." : "Issue & Record"}
-              </button>
-            </div>
-          </form>
-        </div>
-      )}
+              <div className="flex justify-end gap-2.5 pt-3 border-t border-white/10">
+                <button
+                  type="button"
+                  onClick={() => setShowIssueModal(false)}
+                  className="px-4 py-2 rounded-xl text-xs font-semibold text-slate-300 hover:bg-white/10 transition"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="glass-btn-primary px-5 py-2 rounded-xl text-xs font-bold shadow-md"
+                >
+                  {loading ? "Generating..." : "Issue & Record"}
+                </button>
+              </div>
+            </motion.form>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

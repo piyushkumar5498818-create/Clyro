@@ -9,14 +9,19 @@ export async function generateTokenAction(
 ): Promise<{ success: boolean; data?: AttendanceToken; error?: string }> {
   try {
     const activeUser = db.getActiveUser();
-    if (
-      activeUser.role !== "student_coordinator" &&
-      activeUser.role !== "society_admin" &&
-      activeUser.role !== "unit_lead" &&
-      activeUser.role !== "faculty_advisor" &&
-      activeUser.role !== "college_admin"
-    ) {
-      return { success: false, error: "Only coordinators or leads can open attendance check-in." };
+    const canManage = [
+      "president",
+      "vice_president",
+      "lead",
+      "admin",
+      "student_coordinator",
+      "society_admin",
+      "unit_lead",
+      "faculty_advisor",
+      "college_admin",
+    ].includes(activeUser.role);
+    if (!canManage) {
+      return { success: false, error: "Only presidents, vice presidents, leads, or campus admins can open attendance check-in." };
     }
 
     const token = db.generateAttendanceToken(activityId, activeUser.id, minutes);
@@ -37,8 +42,8 @@ export async function checkInStudentAction(
 ): Promise<{ success: boolean; data?: AttendanceRecord; error?: string }> {
   try {
     const activeUser = db.getActiveUser();
-    if (activeUser.role !== "student") {
-      return { success: false, error: "Only students can check in to sessions." };
+    if (activeUser.role !== "student" && activeUser.role !== "member") {
+      return { success: false, error: "Only student members can check in to sessions." };
     }
 
     const record = db.checkInStudent(activityId, activeUser.id, code, method);
@@ -55,13 +60,18 @@ export async function correctAttendanceAction(
 ): Promise<{ success: boolean; data?: AttendanceRecord; error?: string }> {
   try {
     const activeUser = db.getActiveUser();
-    if (
-      activeUser.role !== "student_coordinator" &&
-      activeUser.role !== "society_admin" &&
-      activeUser.role !== "faculty_advisor" &&
-      activeUser.role !== "college_admin"
-    ) {
-      return { success: false, error: "Only coordinators, advisors, or admins can correct attendance." };
+    const canCorrect = [
+      "president",
+      "vice_president",
+      "lead",
+      "admin",
+      "student_coordinator",
+      "society_admin",
+      "faculty_advisor",
+      "college_admin",
+    ].includes(activeUser.role);
+    if (!canCorrect) {
+      return { success: false, error: "Only presidents, vice presidents, leads, or campus admins can correct attendance." };
     }
 
     if (!reason || reason.trim().length < 5) {

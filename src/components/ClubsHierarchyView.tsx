@@ -12,10 +12,15 @@ import {
   Rocket,
   Code2,
   Palette,
-  Shield,
   Layers,
   Sparkles,
+  BookOpen,
+  GraduationCap,
+  Terminal,
+  Cpu,
+  Laptop,
 } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 
 interface ClubsHierarchyViewProps {
   currentUser: Profile;
@@ -34,12 +39,17 @@ export function ClubsHierarchyView({
   onRefresh,
 }: ClubsHierarchyViewProps) {
   const [selectedOrg, setSelectedOrg] = useState<Organization | null>(null);
+  const [selectedDomainCode, setSelectedDomainCode] = useState<string>("CP");
   const [membershipType, setMembershipType] = useState<"primary" | "secondary">("primary");
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<{ text: string; type: "success" | "error" } | null>(null);
 
-  const isStudent = currentUser.role === "student";
+  const isStudent = currentUser.role === "member" || currentUser.role === "student";
   const canReview =
+    currentUser.role === "president" ||
+    currentUser.role === "vice_president" ||
+    currentUser.role === "lead" ||
+    currentUser.role === "admin" ||
     currentUser.role === "student_coordinator" ||
     currentUser.role === "society_admin" ||
     currentUser.role === "faculty_advisor" ||
@@ -51,7 +61,7 @@ export function ClubsHierarchyView({
     const res = await requestMembershipAction(orgId, membershipType);
     setLoading(false);
     if (res.success) {
-      setMessage({ text: "Membership request submitted for advisor/coordinator review!", type: "success" });
+      setMessage({ text: "Membership request submitted!", type: "success" });
       setSelectedOrg(null);
       onRefresh();
     } else {
@@ -76,136 +86,76 @@ export function ClubsHierarchyView({
   const malhar = topClubs.find((o) => o.shortName === "MALHAR");
 
   return (
-    <div className="space-y-8">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-white/10 pb-5">
+    <div className="space-y-6">
+      {/* Minimal Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-white/10 pb-4">
         <div>
-          <h2 className="text-2xl font-black tracking-tight text-white">
-            Mirai Campus Organizations & Units
+          <h2 className="text-xl sm:text-2xl font-black tracking-tight text-white">
+            Campus Organizations
           </h2>
-          <p className="text-sm text-slate-300 mt-1">
-            3 Primary Organizations &middot; 6 Technical Domains &middot; 5 Cultural Departments &middot; 6 Venture Initiatives
+          <p className="text-xs text-slate-400 mt-0.5">
+            3 Clubs &bull; 8 Specialized Units
           </p>
         </div>
 
         {isStudent && (
-          <div className="flex items-center gap-2 bg-indigo-500/15 border border-indigo-400/30 px-3.5 py-1.5 rounded-xl text-xs backdrop-blur-md">
-            <span className="font-semibold text-indigo-300">Institutional Policy:</span>
-            <span className="text-indigo-200">Max 2 Primary Organizations</span>
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-indigo-500/15 border border-indigo-500/30 text-[11px] text-indigo-300">
+            <span>Policy: Max 2 Primary Memberships</span>
           </div>
         )}
       </div>
 
       {message && (
-        <div
-          className={`p-4 rounded-2xl flex items-center gap-3 text-sm font-semibold backdrop-blur-md border ${
+        <motion.div
+          initial={{ opacity: 0, y: -6 }}
+          animate={{ opacity: 1, y: 0 }}
+          className={`p-3 rounded-xl flex items-center gap-2 text-xs font-semibold backdrop-blur-md border ${
             message.type === "success"
               ? "bg-emerald-500/15 text-emerald-200 border-emerald-500/30"
               : "bg-rose-500/15 text-rose-200 border-rose-500/30"
           }`}
         >
-          {message.type === "success" ? <Check className="w-5 h-5 text-emerald-400" /> : <AlertCircle className="w-5 h-5 text-rose-400" />}
+          {message.type === "success" ? <Check className="w-4 h-4 text-emerald-400" /> : <AlertCircle className="w-4 h-4 text-rose-400" />}
           {message.text}
-        </div>
+        </motion.div>
       )}
 
-      {/* 1. NEX-CELL: Entrepreneurship Club */}
-      {nexcell && (
-        <div className="glass-panel rounded-3xl p-6 sm:p-8 space-y-6">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-white/10 pb-5">
-            <div className="flex items-start gap-4">
-              <div className="w-14 h-14 rounded-2xl bg-amber-500/20 border border-amber-400/30 text-amber-400 flex items-center justify-center shrink-0 shadow-lg shadow-amber-500/10">
-                <Rocket className="w-7 h-7" />
-              </div>
-              <div>
-                <div className="flex items-center gap-2.5">
-                  <h3 className="text-xl sm:text-2xl font-black text-white">{nexcell.name}</h3>
-                  <span className="text-[10px] font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30">
-                    Entrepreneurship
-                  </span>
-                </div>
-                <p className="text-xs sm:text-sm text-slate-300 mt-1 max-w-3xl leading-relaxed">{nexcell.description}</p>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-3 shrink-0">
-              {isStudent && (
-                (() => {
-                  const mem = myMemberships.find((m) => m.organizationId === nexcell.id);
-                  return mem ? (
-                    <span className="px-3.5 py-1.5 rounded-xl text-xs font-bold uppercase bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
-                      {mem.membershipType} &middot; {mem.status}
-                    </span>
-                  ) : (
-                    <button
-                      onClick={() => setSelectedOrg(nexcell)}
-                      className="glass-btn-primary px-4 py-2 rounded-xl text-xs font-bold shadow-md transition"
-                    >
-                      Join NEX-CELL
-                    </button>
-                  );
-                })()
-              )}
-            </div>
-          </div>
-
-          {/* NEX-CELL 6 Flagship Initiatives */}
-          <div>
-            <div className="flex items-center gap-2 mb-3.5">
-              <Sparkles className="w-4 h-4 text-amber-400" />
-              <h4 className="text-xs font-extrabold uppercase tracking-wider text-slate-300">
-                Flagship Venture Initiatives (6 Recurring Programmes)
-              </h4>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5">
-              {nexcell.initiatives?.map((init) => (
-                <div key={init.id} className="glass-card p-4 rounded-2xl">
-                  <div className="flex items-center justify-between text-xs font-bold text-white">
-                    <span>{init.name}</span>
-                    <span className="font-mono text-[10px] text-amber-300 bg-amber-500/20 px-2 py-0.5 rounded-full border border-amber-500/30">
-                      {init.format}
-                    </span>
-                  </div>
-                  <p className="text-xs text-slate-300 mt-1.5 leading-relaxed">{init.description}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* 2. Kaizen Tech: Technical Club */}
+      {/* 1. Kaizen Tech: 3 Technical Domains with Roadmaps & Mentors */}
       {kaizen && (
-        <div className="glass-panel rounded-3xl p-6 sm:p-8 space-y-6">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-white/10 pb-5">
-            <div className="flex items-start gap-4">
-              <div className="w-14 h-14 rounded-2xl bg-indigo-500/20 border border-indigo-400/30 text-indigo-400 flex items-center justify-center shrink-0 shadow-lg shadow-indigo-500/10">
-                <Code2 className="w-7 h-7" />
+        <motion.div
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.25 }}
+          className="glass-panel rounded-3xl p-5 sm:p-6 space-y-5"
+        >
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-white/10 pb-4">
+            <div className="flex items-center gap-3">
+              <div className="w-11 h-11 rounded-xl bg-indigo-500/20 border border-indigo-400/30 text-indigo-400 flex items-center justify-center shrink-0">
+                <Code2 className="w-6 h-6" />
               </div>
               <div>
-                <div className="flex items-center gap-2.5">
-                  <h3 className="text-xl sm:text-2xl font-black text-white">{kaizen.name}</h3>
-                  <span className="text-[10px] font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
-                    Technical
+                <div className="flex items-center gap-2">
+                  <h3 className="text-lg sm:text-xl font-black text-white">{kaizen.name}</h3>
+                  <span className="text-[10px] font-bold uppercase px-2 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
+                    3 Tech Domains
                   </span>
                 </div>
-                <p className="text-xs sm:text-sm text-slate-300 mt-1 max-w-3xl leading-relaxed">{kaizen.description}</p>
+                <p className="text-xs text-slate-400 mt-0.5">{kaizen.description}</p>
               </div>
             </div>
 
-            <div className="flex items-center gap-3 shrink-0">
+            <div className="shrink-0">
               {isStudent && (
                 (() => {
                   const mem = myMemberships.find((m) => m.organizationId === kaizen.id);
                   return mem ? (
-                    <span className="px-3.5 py-1.5 rounded-xl text-xs font-bold uppercase bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
-                      {mem.membershipType} &middot; {mem.status}
+                    <span className="px-3 py-1 rounded-xl text-xs font-bold uppercase bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                      {mem.membershipType} &bull; {mem.status}
                     </span>
                   ) : (
                     <button
                       onClick={() => setSelectedOrg(kaizen)}
-                      className="glass-btn-primary px-4 py-2 rounded-xl text-xs font-bold shadow-md transition"
+                      className="glass-btn-primary px-3.5 py-1.5 rounded-xl text-xs font-bold shadow"
                     >
                       Join Kaizen Tech
                     </button>
@@ -215,63 +165,251 @@ export function ClubsHierarchyView({
             </div>
           </div>
 
-          {/* Kaizen Tech 6 Technical Domains */}
+          {/* 3 Domain Selector Tabs */}
           <div>
-            <div className="flex items-center gap-2 mb-3.5">
+            <div className="flex items-center gap-2 mb-3">
               <Layers className="w-4 h-4 text-indigo-400" />
-              <h4 className="text-xs font-extrabold uppercase tracking-wider text-slate-300">
-                Configured Technical Domains (6 Specialized Tracks)
-              </h4>
+              <span className="text-xs font-bold uppercase tracking-wider text-slate-300">
+                Technical Domains
+              </span>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5">
-              {kaizen.units?.map((domain) => (
-                <div key={domain.id} className="glass-card p-4 rounded-2xl">
-                  <div className="flex items-center justify-between text-xs font-bold text-white">
-                    <span>{domain.name}</span>
-                    <span className="font-mono text-[10px] text-indigo-300 bg-indigo-500/20 px-2 py-0.5 rounded-full border border-indigo-500/30">
-                      {domain.code}
-                    </span>
-                  </div>
-                  <p className="text-xs text-slate-300 mt-1.5 leading-relaxed">{domain.description}</p>
-                </div>
-              ))}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+              {kaizen.units?.map((domain) => {
+                const isSelected = selectedDomainCode === domain.code;
+                return (
+                  <motion.button
+                    key={domain.id}
+                    whileHover={{ scale: 1.01 }}
+                    whileTap={{ scale: 0.99 }}
+                    onClick={() => setSelectedDomainCode(domain.code)}
+                    className={`p-3.5 rounded-2xl text-left transition border backdrop-blur-md ${
+                      isSelected
+                        ? "bg-indigo-600/30 border-indigo-400/60 shadow-lg shadow-indigo-500/10"
+                        : "bg-white/[0.04] border-white/10 hover:bg-white/[0.07]"
+                    }`}
+                  >
+                    <div className="flex items-center justify-between mb-1">
+                      <div className="flex items-center gap-2">
+                        {domain.code === "CP" && <Terminal className="w-4 h-4 text-indigo-400" />}
+                        {domain.code === "WEB" && <Laptop className="w-4 h-4 text-indigo-400" />}
+                        {domain.code === "AI_DS" && <Cpu className="w-4 h-4 text-indigo-400" />}
+                        <span className="font-bold text-xs text-white">{domain.name}</span>
+                      </div>
+                      <span className="font-mono text-[10px] text-indigo-300 bg-indigo-500/20 px-2 py-0.2 rounded-full">
+                        {domain.code}
+                      </span>
+                    </div>
+                    {domain.subtitle && (
+                      <div className="text-[11px] text-indigo-300/80 font-medium">{domain.subtitle}</div>
+                    )}
+                  </motion.button>
+                );
+              })}
             </div>
           </div>
-        </div>
+
+          {/* Selected Domain Deep View (Roadmap & Mentors) with Swipe Transition */}
+          <AnimatePresence mode="wait">
+            {(() => {
+              const activeDomain =
+                kaizen.units?.find((d) => d.code === selectedDomainCode) || kaizen.units?.[0];
+              if (!activeDomain) return null;
+
+              return (
+                <motion.div
+                  key={activeDomain.code}
+                  initial={{ opacity: 0, x: 18 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: -18 }}
+                  transition={{ duration: 0.22, ease: "easeOut" }}
+                  className="glass-card-static rounded-2xl p-4 sm:p-5 border border-white/10 space-y-4"
+                >
+                  <div className="flex items-center justify-between pb-3 border-b border-white/10">
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <h4 className="font-black text-base text-white">{activeDomain.name}</h4>
+                        <span className="text-[10px] font-mono text-indigo-300 bg-indigo-500/20 px-2 py-0.5 rounded-full">
+                          {activeDomain.code}
+                        </span>
+                      </div>
+                      {activeDomain.subtitle && (
+                        <p className="text-xs text-indigo-300 font-medium mt-0.5">{activeDomain.subtitle}</p>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
+                    {/* Left: 4-Phase Roadmap */}
+                    <div className="lg:col-span-7 space-y-3">
+                      <div className="flex items-center gap-1.5 text-xs font-bold uppercase text-slate-300">
+                        <BookOpen className="w-3.5 h-3.5 text-indigo-400" />
+                        <span>Roadmap (4 Phases)</span>
+                      </div>
+
+                      <div className="space-y-2.5">
+                        {activeDomain.roadmap?.map((phase, idx) => (
+                          <div key={idx} className="flex items-start gap-3">
+                            <div className="w-5 h-5 rounded-full bg-indigo-500/20 border border-indigo-400 text-indigo-300 flex items-center justify-center text-[10px] font-black shrink-0 mt-0.5">
+                              {idx + 1}
+                            </div>
+                            <div className="flex-1 glass-card p-2.5 rounded-xl border border-white/10 text-xs">
+                              <span className="font-bold text-white">
+                                {phase.phase}: {phase.title}
+                              </span>
+                              <p className="text-[11px] text-slate-300 mt-0.5 leading-relaxed">
+                                {phase.description}
+                              </p>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Right: Domain Leads & Mentors */}
+                    <div className="lg:col-span-5 space-y-3">
+                      <div className="flex items-center gap-1.5 text-xs font-bold uppercase text-slate-300">
+                        <Users className="w-3.5 h-3.5 text-indigo-400" />
+                        <span>Leads & Mentors</span>
+                      </div>
+
+                      <div className="glass-card-static rounded-2xl p-3 border border-white/10 space-y-2 max-h-[380px] overflow-y-auto">
+                        {activeDomain.mentors && activeDomain.mentors.length > 0 ? (
+                          activeDomain.mentors.map((m, idx) => (
+                            <div
+                              key={idx}
+                              className="flex items-center justify-between p-2 rounded-xl bg-white/[0.03] text-xs border border-white/5"
+                            >
+                              <div className="flex items-center gap-2">
+                                <div className="w-7 h-7 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-400/30 flex items-center justify-center text-[10px] font-bold">
+                                  {m.name
+                                    .split(" ")
+                                    .map((n) => n[0])
+                                    .join("")}
+                                </div>
+                                <div>
+                                  <div className="font-bold text-white">{m.name}</div>
+                                  <div className="text-[10px] text-slate-400">{m.role}</div>
+                                </div>
+                              </div>
+                              <span className="text-[9px] font-semibold px-2 py-0.5 rounded-full bg-indigo-500/15 text-indigo-300">
+                                Mentor
+                              </span>
+                            </div>
+                          ))
+                        ) : (
+                          <div className="py-6 text-center text-slate-400 space-y-1 text-xs">
+                            <GraduationCap className="w-6 h-6 mx-auto text-slate-500 opacity-60" />
+                            <div>Mentors currently unassigned.</div>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </motion.div>
+              );
+            })()}
+          </AnimatePresence>
+        </motion.div>
+      )}
+
+      {/* 2. NEX-CELL: Entrepreneurship Club */}
+      {nexcell && (
+        <motion.div
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.25, delay: 0.05 }}
+          className="glass-panel rounded-3xl p-5 sm:p-6 space-y-4"
+        >
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-white/10 pb-4">
+            <div className="flex items-center gap-3">
+              <div className="w-11 h-11 rounded-xl bg-amber-500/20 border border-amber-400/30 text-amber-400 flex items-center justify-center shrink-0">
+                <Rocket className="w-6 h-6" />
+              </div>
+              <div>
+                <div className="flex items-center gap-2">
+                  <h3 className="text-lg sm:text-xl font-black text-white">{nexcell.name}</h3>
+                  <span className="text-[10px] font-bold uppercase px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30">
+                    6 Initiatives
+                  </span>
+                </div>
+                <p className="text-xs text-slate-400 mt-0.5">{nexcell.description}</p>
+              </div>
+            </div>
+
+            <div className="shrink-0">
+              {isStudent && (
+                (() => {
+                  const mem = myMemberships.find((m) => m.organizationId === nexcell.id);
+                  return mem ? (
+                    <span className="px-3 py-1 rounded-xl text-xs font-bold uppercase bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                      {mem.membershipType} &bull; {mem.status}
+                    </span>
+                  ) : (
+                    <button
+                      onClick={() => setSelectedOrg(nexcell)}
+                      className="glass-btn-primary px-3.5 py-1.5 rounded-xl text-xs font-bold shadow"
+                    >
+                      Join NEX-CELL
+                    </button>
+                  );
+                })()
+              )}
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5">
+            {nexcell.initiatives?.map((init) => (
+              <div key={init.id} className="glass-card p-3 rounded-xl">
+                <div className="flex items-center justify-between text-xs font-bold text-white mb-1">
+                  <span>{init.name}</span>
+                  <span className="text-[10px] text-amber-300 bg-amber-500/20 px-2 py-0.5 rounded-full">
+                    {init.format}
+                  </span>
+                </div>
+                <p className="text-[11px] text-slate-300">{init.description}</p>
+              </div>
+            ))}
+          </div>
+        </motion.div>
       )}
 
       {/* 3. MALHAR: Cultural Society */}
       {malhar && (
-        <div className="glass-panel rounded-3xl p-6 sm:p-8 space-y-6">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-white/10 pb-5">
-            <div className="flex items-start gap-4">
-              <div className="w-14 h-14 rounded-2xl bg-rose-500/20 border border-rose-400/30 text-rose-400 flex items-center justify-center shrink-0 shadow-lg shadow-rose-500/10">
-                <Palette className="w-7 h-7" />
+        <motion.div
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.25, delay: 0.1 }}
+          className="glass-panel rounded-3xl p-5 sm:p-6 space-y-4"
+        >
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-white/10 pb-4">
+            <div className="flex items-center gap-3">
+              <div className="w-11 h-11 rounded-xl bg-rose-500/20 border border-rose-400/30 text-rose-400 flex items-center justify-center shrink-0">
+                <Palette className="w-6 h-6" />
               </div>
               <div>
-                <div className="flex items-center gap-2.5">
-                  <h3 className="text-xl sm:text-2xl font-black text-white">{malhar.name}</h3>
-                  <span className="text-[10px] font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-rose-500/20 text-rose-300 border border-rose-500/30">
-                    Cultural Society
+                <div className="flex items-center gap-2">
+                  <h3 className="text-lg sm:text-xl font-black text-white">{malhar.name}</h3>
+                  <span className="text-[10px] font-bold uppercase px-2 py-0.5 rounded-full bg-rose-500/20 text-rose-300 border border-rose-500/30">
+                    5 Departments
                   </span>
                 </div>
-                <p className="text-xs sm:text-sm text-slate-300 mt-1 max-w-3xl leading-relaxed">{malhar.description}</p>
+                <p className="text-xs text-slate-400 mt-0.5">{malhar.description}</p>
               </div>
             </div>
 
-            <div className="flex items-center gap-3 shrink-0">
+            <div className="shrink-0">
               {isStudent && (
                 (() => {
                   const mem = myMemberships.find((m) => m.organizationId === malhar.id);
                   return mem ? (
-                    <span className="px-3.5 py-1.5 rounded-xl text-xs font-bold uppercase bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
-                      {mem.membershipType} &middot; {mem.status}
+                    <span className="px-3 py-1 rounded-xl text-xs font-bold uppercase bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                      {mem.membershipType} &bull; {mem.status}
                     </span>
                   ) : (
                     <button
                       onClick={() => setSelectedOrg(malhar)}
-                      className="glass-btn-primary px-4 py-2 rounded-xl text-xs font-bold shadow-md transition"
+                      className="glass-btn-primary px-3.5 py-1.5 rounded-xl text-xs font-bold shadow"
                     >
                       Join MALHAR
                     </button>
@@ -281,66 +419,58 @@ export function ClubsHierarchyView({
             </div>
           </div>
 
-          {/* MALHAR 5 Departments */}
-          <div>
-            <div className="flex items-center gap-2 mb-3.5">
-              <Building className="w-4 h-4 text-rose-400" />
-              <h4 className="text-xs font-extrabold uppercase tracking-wider text-slate-300">
-                Operating Departments (5 Specialized Production Units)
-              </h4>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5">
-              {malhar.units?.map((dept) => (
-                <div key={dept.id} className="glass-card p-4 rounded-2xl">
-                  <div className="flex items-center justify-between text-xs font-bold text-white">
-                    <span>{dept.name}</span>
-                    <span className="font-mono text-[10px] text-rose-300 bg-rose-500/20 px-2 py-0.5 rounded-full border border-rose-500/30">
-                      {dept.code}
-                    </span>
-                  </div>
-                  <p className="text-xs text-slate-300 mt-1.5 leading-relaxed">{dept.description}</p>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5">
+            {malhar.units?.map((dept) => (
+              <div key={dept.id} className="glass-card p-3 rounded-xl">
+                <div className="flex items-center justify-between text-xs font-bold text-white mb-1">
+                  <span>{dept.name}</span>
+                  <span className="text-[10px] text-rose-300 bg-rose-500/20 px-2 py-0.5 rounded-full">
+                    {dept.code}
+                  </span>
                 </div>
-              ))}
-            </div>
+                <p className="text-[11px] text-slate-300">{dept.description}</p>
+              </div>
+            ))}
           </div>
-        </div>
+        </motion.div>
       )}
 
-      {/* Membership Review Section (Coordinators, Advisors, Admins) */}
+      {/* Membership Review Section */}
       {canReview && (
-        <div className="glass-panel rounded-3xl p-6 sm:p-8 space-y-4">
+        <motion.div
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.25, delay: 0.15 }}
+          className="glass-panel rounded-3xl p-5 sm:p-6 space-y-3"
+        >
           <div className="flex items-center justify-between">
-            <h3 className="font-bold text-base text-white flex items-center gap-2">
+            <h3 className="font-bold text-sm text-white flex items-center gap-2">
               <Users className="w-4 h-4 text-indigo-400" />
-              Organization Membership Queue ({allMemberships.length})
+              Membership Queue ({allMemberships.length})
             </h3>
-            <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-white/10 text-slate-200 border border-white/10">
-              Authorized Review
-            </span>
           </div>
 
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs">
               <thead className="bg-white/5 border-b border-white/10 text-slate-300 uppercase font-semibold">
                 <tr>
-                  <th className="py-2.5 px-3">Student</th>
-                  <th className="py-2.5 px-3">Organization</th>
-                  <th className="py-2.5 px-3">Tier</th>
-                  <th className="py-2.5 px-3">Status</th>
-                  <th className="py-2.5 px-3">Date</th>
-                  <th className="py-2.5 px-3 text-right">Actions</th>
+                  <th className="py-2 px-3">Student</th>
+                  <th className="py-2 px-3">Club</th>
+                  <th className="py-2 px-3">Tier</th>
+                  <th className="py-2 px-3">Status</th>
+                  <th className="py-2 px-3">Date</th>
+                  <th className="py-2 px-3 text-right">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-white/5">
                 {allMemberships.map((m) => (
                   <tr key={m.id} className="hover:bg-white/[0.04] transition">
-                    <td className="py-2.5 px-3 font-semibold text-white">
-                      {m.userFullName} ({m.studentId || "Student"})
+                    <td className="py-2 px-3 font-semibold text-white">
+                      {m.userFullName}
                     </td>
-                    <td className="py-2.5 px-3 text-slate-200 font-bold">{m.organizationName}</td>
-                    <td className="py-2.5 px-3 font-semibold uppercase text-indigo-300">{m.membershipType}</td>
-                    <td className="py-2.5 px-3">
+                    <td className="py-2 px-3 text-slate-200 font-bold">{m.organizationName}</td>
+                    <td className="py-2 px-3 uppercase text-indigo-300">{m.membershipType}</td>
+                    <td className="py-2 px-3">
                       <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase border ${
                         m.status === "approved"
                           ? "bg-emerald-500/20 text-emerald-300 border-emerald-500/30"
@@ -351,27 +481,27 @@ export function ClubsHierarchyView({
                         {m.status}
                       </span>
                     </td>
-                    <td className="py-2.5 px-3 text-slate-400">
+                    <td className="py-2 px-3 text-slate-400">
                       {new Date(m.requestedAt).toLocaleDateString()}
                     </td>
-                    <td className="py-2.5 px-3 text-right">
+                    <td className="py-2 px-3 text-right">
                       {m.status === "pending" && (
                         <div className="inline-flex items-center gap-1.5">
                           <button
                             onClick={() => handleReviewMembership(m.id, "approved")}
                             disabled={loading}
-                            className="p-1.5 rounded-lg bg-emerald-500/20 text-emerald-300 hover:bg-emerald-500/30 border border-emerald-500/30 transition"
+                            className="p-1 rounded-lg bg-emerald-500/20 text-emerald-300 hover:bg-emerald-500/30 transition"
                             title="Approve"
                           >
-                            <Check className="w-4 h-4" />
+                            <Check className="w-3.5 h-3.5" />
                           </button>
                           <button
                             onClick={() => handleReviewMembership(m.id, "rejected")}
                             disabled={loading}
-                            className="p-1.5 rounded-lg bg-rose-500/20 text-rose-300 hover:bg-rose-500/30 border border-rose-500/30 transition"
+                            className="p-1 rounded-lg bg-rose-500/20 text-rose-300 hover:bg-rose-500/30 transition"
                             title="Reject"
                           >
-                            <X className="w-4 h-4" />
+                            <X className="w-3.5 h-3.5" />
                           </button>
                         </div>
                       )}
@@ -381,22 +511,22 @@ export function ClubsHierarchyView({
               </tbody>
             </table>
           </div>
-        </div>
+        </motion.div>
       )}
 
-      {/* Membership Request Modal */}
+      {/* Minimal Membership Modal */}
       {selectedOrg && (
         <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-md flex items-center justify-center p-4">
-          <div className="glass-panel bg-slate-900/90 rounded-3xl max-w-md w-full p-6 sm:p-8 shadow-2xl space-y-4 border border-white/15">
-            <h4 className="font-black text-lg text-white">
+          <motion.div
+            initial={{ scale: 0.95, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            className="glass-panel bg-slate-900/90 rounded-3xl max-w-sm w-full p-6 shadow-2xl space-y-4 border border-white/15"
+          >
+            <h4 className="font-bold text-base text-white">
               Join {selectedOrg.name}
             </h4>
-            <p className="text-xs text-slate-300">
-              Select your membership tier for this organization. Mirai policy allows students to join up to 2 primary organizations.
-            </p>
-
-            <div className="space-y-2.5">
-              <label className="flex items-center gap-3 p-3.5 rounded-2xl glass-card cursor-pointer border border-white/10 hover:border-indigo-400/40">
+            <div className="space-y-2">
+              <label className="flex items-center gap-2.5 p-3 rounded-xl glass-card cursor-pointer border border-white/10">
                 <input
                   type="radio"
                   name="memType"
@@ -405,13 +535,10 @@ export function ClubsHierarchyView({
                   onChange={() => setMembershipType("primary")}
                   className="text-indigo-500 focus:ring-indigo-500"
                 />
-                <div>
-                  <div className="text-xs font-bold text-white">Primary Membership</div>
-                  <div className="text-[11px] text-slate-400">Core commitment, voting, and leadership eligibility.</div>
-                </div>
+                <span className="text-xs font-bold text-white">Primary Membership</span>
               </label>
 
-              <label className="flex items-center gap-3 p-3.5 rounded-2xl glass-card cursor-pointer border border-white/10 hover:border-indigo-400/40">
+              <label className="flex items-center gap-2.5 p-3 rounded-xl glass-card cursor-pointer border border-white/10">
                 <input
                   type="radio"
                   name="memType"
@@ -420,29 +547,26 @@ export function ClubsHierarchyView({
                   onChange={() => setMembershipType("secondary")}
                   className="text-indigo-500 focus:ring-indigo-500"
                 />
-                <div>
-                  <div className="text-xs font-bold text-white">Secondary Membership</div>
-                  <div className="text-[11px] text-slate-400">Cross-domain participation and club day attendance.</div>
-                </div>
+                <span className="text-xs font-bold text-white">Secondary Membership</span>
               </label>
             </div>
 
-            <div className="flex justify-end gap-2.5 pt-3">
+            <div className="flex justify-end gap-2 pt-2">
               <button
                 onClick={() => setSelectedOrg(null)}
-                className="px-4 py-2 rounded-xl text-xs font-semibold text-slate-300 hover:bg-white/10 transition"
+                className="px-3 py-1.5 rounded-xl text-xs font-semibold text-slate-300 hover:bg-white/10"
               >
                 Cancel
               </button>
               <button
                 onClick={() => handleRequestMembership(selectedOrg.id)}
                 disabled={loading}
-                className="glass-btn-primary px-5 py-2 rounded-xl text-xs font-bold shadow-md"
+                className="glass-btn-primary px-4 py-1.5 rounded-xl text-xs font-bold"
               >
-                {loading ? "Submitting..." : "Submit Request"}
+                {loading ? "Submitting..." : "Join"}
               </button>
             </div>
-          </div>
+          </motion.div>
         </div>
       )}
     </div>

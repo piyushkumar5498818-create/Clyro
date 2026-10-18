@@ -36,16 +36,13 @@ async function runTests() {
   // 2. Units & Initiatives Tests
   console.log("\n2. Specialized Units (Domains & Departments) & Initiatives:");
   const kaizenDomains = db.getUnits(kaizen?.id);
-  assert(kaizenDomains.length === 6, "Kaizen Tech has exactly 6 technical domains", `Found ${kaizenDomains.length}`);
+  assert(kaizenDomains.length === 3, "Kaizen Tech has exactly 3 technical domains", `Found ${kaizenDomains.length}`);
   const domainCodes = kaizenDomains.map((d) => d.code);
   assert(
-    domainCodes.includes("WEB") &&
-    domainCodes.includes("AI_ML") &&
     domainCodes.includes("CP") &&
-    domainCodes.includes("MOBILE") &&
-    domainCodes.includes("OSS") &&
-    domainCodes.includes("UIUX"),
-    "All 6 Kaizen technical domains verified (Web, AI/ML, CP, Mobile, OSS, UI/UX)"
+    domainCodes.includes("WEB") &&
+    domainCodes.includes("AI_DS"),
+    "All 3 Kaizen technical domains verified (CP, Web, AI & Data Science)"
   );
 
   const malharDepts = db.getUnits(malhar?.id);
@@ -77,13 +74,13 @@ async function runTests() {
   console.log("\n3. Campus Metrics & Non-Double-Counting Aggregation:");
   const institutionalMetrics = db.getInstitutionalMetrics();
   assert(institutionalMetrics.totalOrganizations === 3, "Reports exactly 3 primary organizations");
-  assert(institutionalMetrics.totalUnits === 11, "Reports exactly 11 subordinate units (6 domains + 5 depts)");
+  assert(institutionalMetrics.totalUnits === 8, "Reports exactly 8 subordinate units (3 domains + 5 depts)");
   assert(institutionalMetrics.totalInitiatives === 6, "Reports exactly 6 initiatives");
   assert(typeof institutionalMetrics.totalEnrolledStudents === "number", "Calculates unique distinct student count");
 
   // 4. Membership Rules & Limit Enforcement
   console.log("\n4. Membership Enrolment & Constraints:");
-  const testStudentId = "u0000000-0000-0000-0000-000000000009"; // Alex Rivera
+  const testStudentId = "u0000000-0000-0000-0000-000000000008"; // Alex Rivera (member)
 
   // Duplicate membership attempt
   let duplicateThrown = false;
@@ -111,8 +108,8 @@ async function runTests() {
   }
   assert(thirdClubThrown, "Enforces institutional membership cap of 2 clubs per student");
 
-  // 5. Activity Lifecycle & Faculty Review
-  console.log("\n5. Activity Lifecycle & Advisory Review:");
+  // 5. Activity Lifecycle & Student Leadership Approval
+  console.log("\n5. Activity Lifecycle & Student Leadership Approval:");
   const newActivity = db.createActivity({
     organizationId: nexcell!.id,
     initiativeId: nexcellInitiatives[0].id, // Founders Fire
@@ -125,20 +122,20 @@ async function runTests() {
     endTime: "18:00",
     venue: "Incubation Center Block B",
     submissionDeadline: new Date(Date.now() + 86400000 * 2).toISOString(),
-    createdBy: "u0000000-0000-0000-0000-000000000006",
+    createdBy: "u0000000-0000-0000-0000-000000000003", // Arman Mehta (President)
   });
   assert(newActivity.status === "submitted_for_approval", "Activity initially in submitted_for_approval state");
 
   const approvedActivity = db.reviewActivity(
     newActivity.id,
     true,
-    "u0000000-0000-0000-0000-000000000004" // Maya Angelou (Advisor)
+    "u0000000-0000-0000-0000-000000000003" // Arman Mehta (President)
   );
-  assert(approvedActivity.status === "approved", "Faculty Advisor approves activity plan");
+  assert(approvedActivity.status === "approved", "Student Leadership (President) approves activity plan");
 
   // 6. Dynamic Attendance Token & Duplicate Protection
   console.log("\n6. Dynamic Attendance Token & Fraud Protection:");
-  const token = db.generateAttendanceToken(approvedActivity.id, "u0000000-0000-0000-0000-000000000006", 45);
+  const token = db.generateAttendanceToken(approvedActivity.id, "u0000000-0000-0000-0000-000000000003", 45);
   assert(!!token.tokenCode, `Dynamic token generated: ${token.tokenCode}`);
 
   // Invalid token check
@@ -168,7 +165,7 @@ async function runTests() {
     attRecord.id,
     "excused",
     "Student representing college at hackathon conference",
-    "u0000000-0000-0000-0000-000000000006"
+    "u0000000-0000-0000-0000-000000000003"
   );
   assert(corrected.status === "excused", "Attendance corrected with mandatory audit reason");
 
@@ -192,7 +189,7 @@ async function runTests() {
   // Dynamic Rubric Evaluation
   const evalResult = db.evaluateSubmission(
     sub.id,
-    "u0000000-0000-0000-0000-000000000004", // Advisor
+    "u0000000-0000-0000-0000-000000000003", // President
     [
       { criteriaName: "Problem Validation & TAM", score: 28, maxScore: 30 },
       { criteriaName: "Technical Feasibility & MVP", score: 28, maxScore: 30 },
@@ -209,7 +206,7 @@ async function runTests() {
     approvedActivity.id,
     "VentureFlow Robotics",
     testStudentId,
-    [testStudentId, "u0000000-0000-0000-0000-000000000007"]
+    [testStudentId, "u0000000-0000-0000-0000-000000000005"]
   );
   assert(team.name === "VentureFlow Robotics", "Team created successfully with lead and members");
 

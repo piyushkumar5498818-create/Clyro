@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { Activity, Profile, Submission, Evaluation } from "@/types/database";
 import { submitWorkAction, getSubmissionsAction } from "@/actions/submissions";
 import { evaluateSubmissionAction } from "@/actions/evaluations";
@@ -45,8 +46,12 @@ export function SubmissionsView({
     feedback: "",
   });
 
-  const isStudent = currentUser.role === "student";
+  const isStudent = currentUser.role === "member" || currentUser.role === "student";
   const canEvaluate =
+    currentUser.role === "president" ||
+    currentUser.role === "vice_president" ||
+    currentUser.role === "lead" ||
+    currentUser.role === "admin" ||
     currentUser.role === "faculty_advisor" ||
     currentUser.role === "student_coordinator" ||
     currentUser.role === "college_admin";
@@ -95,26 +100,31 @@ export function SubmissionsView({
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-white/10 pb-5">
         <div>
           <h2 className="text-2xl font-black tracking-tight text-white">
-            Activity Submissions & Rubric Evaluation
+            Deliverables & Evaluation
           </h2>
           <p className="text-sm text-slate-300 mt-1">
-            Deliverable Uploads &middot; Standardized 100-Point MSOT Rubric &middot; Feedback Loop
+            Submit project links, evaluate with standard rubrics, and provide feedback.
           </p>
         </div>
       </div>
 
-      {message && (
-        <div
-          className={`p-4 rounded-2xl flex items-center gap-3 text-sm font-semibold backdrop-blur-md border ${
-            message.type === "success"
-              ? "bg-emerald-500/15 text-emerald-200 border-emerald-500/30"
-              : "bg-rose-500/15 text-rose-200 border-rose-500/30"
-          }`}
-        >
-          {message.type === "success" ? <CheckCircle className="w-5 h-5 text-emerald-400" /> : <AlertCircle className="w-5 h-5 text-rose-400" />}
-          {message.text}
-        </div>
-      )}
+      <AnimatePresence>
+        {message && (
+          <motion.div
+            initial={{ opacity: 0, y: -8 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -8 }}
+            className={`p-4 rounded-2xl flex items-center gap-3 text-sm font-semibold backdrop-blur-md border ${
+              message.type === "success"
+                ? "bg-emerald-500/15 text-emerald-200 border-emerald-500/30"
+                : "bg-rose-500/15 text-rose-200 border-rose-500/30"
+            }`}
+          >
+            {message.type === "success" ? <CheckCircle className="w-5 h-5 text-emerald-400" /> : <AlertCircle className="w-5 h-5 text-rose-400" />}
+            {message.text}
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Student Submission Card */}
       {isStudent && (
@@ -265,101 +275,114 @@ export function SubmissionsView({
       </div>
 
       {/* Rubric Evaluation Modal */}
-      {evaluatingSub && (
-        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-md flex items-center justify-center p-4">
-          <form onSubmit={handleEvaluate} className="glass-panel bg-slate-900/90 rounded-3xl max-w-lg w-full p-6 sm:p-8 shadow-2xl space-y-4 border border-white/15">
-            <div className="flex items-center justify-between border-b border-white/10 pb-3">
-              <div>
-                <h4 className="font-black text-base text-white">
-                  Rubric Scoring for {evaluatingSub.userFullName}
-                </h4>
-                <p className="text-xs text-slate-400">{evaluatingSub.activityTitle}</p>
-              </div>
-              <div className="text-right">
-                <div className="text-[10px] text-slate-400 uppercase font-bold">Total Score</div>
-                <div className="text-xl font-black text-indigo-400">
-                  {currentTotalScore}/100
+      <AnimatePresence>
+        {evaluatingSub && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 bg-black/60 backdrop-blur-md flex items-center justify-center p-4"
+          >
+            <motion.form
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.95, opacity: 0 }}
+              onSubmit={handleEvaluate}
+              className="glass-panel bg-slate-900/95 rounded-3xl max-w-lg w-full p-6 sm:p-8 shadow-2xl space-y-4 border border-white/15"
+            >
+              <div className="flex items-center justify-between border-b border-white/10 pb-3">
+                <div>
+                  <h4 className="font-black text-base text-white">
+                    Rubric Scoring: {evaluatingSub.userFullName}
+                  </h4>
+                  <p className="text-xs text-slate-400">{evaluatingSub.activityTitle}</p>
+                </div>
+                <div className="text-right">
+                  <div className="text-[10px] text-slate-400 uppercase font-bold">Total Score</div>
+                  <div className="text-xl font-black text-indigo-400">
+                    {currentTotalScore}/100
+                  </div>
                 </div>
               </div>
-            </div>
 
-            <div className="space-y-4">
-              <div>
-                <div className="flex justify-between text-xs font-semibold mb-1.5 text-slate-300">
-                  <span>1. Content & Technical Depth (Max 40)</span>
-                  <span className="font-bold text-indigo-300">{rubric.scoreContent} pts</span>
+              <div className="space-y-4">
+                <div>
+                  <div className="flex justify-between text-xs font-semibold mb-1.5 text-slate-300">
+                    <span>1. Content & Technical Depth (Max 40)</span>
+                    <span className="font-bold text-indigo-300">{rubric.scoreContent} pts</span>
+                  </div>
+                  <input
+                    type="range"
+                    min="0"
+                    max="40"
+                    value={rubric.scoreContent}
+                    onChange={(e) => setRubric({ ...rubric, scoreContent: Number(e.target.value) })}
+                    className="w-full accent-indigo-500 cursor-pointer"
+                  />
                 </div>
-                <input
-                  type="range"
-                  min="0"
-                  max="40"
-                  value={rubric.scoreContent}
-                  onChange={(e) => setRubric({ ...rubric, scoreContent: Number(e.target.value) })}
-                  className="w-full accent-indigo-500 cursor-pointer"
-                />
-              </div>
 
-              <div>
-                <div className="flex justify-between text-xs font-semibold mb-1.5 text-slate-300">
-                  <span>2. Presentation & Clarity (Max 30)</span>
-                  <span className="font-bold text-indigo-300">{rubric.scorePresentation} pts</span>
+                <div>
+                  <div className="flex justify-between text-xs font-semibold mb-1.5 text-slate-300">
+                    <span>2. Presentation & Clarity (Max 30)</span>
+                    <span className="font-bold text-indigo-300">{rubric.scorePresentation} pts</span>
+                  </div>
+                  <input
+                    type="range"
+                    min="0"
+                    max="30"
+                    value={rubric.scorePresentation}
+                    onChange={(e) => setRubric({ ...rubric, scorePresentation: Number(e.target.value) })}
+                    className="w-full accent-indigo-500 cursor-pointer"
+                  />
                 </div>
-                <input
-                  type="range"
-                  min="0"
-                  max="30"
-                  value={rubric.scorePresentation}
-                  onChange={(e) => setRubric({ ...rubric, scorePresentation: Number(e.target.value) })}
-                  className="w-full accent-indigo-500 cursor-pointer"
-                />
-              </div>
 
-              <div>
-                <div className="flex justify-between text-xs font-semibold mb-1.5 text-slate-300">
-                  <span>3. Participation & Timeliness (Max 30)</span>
-                  <span className="font-bold text-indigo-300">{rubric.scoreParticipation} pts</span>
+                <div>
+                  <div className="flex justify-between text-xs font-semibold mb-1.5 text-slate-300">
+                    <span>3. Participation & Timeliness (Max 30)</span>
+                    <span className="font-bold text-indigo-300">{rubric.scoreParticipation} pts</span>
+                  </div>
+                  <input
+                    type="range"
+                    min="0"
+                    max="30"
+                    value={rubric.scoreParticipation}
+                    onChange={(e) => setRubric({ ...rubric, scoreParticipation: Number(e.target.value) })}
+                    className="w-full accent-indigo-500 cursor-pointer"
+                  />
                 </div>
-                <input
-                  type="range"
-                  min="0"
-                  max="30"
-                  value={rubric.scoreParticipation}
-                  onChange={(e) => setRubric({ ...rubric, scoreParticipation: Number(e.target.value) })}
-                  className="w-full accent-indigo-500 cursor-pointer"
-                />
+
+                <div>
+                  <label className="block text-xs font-semibold text-slate-300 mb-1">Evaluator Feedback</label>
+                  <textarea
+                    rows={2}
+                    placeholder="Constructive feedback, highlights, and growth advice..."
+                    value={rubric.feedback}
+                    onChange={(e) => setRubric({ ...rubric, feedback: e.target.value })}
+                    className="w-full text-xs rounded-xl border border-white/15 p-2.5 bg-slate-800 text-white placeholder-slate-500 focus:border-indigo-400 focus:outline-none"
+                  />
+                </div>
               </div>
 
-              <div>
-                <label className="block text-xs font-semibold text-slate-300 mb-1">Evaluator Feedback</label>
-                <textarea
-                  rows={2}
-                  placeholder="Constructive feedback, highlights, and growth advice..."
-                  value={rubric.feedback}
-                  onChange={(e) => setRubric({ ...rubric, feedback: e.target.value })}
-                  className="w-full text-xs rounded-xl border border-white/15 p-2.5 bg-slate-800 text-white placeholder-slate-500 focus:border-indigo-400 focus:outline-none"
-                />
+              <div className="flex justify-end gap-2.5 pt-3 border-t border-white/10">
+                <button
+                  type="button"
+                  onClick={() => setEvaluatingSub(null)}
+                  className="px-4 py-2 rounded-xl text-xs font-semibold text-slate-300 hover:bg-white/10 transition"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="glass-btn-primary px-5 py-2 rounded-xl text-xs font-bold shadow-md"
+                >
+                  Save Evaluation
+                </button>
               </div>
-            </div>
-
-            <div className="flex justify-end gap-2.5 pt-3 border-t border-white/10">
-              <button
-                type="button"
-                onClick={() => setEvaluatingSub(null)}
-                className="px-4 py-2 rounded-xl text-xs font-semibold text-slate-300 hover:bg-white/10 transition"
-              >
-                Cancel
-              </button>
-              <button
-                type="submit"
-                disabled={loading}
-                className="glass-btn-primary px-5 py-2 rounded-xl text-xs font-bold shadow-md"
-              >
-                Save Evaluation
-              </button>
-            </div>
-          </form>
-        </div>
-      )}
+            </motion.form>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

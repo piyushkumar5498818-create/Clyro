@@ -10,14 +10,19 @@ export async function evaluateSubmissionAction(
 ): Promise<{ success: boolean; data?: Evaluation; error?: string }> {
   try {
     const activeUser = db.getActiveUser();
-    if (
-      activeUser.role !== "faculty_advisor" &&
-      activeUser.role !== "student_coordinator" &&
-      activeUser.role !== "unit_lead" &&
-      activeUser.role !== "society_admin" &&
-      activeUser.role !== "college_admin"
-    ) {
-      return { success: false, error: "Only authorized evaluators, advisors, or coordinators can evaluate submissions." };
+    const canEvaluate = [
+      "president",
+      "vice_president",
+      "lead",
+      "admin",
+      "faculty_advisor",
+      "student_coordinator",
+      "unit_lead",
+      "society_admin",
+      "college_admin",
+    ].includes(activeUser.role);
+    if (!canEvaluate) {
+      return { success: false, error: "Only presidents, vice presidents, leads, or campus admins can evaluate submissions." };
     }
 
     let breakdown: { criteriaName: string; score: number; maxScore: number }[] = [];

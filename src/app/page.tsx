@@ -1,5 +1,8 @@
+"use client";
+
 import Link from "next/link";
-import { ArrowRight, ShieldCheck, Users, Calendar, Award } from "lucide-react";
+import { motion } from "framer-motion";
+import { ArrowRight, ShieldCheck, Users, Calendar, Award, Sparkles } from "lucide-react";
 
 export default function HomePage() {
   return (
@@ -19,7 +22,7 @@ export default function HomePage() {
                 Clyro
               </span>
               <span className="text-[10px] text-indigo-400 font-bold uppercase tracking-wider mt-0.5">
-                Mirai Campus v1.0
+                Mirai Campus
               </span>
             </div>
           </div>
@@ -40,24 +43,45 @@ export default function HomePage() {
         </div>
       </header>
 
+      {/* Hero Section */}
       <section className="py-20 sm:py-28 px-4 text-center max-w-5xl mx-auto flex flex-col items-center">
-        <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/10 text-indigo-300 text-xs font-bold mb-8 border border-white/15 backdrop-blur-md shadow-inner">
-          <ShieldCheck className="w-4 h-4 text-emerald-400" />
-          Verified Co-Curricular Management Platform &middot; Mirai School of Technology
-        </div>
+        <motion.div
+          initial={{ opacity: 0, y: -12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4 }}
+          className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/10 text-indigo-300 text-xs font-bold mb-8 border border-white/15 backdrop-blur-md shadow-inner"
+        >
+          <Sparkles className="w-4 h-4 text-indigo-400" />
+          Club Management Platform &middot; Mirai School of Technology
+        </motion.div>
 
-        <h1 className="text-4xl sm:text-6xl md:text-7xl font-black tracking-tight text-white leading-tight">
+        <motion.h1
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.1 }}
+          className="text-4xl sm:text-6xl md:text-7xl font-black tracking-tight text-white leading-tight"
+        >
           One platform for every club, activity, and{" "}
           <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-300 via-purple-300 to-pink-300">
             verified achievement.
           </span>
-        </h1>
+        </motion.h1>
 
-        <p className="mt-6 text-base sm:text-lg text-slate-300 max-w-2xl mx-auto leading-relaxed">
-          Manage Mirai&apos;s 3 primary organizations (NEX-CELL, Kaizen Tech, MALHAR), 6 technical domains, 5 departments, real-time QR attendance check-in, rubric evaluations, and cryptographic transcripts.
-        </p>
+        <motion.p
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.2 }}
+          className="mt-6 text-base sm:text-lg text-slate-300 max-w-2xl mx-auto leading-relaxed"
+        >
+          Streamlined co-curricular operations: NEX-CELL, Kaizen Tech (CP, Web, AI & Data Science), and MALHAR. Real-time QR attendance, rubric grading, and cryptographic transcripts.
+        </motion.p>
 
-        <div className="mt-10 flex flex-wrap justify-center gap-4">
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.3 }}
+          className="mt-10 flex flex-wrap justify-center gap-4"
+        >
           <Link
             href="/dashboard"
             className="glass-btn-primary px-8 py-3.5 rounded-2xl font-bold text-sm shadow-xl flex items-center gap-2 transition"
@@ -70,40 +94,73 @@ export default function HomePage() {
           >
             Verify Certificate
           </Link>
-        </div>
+        </motion.div>
       </section>
 
+      {/* Feature Cards */}
       <section className="py-16 px-4 max-w-7xl mx-auto w-full">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="glass-panel rounded-3xl p-7 flex flex-col justify-between hover:border-indigo-400/30 transition duration-300">
+        <motion.div
+          initial="hidden"
+          animate="show"
+          variants={{
+            hidden: { opacity: 0 },
+            show: {
+              opacity: 1,
+              transition: { staggerChildren: 0.12, delayChildren: 0.35 },
+            },
+          }}
+          className="grid grid-cols-1 md:grid-cols-3 gap-6"
+        >
+          <motion.div
+            variants={{
+              hidden: { opacity: 0, y: 20 },
+              show: { opacity: 1, y: 0, transition: { duration: 0.4 } },
+            }}
+            whileHover={{ y: -4, transition: { duration: 0.2 } }}
+            className="glass-panel rounded-3xl p-7 flex flex-col justify-between hover:border-indigo-400/30 transition duration-300"
+          >
             <div>
               <div className="w-12 h-12 rounded-2xl bg-indigo-500/20 border border-indigo-400/30 flex items-center justify-center text-indigo-400 mb-5 shadow-lg shadow-indigo-500/10">
                 <Users className="w-6 h-6" />
               </div>
               <h3 className="font-extrabold text-lg text-white mb-2">
-                Multi-Level Hierarchy
+                Unified Club Hierarchy
               </h3>
               <p className="text-sm text-slate-300 leading-relaxed">
-                3 primary campus organizations (NEX-CELL, Kaizen Tech, MALHAR) with 6 technical domains, 5 departments, and 6 venture initiatives. Non-double-counted enrollment ledgers.
+                NEX-CELL entrepreneurship initiatives, Kaizen Tech 3 core technical tracks (CP, Web, AI & Data Science), and MALHAR cultural departments with non-double-counted rosters.
               </p>
             </div>
-          </div>
+          </motion.div>
 
-          <div className="glass-panel rounded-3xl p-7 flex flex-col justify-between hover:border-purple-400/30 transition duration-300">
+          <motion.div
+            variants={{
+              hidden: { opacity: 0, y: 20 },
+              show: { opacity: 1, y: 0, transition: { duration: 0.4 } },
+            }}
+            whileHover={{ y: -4, transition: { duration: 0.2 } }}
+            className="glass-panel rounded-3xl p-7 flex flex-col justify-between hover:border-purple-400/30 transition duration-300"
+          >
             <div>
               <div className="w-12 h-12 rounded-2xl bg-purple-500/20 border border-purple-400/30 flex items-center justify-center text-purple-400 mb-5 shadow-lg shadow-purple-500/10">
                 <Calendar className="w-6 h-6" />
               </div>
               <h3 className="font-extrabold text-lg text-white mb-2">
-                Verified Club Day Lifecycle
+                Activity Lifecycle
               </h3>
               <p className="text-sm text-slate-300 leading-relaxed">
-                End-to-end flow: 7-day advance planning &rarr; Faculty Advisor approval &rarr; dynamic QR check-in &rarr; work deliverables &rarr; 100-point rubric evaluation.
+                Streamlined session scheduling, student leadership review, dynamic 60-minute QR passcodes, project deliverable uploads, and standardized 100-point rubric grading.
               </p>
             </div>
-          </div>
+          </motion.div>
 
-          <div className="glass-panel rounded-3xl p-7 flex flex-col justify-between hover:border-emerald-400/30 transition duration-300">
+          <motion.div
+            variants={{
+              hidden: { opacity: 0, y: 20 },
+              show: { opacity: 1, y: 0, transition: { duration: 0.4 } },
+            }}
+            whileHover={{ y: -4, transition: { duration: 0.2 } }}
+            className="glass-panel rounded-3xl p-7 flex flex-col justify-between hover:border-emerald-400/30 transition duration-300"
+          >
             <div>
               <div className="w-12 h-12 rounded-2xl bg-emerald-500/20 border border-emerald-400/30 flex items-center justify-center text-emerald-400 mb-5 shadow-lg shadow-emerald-500/10">
                 <Award className="w-6 h-6" />
@@ -112,11 +169,11 @@ export default function HomePage() {
                 Tamper-Proof Transcripts
               </h3>
               <p className="text-sm text-slate-300 leading-relaxed">
-                Cryptographically hashed certificates and verified student transcripts downloadable as PDF and instantly checkable on the public ledger.
+                Cryptographically hashed certificate records and verified student transcripts downloadable as PDF and instantly checkable on the public ledger.
               </p>
             </div>
-          </div>
-        </div>
+          </motion.div>
+        </motion.div>
       </section>
     </main>
   );

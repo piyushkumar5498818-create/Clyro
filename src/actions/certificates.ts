@@ -12,12 +12,16 @@ export async function issueCertificateAction(
 ): Promise<{ success: boolean; data?: Certificate; error?: string }> {
   try {
     const activeUser = db.getActiveUser();
-    if (
-      activeUser.role !== "faculty_advisor" &&
-      activeUser.role !== "college_admin" &&
-      activeUser.role !== "campus_manager"
-    ) {
-      return { success: false, error: "Only faculty advisors or college leadership can issue official certificates." };
+    const canIssue = [
+      "president",
+      "vice_president",
+      "admin",
+      "faculty_advisor",
+      "college_admin",
+      "campus_manager",
+    ].includes(activeUser.role);
+    if (!canIssue) {
+      return { success: false, error: "Only club presidents, vice presidents, or campus admins can issue official certificates." };
     }
 
     const cert = db.issueCertificate(userId, organizationId, title, type, activityId);

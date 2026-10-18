@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { Activity, Club, Profile, ActivityFormat } from "@/types/database";
 import { createActivityAction, reviewActivityAction } from "@/actions/activities";
 import {
@@ -45,11 +46,18 @@ export function ActivityManagementView({
   const [message, setMessage] = useState<{ text: string; type: "success" | "error" } | null>(null);
 
   const canCreate =
+    currentUser.role === "president" ||
+    currentUser.role === "vice_president" ||
+    currentUser.role === "lead" ||
+    currentUser.role === "admin" ||
     currentUser.role === "student_coordinator" ||
     currentUser.role === "faculty_advisor" ||
     currentUser.role === "college_admin";
 
   const canApprove =
+    currentUser.role === "president" ||
+    currentUser.role === "vice_president" ||
+    currentUser.role === "admin" ||
     currentUser.role === "faculty_advisor" ||
     currentUser.role === "college_admin" ||
     currentUser.role === "campus_manager";
@@ -64,7 +72,7 @@ export function ActivityManagementView({
     });
     setLoading(false);
     if (res.success) {
-      setMessage({ text: "Activity created and submitted for advisor review!", type: "success" });
+      setMessage({ text: "Activity scheduled successfully!", type: "success" });
       setShowForm(false);
       onRefresh();
     } else {
@@ -89,10 +97,10 @@ export function ActivityManagementView({
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-white/10 pb-5">
         <div>
           <h2 className="text-2xl font-black tracking-tight text-white">
-            Club Day Activity Management
+            Activities & Sessions
           </h2>
           <p className="text-sm text-slate-300 mt-1">
-            Weekly 7-Day Planning &middot; Faculty Review &middot; Deliverable Guidelines
+            Schedule sessions, coordinate deliverables, and track activity lifecycle.
           </p>
         </div>
 
@@ -102,31 +110,44 @@ export function ActivityManagementView({
             className="glass-btn-primary inline-flex items-center gap-2 px-4 py-2.5 rounded-xl font-bold text-xs shadow-md transition"
           >
             <Plus className="w-4 h-4" />
-            {showForm ? "Close Form" : "Plan New Club Day Activity"}
+            {showForm ? "Cancel" : "Plan Activity"}
           </button>
         )}
       </div>
 
-      {message && (
-        <div
-          className={`p-4 rounded-2xl flex items-center gap-3 text-sm font-semibold backdrop-blur-md border ${
-            message.type === "success"
-              ? "bg-emerald-500/15 text-emerald-200 border-emerald-500/30"
-              : "bg-rose-500/15 text-rose-200 border-rose-500/30"
-          }`}
-        >
-          {message.type === "success" ? <CheckCircle className="w-5 h-5 text-emerald-400" /> : <AlertCircle className="w-5 h-5 text-rose-400" />}
-          {message.text}
-        </div>
-      )}
+      <AnimatePresence>
+        {message && (
+          <motion.div
+            initial={{ opacity: 0, y: -8 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -8 }}
+            className={`p-4 rounded-2xl flex items-center gap-3 text-sm font-semibold backdrop-blur-md border ${
+              message.type === "success"
+                ? "bg-emerald-500/15 text-emerald-200 border-emerald-500/30"
+                : "bg-rose-500/15 text-rose-200 border-rose-500/30"
+            }`}
+          >
+            {message.type === "success" ? <CheckCircle className="w-5 h-5 text-emerald-400" /> : <AlertCircle className="w-5 h-5 text-rose-400" />}
+            {message.text}
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Plan Activity Form */}
-      {showForm && (
-        <form onSubmit={handleCreate} className="glass-panel rounded-3xl p-6 sm:p-8 space-y-4">
-          <h3 className="font-extrabold text-base text-white flex items-center gap-2">
-            <FileText className="w-4 h-4 text-indigo-400" />
-            Activity Planning Form (7 Days Prior)
-          </h3>
+      <AnimatePresence>
+        {showForm && (
+          <motion.form
+            initial={{ opacity: 0, height: 0, overflow: "hidden" }}
+            animate={{ opacity: 1, height: "auto", overflow: "visible" }}
+            exit={{ opacity: 0, height: 0, overflow: "hidden" }}
+            transition={{ duration: 0.25, ease: "easeInOut" }}
+            onSubmit={handleCreate}
+            className="glass-panel rounded-3xl p-6 sm:p-8 space-y-4"
+          >
+            <h3 className="font-extrabold text-base text-white flex items-center gap-2">
+              <FileText className="w-4 h-4 text-indigo-400" />
+              Activity Details
+            </h3>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
@@ -242,17 +263,34 @@ export function ActivityManagementView({
               disabled={loading}
               className="glass-btn-primary px-5 py-2 rounded-xl text-xs font-bold shadow-md"
             >
-              {loading ? "Submitting..." : "Submit to Faculty Advisor"}
+              {loading ? "Publishing..." : "Publish Activity"}
             </button>
           </div>
-        </form>
+        </motion.form>
       )}
+      </AnimatePresence>
 
       {/* Activities Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <motion.div
+        initial="hidden"
+        animate="show"
+        variants={{
+          hidden: { opacity: 0 },
+          show: {
+            opacity: 1,
+            transition: { staggerChildren: 0.08 },
+          },
+        }}
+        className="grid grid-cols-1 md:grid-cols-2 gap-6"
+      >
         {activities.map((act) => (
-          <div
+          <motion.div
             key={act.id}
+            variants={{
+              hidden: { opacity: 0, y: 16 },
+              show: { opacity: 1, y: 0, transition: { duration: 0.3 } },
+            }}
+            whileHover={{ y: -3, transition: { duration: 0.2 } }}
             className="glass-panel rounded-3xl p-6 flex flex-col justify-between hover:border-indigo-400/40 transition duration-300"
           >
             <div>
@@ -302,7 +340,7 @@ export function ActivityManagementView({
               </div>
             </div>
 
-            {/* Advisor Approval Actions */}
+            {/* Leadership Approval Actions */}
             {canApprove && act.status === "submitted_for_approval" && (
               <div className="mt-4 pt-3 border-t border-white/10 flex items-center justify-end gap-2">
                 <button
@@ -321,9 +359,9 @@ export function ActivityManagementView({
                 </button>
               </div>
             )}
-          </div>
+          </motion.div>
         ))}
-      </div>
+      </motion.div>
     </div>
   );
 }
