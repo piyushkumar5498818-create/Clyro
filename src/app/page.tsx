@@ -2,36 +2,23 @@
 
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { ArrowRight, ShieldCheck, Users, Calendar, Award, Sparkles } from "lucide-react";
+import { ArrowRight, ShieldCheck, Users, Calendar, Award, Sparkles, Terminal } from "lucide-react";
+import { GitclubLogo } from "@/components/GitclubLogo";
 
 export default function HomePage() {
   return (
     <main className="flex flex-col min-h-screen">
-      <header className="border-b border-white/10 bg-slate-900/40 backdrop-blur-2xl sticky top-0 z-50">
+      <header className="border-b border-white/10 bg-[#070b16]/70 backdrop-blur-2xl sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-500 via-purple-500 to-pink-500 p-[1px] shadow-lg shadow-indigo-500/25">
-              <div className="w-full h-full bg-slate-950/80 rounded-[11px] flex items-center justify-center backdrop-blur-sm">
-                <span className="font-black text-xl text-transparent bg-clip-text bg-gradient-to-tr from-indigo-300 via-purple-200 to-pink-300">
-                  C
-                </span>
-              </div>
-            </div>
-            <div className="flex flex-col">
-              <span className="font-extrabold text-lg tracking-tight text-white leading-none">
-                Clyro
-              </span>
-              <span className="text-[10px] text-indigo-400 font-bold uppercase tracking-wider mt-0.5">
-                Mirai Campus
-              </span>
-            </div>
-          </div>
+          <Link href="/" className="flex items-center gap-3">
+            <GitclubLogo size="sm" showText={true} />
+          </Link>
           <nav className="flex items-center gap-3">
             <Link
               href="/verify"
               className="text-xs font-semibold text-slate-300 hover:text-white px-3.5 py-2 rounded-xl bg-white/[0.05] hover:bg-white/[0.1] transition border border-white/10 backdrop-blur-md"
             >
-              Verify
+              Verify Credentials
             </Link>
             <Link
               href="/login"
@@ -55,10 +42,10 @@ export default function HomePage() {
           initial={{ opacity: 0, y: -12 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4 }}
-          className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/10 text-indigo-300 text-xs font-bold mb-8 border border-white/15 backdrop-blur-md shadow-inner"
+          className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-blue-500/10 text-cyan-300 text-xs font-bold mb-8 border border-blue-500/20 backdrop-blur-md shadow-inner"
         >
-          <Sparkles className="w-4 h-4 text-indigo-400" />
-          Club Management Platform &middot; Mirai School of Technology
+          <Sparkles className="w-4 h-4 text-cyan-400" />
+          Gitclub &middot; Mirai School of Technology Operations Hub
         </motion.div>
 
         <motion.h1
@@ -67,8 +54,8 @@ export default function HomePage() {
           transition={{ duration: 0.5, delay: 0.1 }}
           className="text-4xl sm:text-6xl md:text-7xl font-black tracking-tight text-white leading-tight"
         >
-          One platform for every club, activity, and{" "}
-          <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-300 via-purple-300 to-pink-300">
+          One unified platform for every club, activity, and{" "}
+          <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-cyan-300 to-indigo-300">
             verified achievement.
           </span>
         </motion.h1>
@@ -79,7 +66,7 @@ export default function HomePage() {
           transition={{ duration: 0.5, delay: 0.2 }}
           className="mt-6 text-base sm:text-lg text-slate-300 max-w-2xl mx-auto leading-relaxed"
         >
-          Streamlined co-curricular operations: NEX-CELL, Kaizen Tech (CP, Web, AI & Data Science), and MALHAR. Real-time QR attendance, rubric grading, and cryptographic transcripts.
+          Streamlined co-curricular operations: NEX-CELL (6 Tracks), Kaizen Tech (CP, Web, AI & Data Science), and MALHAR (5 Cultural Depts). Real-time QR attendance, rubric grading, and cryptographic transcripts.
         </motion.p>
 
         <motion.div
@@ -92,13 +79,13 @@ export default function HomePage() {
             href="/login"
             className="glass-btn-primary px-8 py-3.5 rounded-2xl font-bold text-sm shadow-xl flex items-center gap-2 transition"
           >
-            Sign In to Portal <ArrowRight className="w-4 h-4" />
+            Sign In with Google Workspace <ArrowRight className="w-4 h-4" />
           </Link>
           <Link
             href="/dashboard"
             className="glass-btn-secondary px-6 py-3.5 rounded-2xl font-semibold text-sm transition"
           >
-            Open Dashboard
+            Open Live Dashboard
           </Link>
           <Link
             href="/verify"
@@ -129,10 +116,10 @@ export default function HomePage() {
               show: { opacity: 1, y: 0, transition: { duration: 0.4 } },
             }}
             whileHover={{ y: -4, transition: { duration: 0.2 } }}
-            className="glass-panel rounded-3xl p-7 flex flex-col justify-between hover:border-indigo-400/30 transition duration-300"
+            className="glass-panel rounded-3xl p-7 flex flex-col justify-between hover:border-blue-400/30 transition duration-300"
           >
             <div>
-              <div className="w-12 h-12 rounded-2xl bg-indigo-500/20 border border-indigo-400/30 flex items-center justify-center text-indigo-400 mb-5 shadow-lg shadow-indigo-500/10">
+              <div className="w-12 h-12 rounded-2xl bg-blue-500/20 border border-blue-400/30 flex items-center justify-center text-blue-400 mb-5 shadow-lg shadow-blue-500/10">
                 <Users className="w-6 h-6" />
               </div>
               <h3 className="font-extrabold text-lg text-white mb-2">
@@ -150,10 +137,10 @@ export default function HomePage() {
               show: { opacity: 1, y: 0, transition: { duration: 0.4 } },
             }}
             whileHover={{ y: -4, transition: { duration: 0.2 } }}
-            className="glass-panel rounded-3xl p-7 flex flex-col justify-between hover:border-purple-400/30 transition duration-300"
+            className="glass-panel rounded-3xl p-7 flex flex-col justify-between hover:border-cyan-400/30 transition duration-300"
           >
             <div>
-              <div className="w-12 h-12 rounded-2xl bg-purple-500/20 border border-purple-400/30 flex items-center justify-center text-purple-400 mb-5 shadow-lg shadow-purple-500/10">
+              <div className="w-12 h-12 rounded-2xl bg-cyan-500/20 border border-cyan-400/30 flex items-center justify-center text-cyan-400 mb-5 shadow-lg shadow-cyan-500/10">
                 <Calendar className="w-6 h-6" />
               </div>
               <h3 className="font-extrabold text-lg text-white mb-2">
@@ -187,6 +174,16 @@ export default function HomePage() {
           </motion.div>
         </motion.div>
       </section>
+
+      {/* Footer */}
+      <footer className="border-t border-white/10 bg-[#070b16]/70 backdrop-blur-2xl py-8 text-center text-xs text-slate-400 mt-auto">
+        <div className="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-4">
+          <GitclubLogo size="sm" showText={true} />
+          <span className="font-mono text-[11px] text-slate-400">
+            &copy; {new Date().getFullYear()} Gitclub &bull; Mirai School of Technology Co-Curricular Platform
+          </span>
+        </div>
+      </footer>
     </main>
   );
 }

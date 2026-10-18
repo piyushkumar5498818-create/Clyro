@@ -247,10 +247,10 @@ export function AttendanceView({
               <form onSubmit={handleCheckIn} className="flex gap-2">
                 <input
                   type="text"
-                  placeholder="e.g. CLYRO-7492"
+                  placeholder="e.g. GITCLUB-7492"
                   value={passcode}
                   onChange={(e) => setPasscode(e.target.value)}
-                  className="flex-1 font-mono uppercase tracking-wider text-sm rounded-xl border border-white/15 p-2.5 bg-slate-900/60 text-white font-bold backdrop-blur-md focus:border-indigo-400 focus:outline-none"
+                  className="flex-1 font-mono uppercase tracking-wider text-sm rounded-xl border border-white/15 p-2.5 bg-slate-900/60 text-white font-bold backdrop-blur-md focus:border-blue-400 focus:outline-none"
                   required
                 />
                 <button

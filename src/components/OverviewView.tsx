@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import QRCode from "qrcode";
 import { motion, Variants } from "framer-motion";
+import { scrollToSection } from "./SmoothScroll";
 
 interface OverviewViewProps {
   currentUser: Profile;
@@ -26,7 +27,7 @@ interface OverviewViewProps {
   attendanceRecords: any[];
   submissions: Submission[];
   certificates: Certificate[];
-  setActiveTab: (tab: string) => void;
+  setActiveTab?: (tab: string) => void;
 }
 
 const containerVariants: Variants = {
@@ -57,8 +58,13 @@ export function OverviewView({
   const isStudent = currentUser.role === "member" || currentUser.role === "student";
   const [qrCodeDataUrl, setQrCodeDataUrl] = useState<string>("");
 
+  const navigateTo = (secId: string) => {
+    scrollToSection(secId);
+    if (setActiveTab) setActiveTab(secId);
+  };
+
   useEffect(() => {
-    QRCode.toDataURL("CLYRO-CAMPUS-ACTIVE-CHECKIN", {
+    QRCode.toDataURL("GITCLUB-CAMPUS-ACTIVE-CHECKIN", {
       margin: 1,
       width: 140,
       color: {
@@ -102,7 +108,7 @@ export function OverviewView({
             <motion.button
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
-              onClick={() => setActiveTab(isStudent ? "attendance" : "activities")}
+              onClick={() => navigateTo(isStudent ? "attendance" : "activities")}
               className="glass-btn-primary px-4 py-2 rounded-xl font-bold text-xs shadow-md flex items-center gap-1.5"
             >
               {isStudent ? "Check In" : "Manage Activities"}
@@ -111,7 +117,7 @@ export function OverviewView({
             <motion.button
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
-              onClick={() => setActiveTab("clubs")}
+              onClick={() => navigateTo("clubs")}
               className="glass-btn-secondary px-3.5 py-2 rounded-xl font-semibold text-xs flex items-center gap-1.5"
             >
               Clubs
@@ -165,7 +171,7 @@ export function OverviewView({
               Organizations
             </h2>
             <button
-              onClick={() => setActiveTab("clubs")}
+              onClick={() => navigateTo("clubs")}
               className="text-[11px] font-semibold text-indigo-300 hover:text-white transition"
             >
               View all &rarr;
@@ -176,7 +182,7 @@ export function OverviewView({
             {/* NEX-CELL */}
             <motion.div
               whileHover={{ y: -2 }}
-              onClick={() => setActiveTab("clubs")}
+              onClick={() => navigateTo("clubs")}
               className="glass-card p-3.5 rounded-2xl cursor-pointer group"
             >
               <div className="flex items-center justify-between">
@@ -200,7 +206,7 @@ export function OverviewView({
             {/* Kaizen Tech */}
             <motion.div
               whileHover={{ y: -2 }}
-              onClick={() => setActiveTab("clubs")}
+              onClick={() => navigateTo("clubs")}
               className="glass-card p-3.5 rounded-2xl cursor-pointer group"
             >
               <div className="flex items-center justify-between">
@@ -224,7 +230,7 @@ export function OverviewView({
             {/* MALHAR */}
             <motion.div
               whileHover={{ y: -2 }}
-              onClick={() => setActiveTab("clubs")}
+              onClick={() => navigateTo("clubs")}
               className="glass-card p-3.5 rounded-2xl cursor-pointer group"
             >
               <div className="flex items-center justify-between">
@@ -257,7 +263,7 @@ export function OverviewView({
                 Activities
               </h2>
               <button
-                onClick={() => setActiveTab("activities")}
+                onClick={() => navigateTo("activities")}
                 className="text-[11px] font-semibold text-indigo-300 hover:text-white"
               >
                 All &rarr;
@@ -282,13 +288,13 @@ export function OverviewView({
                   </div>
                   <div className="mt-2.5 pt-2 border-t border-white/10 flex gap-2">
                     <button
-                      onClick={() => setActiveTab("activities")}
+                      onClick={() => navigateTo("activities")}
                       className="flex-1 glass-btn-secondary py-1 rounded-lg text-[10px] font-semibold text-center"
                     >
                       Details
                     </button>
                     <button
-                      onClick={() => setActiveTab(isStudent ? "attendance" : "submissions")}
+                      onClick={() => navigateTo(isStudent ? "attendance" : "submissions")}
                       className="flex-1 glass-btn-primary py-1 rounded-lg text-[10px] font-semibold text-center"
                     >
                       {isStudent ? "Check In" : "Evaluate"}
@@ -366,7 +372,7 @@ export function OverviewView({
             </div>
 
             <button
-              onClick={() => setActiveTab("attendance")}
+              onClick={() => navigateTo("attendance")}
               className="mt-3.5 w-full glass-btn-primary py-2 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 shadow"
             >
               Open Attendance

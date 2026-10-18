@@ -18,6 +18,7 @@ import {
   Hash,
   Loader2,
 } from "lucide-react";
+import { GitclubLogo } from "@/components/GitclubLogo";
 
 function VerifyContent() {
   const searchParams = useSearchParams();
@@ -53,10 +54,10 @@ function VerifyContent() {
           <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5" />
           <input
             type="text"
-            placeholder="Enter Verification Code (e.g. CLYRO-ACH-2024-9581)"
+            placeholder="Enter Verification Code (e.g. GITCLUB-KAI-2024-9142 or CLYRO-...)"
             value={code}
             onChange={(e) => setCode(e.target.value)}
-            className="w-full text-sm font-mono rounded-xl border border-white/15 py-3 pl-10 pr-4 bg-slate-900/80 text-white placeholder-slate-500 shadow-inner backdrop-blur-md focus:border-indigo-400 focus:outline-none"
+            className="w-full text-sm font-mono rounded-xl border border-white/15 py-3 pl-10 pr-4 bg-slate-900/80 text-white placeholder-slate-500 shadow-inner backdrop-blur-md focus:border-blue-400 focus:outline-none"
             required
           />
         </div>
@@ -157,18 +158,15 @@ function VerifyContent() {
 export default function VerifyPage() {
   return (
     <div className="min-h-screen flex flex-col">
-      <header className="border-b border-white/10 bg-slate-900/40 backdrop-blur-2xl sticky top-0 z-50">
+      <header className="border-b border-white/10 bg-[#070b16]/70 backdrop-blur-2xl sticky top-0 z-50">
         <div className="max-w-5xl mx-auto px-4 h-16 flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-2.5 font-bold text-white text-lg">
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-indigo-500 to-purple-600 flex items-center justify-center text-white font-extrabold text-base shadow-md">
-              C
-            </div>
-            <span>Clyro Verification Portal</span>
+          <Link href="/" className="flex items-center gap-2.5">
+            <GitclubLogo size="sm" showText={true} />
           </Link>
 
           <Link
             href="/dashboard"
-            className="inline-flex items-center gap-1.5 text-xs font-semibold text-indigo-300 hover:text-white px-3 py-1.5 rounded-xl bg-white/[0.06] hover:bg-white/[0.12] transition border border-white/10 backdrop-blur-md"
+            className="inline-flex items-center gap-1.5 text-xs font-semibold text-cyan-300 hover:text-white px-3.5 py-1.5 rounded-xl bg-white/[0.06] hover:bg-white/[0.12] transition border border-white/10 backdrop-blur-md"
           >
             <ArrowLeft className="w-3.5 h-3.5" /> Back to Dashboard
           </Link>

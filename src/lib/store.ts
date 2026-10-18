@@ -896,7 +896,7 @@ export const db = {
       (t) => t.activityId !== activityId
     );
 
-    const tokenCode = `CLYRO-${Math.floor(1000 + Math.random() * 9000)}`;
+    const tokenCode = `GITCLUB-${Math.floor(1000 + Math.random() * 9000)}`;
     const now = new Date();
     const validUntil = new Date(now.getTime() + minutes * 60 * 1000);
 
@@ -1135,7 +1135,7 @@ export const db = {
     const state = getDatabase();
     const org = state.organizations.find((o) => o.id === organizationId);
     const orgPrefix = org?.shortName.replace(/[^a-zA-Z]/g, "").substring(0, 3).toUpperCase() || "MST";
-    const verificationCode = `CLYRO-${orgPrefix}-${Math.floor(1000 + Math.random() * 9000)}`;
+    const verificationCode = `GITCLUB-${orgPrefix}-${Math.floor(1000 + Math.random() * 9000)}`;
     
     // Deterministic cryptographic-style ledger digest
     const rawPayload = `${userId}:${organizationId}:${title}:${type}:${Date.now()}`;

@@ -15,7 +15,7 @@ function assert(condition: boolean, testName: string, detail?: string) {
 }
 
 async function runTests() {
-  console.log("=== RUNNING CLYRO MIRAI ORGANIZATIONAL INTEGRITY & WORKFLOW TEST SUITE ===");
+  console.log("=== RUNNING GITCLUB MIRAI ORGANIZATIONAL INTEGRITY & WORKFLOW TEST SUITE ===");
 
   // 1. Organizational Model Tests
   console.log("\n1. Primary Organizations & Institutional Structure:");
