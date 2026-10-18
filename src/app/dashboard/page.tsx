@@ -163,8 +163,8 @@ export default function DashboardPage() {
         activeSection={activeSection}
       />
 
-      {/* Main Single Scrollable Canvas (Full Width & Spacious, Unicorn Studio aesthetic) */}
-      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-24">
+      {/* Main Single Scrollable Canvas (Zoomed-in focus, clean & tight) */}
+      <main className="flex-1 max-w-6xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-16">
         {/* Section 01: [01] / OVERVIEW & CAMPUS CLUBS METRICS */}
         <ScrollFadeIn direction="up">
           <section id="overview" className="scroll-mt-28 space-y-5">

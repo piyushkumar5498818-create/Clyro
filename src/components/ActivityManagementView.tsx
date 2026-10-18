@@ -270,37 +270,15 @@ export function ActivityManagementView({
       )}
       </AnimatePresence>
 
-      {/* Activities Grid */}
-      <motion.div
-        initial="hidden"
-        animate="show"
-        variants={{
-          hidden: { opacity: 0 },
-          show: {
-            opacity: 1,
-            transition: { staggerChildren: 0.08 },
-          },
-        }}
-        className="grid grid-cols-1 md:grid-cols-2 gap-6"
-      >
+      {/* Activities Grid (Low Profile by default, details revealed on hover) */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
         {activities.map((act) => (
-          <motion.div
+          <div
             key={act.id}
-            variants={{
-              hidden: { opacity: 0, scale: 0.88, y: 24, filter: "blur(6px)" },
-              show: {
-                opacity: 1,
-                scale: 1,
-                y: 0,
-                filter: "blur(0px)",
-                transition: { type: "spring", stiffness: 85, damping: 16 },
-              },
-            }}
-            whileHover={{ scale: 1.025, y: -4, transition: { type: "spring", stiffness: 450, damping: 20 } }}
-            className="glass-panel rounded-3xl p-6 flex flex-col justify-between hover:border-indigo-400/40 hover:shadow-xl hover:shadow-indigo-500/10 transition-all"
+            className="glass-panel rounded-3xl p-5 sm:p-6 flex flex-col justify-between hover:border-indigo-400/50 hover:bg-white/[0.05] hover:shadow-xl hover:shadow-indigo-500/10 transition-all duration-200 group cursor-default"
           >
             <div>
-              <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center justify-between mb-2.5">
                 <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-indigo-500/15 text-indigo-300 border border-indigo-400/30">
                   {act.clubName}
                 </span>
@@ -319,30 +297,27 @@ export function ActivityManagementView({
                 </span>
               </div>
 
-              <h4 className="font-extrabold text-base text-white leading-snug">
+              <h4 className="font-extrabold text-base text-white leading-snug group-hover:text-indigo-200 transition">
                 {act.title}
               </h4>
-              <p className="text-xs font-semibold text-indigo-300 mt-1">
-                Topic: {act.topic}
-              </p>
 
-              <div className="mt-3.5 text-xs text-slate-300 space-y-2 border-t border-white/10 pt-3">
-                <div className="flex items-center gap-2">
-                  <Calendar className="w-3.5 h-3.5 text-indigo-400" />
-                  <span>{act.scheduledDate} ({act.startTime} - {act.endTime})</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <MapPin className="w-3.5 h-3.5 text-rose-400" />
-                  <span>{act.venue}</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Clock className="w-3.5 h-3.5 text-amber-400" />
-                  <span>Deadline: {new Date(act.submissionDeadline).toLocaleDateString()}</span>
-                </div>
+              <div className="flex items-center gap-2 text-xs text-slate-400 mt-1">
+                <Calendar className="w-3.5 h-3.5 text-indigo-400 shrink-0" />
+                <span>{act.scheduledDate} &bull; {act.startTime}</span>
               </div>
 
-              <div className="mt-3.5 p-3 rounded-2xl glass-card text-xs text-slate-300">
-                <strong className="text-white">Deliverable:</strong> {act.deliverableDescription}
+              {/* Progressive Disclosure: Revealed on cursor hover */}
+              <div className="overflow-hidden max-h-0 opacity-0 group-hover:max-h-48 group-hover:opacity-100 group-hover:mt-3 group-hover:pt-3 group-hover:border-t group-hover:border-white/10 transition-all duration-300 ease-out space-y-2">
+                <p className="text-xs text-indigo-300 font-medium">
+                  Topic: {act.topic}
+                </p>
+                <div className="flex items-center gap-2 text-xs text-slate-300">
+                  <MapPin className="w-3.5 h-3.5 text-rose-400 shrink-0" />
+                  <span>{act.venue}</span>
+                </div>
+                <div className="p-2.5 rounded-xl glass-card text-xs text-slate-300 leading-relaxed">
+                  <strong className="text-white">Deliverable:</strong> {act.deliverableDescription}
+                </div>
               </div>
             </div>
 
@@ -365,9 +340,9 @@ export function ActivityManagementView({
                 </button>
               </div>
             )}
-          </motion.div>
+          </div>
         ))}
-      </motion.div>
+      </div>
     </div>
   );
 }

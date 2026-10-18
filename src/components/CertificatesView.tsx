@@ -187,36 +187,15 @@ export function CertificatesView({
       </AnimatePresence>
 
       {/* Certificates Roster */}
-      <motion.div
-        initial="hidden"
-        animate="show"
-        variants={{
-          hidden: { opacity: 0 },
-          show: {
-            opacity: 1,
-            transition: { staggerChildren: 0.08 },
-          },
-        }}
-        className="grid grid-cols-1 md:grid-cols-2 gap-6"
-      >
+      {/* Certificates Grid (Low Profile by default, details revealed on hover) */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
         {certificates.map((cert) => (
-          <motion.div
+          <div
             key={cert.id}
-            variants={{
-              hidden: { opacity: 0, scale: 0.88, y: 28, filter: "blur(6px)" },
-              show: {
-                opacity: 1,
-                scale: 1,
-                y: 0,
-                filter: "blur(0px)",
-                transition: { type: "spring", stiffness: 85, damping: 16 },
-              },
-            }}
-            whileHover={{ scale: 1.025, y: -4, transition: { type: "spring", stiffness: 450, damping: 20 } }}
-            className="glass-panel rounded-3xl p-6 flex flex-col justify-between hover:border-indigo-400/40 hover:shadow-2xl hover:shadow-indigo-500/10 transition-all"
+            className="glass-panel rounded-3xl p-5 sm:p-6 flex flex-col justify-between hover:border-indigo-400/50 hover:bg-white/[0.05] hover:shadow-xl hover:shadow-indigo-500/10 transition-all duration-200 group cursor-default"
           >
             <div>
-              <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center justify-between mb-2.5">
                 <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-indigo-500/15 text-indigo-300 border border-indigo-400/30">
                   {cert.organizationName || cert.clubName}
                 </span>
@@ -225,21 +204,24 @@ export function CertificatesView({
                 </span>
               </div>
 
-              <h4 className="font-extrabold text-base text-white leading-snug">
+              <h4 className="font-extrabold text-base text-white leading-snug group-hover:text-indigo-200 transition">
                 {cert.title}
               </h4>
-              <p className="text-xs font-semibold text-slate-300 mt-1">
+              <p className="text-xs text-slate-300 mt-1">
                 Recipient: <strong className="text-white">{cert.userFullName}</strong>
               </p>
 
-              <div className="mt-3.5 p-3 rounded-2xl glass-card text-xs font-mono text-slate-300 space-y-1.5">
-                <div className="flex justify-between">
-                  <span className="text-slate-400">Code:</span>
-                  <strong className="text-indigo-400">{cert.verificationCode}</strong>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-slate-400">Date:</span>
-                  <span>{cert.issueDate}</span>
+              {/* Progressive Disclosure: Revealed on cursor hover */}
+              <div className="overflow-hidden max-h-0 opacity-0 group-hover:max-h-36 group-hover:opacity-100 group-hover:mt-3 group-hover:pt-3 group-hover:border-t group-hover:border-white/10 transition-all duration-300 ease-out space-y-2">
+                <div className="p-3 rounded-2xl glass-card text-xs font-mono text-slate-300 space-y-1.5">
+                  <div className="flex justify-between">
+                    <span className="text-slate-400">Ledger Code:</span>
+                    <strong className="text-cyan-400">{cert.verificationCode}</strong>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-slate-400">Issue Date:</span>
+                    <span>{cert.issueDate}</span>
+                  </div>
                 </div>
               </div>
             </div>
@@ -251,15 +233,15 @@ export function CertificatesView({
               </span>
               <button
                 onClick={() => handleDownloadPDF(cert)}
-                className="glass-btn-primary px-3.5 py-2 rounded-xl font-bold text-xs flex items-center gap-1.5 shadow-md transition"
+                className="glass-btn-primary px-3.5 py-1.5 rounded-xl font-bold text-xs flex items-center gap-1.5 shadow-md transition"
               >
                 <Download className="w-3.5 h-3.5" />
                 Download PDF
               </button>
             </div>
-          </motion.div>
+          </div>
         ))}
-      </motion.div>
+      </div>
 
       {/* Issue Modal */}
       <AnimatePresence>

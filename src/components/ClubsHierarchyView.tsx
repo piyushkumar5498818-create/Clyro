@@ -122,12 +122,7 @@ export function ClubsHierarchyView({
 
       {/* 1. Kaizen Tech: 3 Technical Domains with Roadmaps & Mentors */}
       {kaizen && (
-        <motion.div
-          initial={{ opacity: 0, y: 12 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.25 }}
-          className="glass-panel rounded-3xl p-5 sm:p-6 space-y-5"
-        >
+        <div className="glass-panel rounded-3xl p-5 sm:p-6 space-y-5">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-white/10 pb-4">
             <div className="flex items-center gap-3">
               <div className="w-11 h-11 rounded-xl bg-indigo-500/20 border border-indigo-400/30 text-indigo-400 flex items-center justify-center shrink-0">
@@ -310,17 +305,12 @@ export function ClubsHierarchyView({
               );
             })()}
           </AnimatePresence>
-        </motion.div>
+        </div>
       )}
 
       {/* 2. NEX-CELL: Entrepreneurship Club */}
       {nexcell && (
-        <motion.div
-          initial={{ opacity: 0, y: 12 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.25, delay: 0.05 }}
-          className="glass-panel rounded-3xl p-5 sm:p-6 space-y-4"
-        >
+        <div className="glass-panel rounded-3xl p-5 sm:p-6 space-y-4">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-white/10 pb-4">
             <div className="flex items-center gap-3">
               <div className="w-11 h-11 rounded-xl bg-amber-500/20 border border-amber-400/30 text-amber-400 flex items-center justify-center shrink-0">
@@ -358,34 +348,31 @@ export function ClubsHierarchyView({
             </div>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
             {nexcell.initiatives?.map((init) => (
-              <motion.div
+              <div
                 key={init.id}
-                whileHover={{ scale: 1.03, y: -3, transition: { type: "spring", stiffness: 450, damping: 20 } }}
-                className="glass-card p-3.5 rounded-2xl border border-white/10 hover:border-amber-400/40 hover:shadow-lg hover:shadow-amber-500/10 transition-colors"
+                className="glass-card p-4 rounded-2xl border border-white/10 hover:border-amber-400/40 hover:bg-white/[0.06] transition-all duration-200 group cursor-default"
               >
-                <div className="flex items-center justify-between text-xs font-bold text-white mb-1">
-                  <span>{init.name}</span>
-                  <span className="text-[10px] text-amber-300 bg-amber-500/20 px-2 py-0.5 rounded-full">
+                <div className="flex items-center justify-between text-sm font-bold text-white">
+                  <span className="group-hover:text-amber-300 transition truncate pr-2">{init.name}</span>
+                  <span className="text-[10px] font-mono text-amber-300 bg-amber-500/20 px-2 py-0.5 rounded-full border border-amber-500/30 shrink-0">
                     {init.format}
                   </span>
                 </div>
-                <p className="text-[11px] text-slate-300">{init.description}</p>
-              </motion.div>
+                {/* Full info revealed ONLY on hover */}
+                <div className="overflow-hidden max-h-0 opacity-0 group-hover:max-h-24 group-hover:opacity-100 group-hover:mt-2.5 group-hover:pt-2.5 group-hover:border-t group-hover:border-white/10 transition-all duration-300 ease-out">
+                  <p className="text-xs text-slate-300 leading-relaxed">{init.description}</p>
+                </div>
+              </div>
             ))}
           </div>
-        </motion.div>
+        </div>
       )}
 
       {/* 3. MALHAR: Cultural Society */}
       {malhar && (
-        <motion.div
-          initial={{ opacity: 0, y: 12 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.25, delay: 0.1 }}
-          className="glass-panel rounded-3xl p-5 sm:p-6 space-y-4"
-        >
+        <div className="glass-panel rounded-3xl p-5 sm:p-6 space-y-4">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-white/10 pb-4">
             <div className="flex items-center gap-3">
               <div className="w-11 h-11 rounded-xl bg-rose-500/20 border border-rose-400/30 text-rose-400 flex items-center justify-center shrink-0">
@@ -398,7 +385,7 @@ export function ClubsHierarchyView({
                     5 Departments
                   </span>
                 </div>
-                <p className="text-xs text-slate-400 mt-0.5">{malhar.description}</p>
+                <p className="text-xs text-slate-400 mt-0.5">Cultural Society of Mirai</p>
               </div>
             </div>
 
@@ -423,144 +410,129 @@ export function ClubsHierarchyView({
             </div>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
             {malhar.units?.map((dept) => (
-              <motion.div
+              <div
                 key={dept.id}
-                whileHover={{ scale: 1.03, y: -3, transition: { type: "spring", stiffness: 450, damping: 20 } }}
-                className="glass-card p-3.5 rounded-2xl border border-white/10 hover:border-rose-400/40 hover:shadow-lg hover:shadow-rose-500/10 transition-colors"
+                className="glass-card p-4 rounded-2xl border border-white/10 hover:border-rose-400/40 hover:bg-white/[0.06] transition-all duration-200 group cursor-default"
               >
-                <div className="flex items-center justify-between text-xs font-bold text-white mb-1">
-                  <span>{dept.name}</span>
-                  <span className="text-[10px] text-rose-300 bg-rose-500/20 px-2 py-0.5 rounded-full">
+                <div className="flex items-center justify-between text-sm font-bold text-white">
+                  <span className="group-hover:text-rose-300 transition truncate pr-2">{dept.name}</span>
+                  <span className="text-[10px] font-mono text-rose-300 bg-rose-500/20 px-2 py-0.5 rounded-full border border-rose-500/30 shrink-0">
                     {dept.code}
                   </span>
                 </div>
-                <p className="text-[11px] text-slate-300">{dept.description}</p>
-              </motion.div>
+                {/* Full info revealed ONLY on hover */}
+                <div className="overflow-hidden max-h-0 opacity-0 group-hover:max-h-24 group-hover:opacity-100 group-hover:mt-2.5 group-hover:pt-2.5 group-hover:border-t group-hover:border-white/10 transition-all duration-300 ease-out">
+                  <p className="text-xs text-slate-300 leading-relaxed">{dept.description}</p>
+                </div>
+              </div>
             ))}
           </div>
-        </motion.div>
+        </div>
       )}
 
-      {/* Member Section with 3D Pop Out from Back Animations */}
-      <motion.div
-        initial={{ opacity: 0, scale: 0.94, y: 24 }}
-        whileInView={{ opacity: 1, scale: 1, y: 0 }}
-        viewport={{ once: false, margin: "-60px" }}
-        transition={{ type: "spring", stiffness: 90, damping: 18, mass: 0.8 }}
-        style={{ transformPerspective: 1200, willChange: "transform, opacity" }}
-        className="glass-panel rounded-3xl p-6 sm:p-8 space-y-6"
-      >
+      {/* Member Section: Low Profile, instant solid rendering, full info on hover */}
+      <div className="glass-panel rounded-3xl p-6 sm:p-7 space-y-5">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-white/10">
           <div>
             <h3 className="text-xl sm:text-2xl font-black text-white flex items-center gap-2.5">
               <Users className="w-6 h-6 text-cyan-400" />
-              Student Members &amp; Enrolment Queue
+              Student Members Directory
             </h3>
-            <p className="text-sm text-slate-300 mt-1">
-              Active verified students across NEX-CELL, Kaizen Tech, and MALHAR.
+            <p className="text-xs text-slate-400 mt-0.5">
+              Verified memberships across active clubs.
             </p>
           </div>
 
           <div className="flex items-center gap-2">
-            <span className="px-3.5 py-1.5 rounded-xl bg-blue-500/15 text-cyan-300 text-xs font-mono font-bold border border-blue-400/30">
-              {allMemberships.length} ENROLLED RECORDS
+            <span className="px-3 py-1 rounded-xl bg-blue-500/15 text-cyan-300 text-xs font-mono font-bold border border-blue-400/30">
+              {allMemberships.length} ENROLLED
             </span>
           </div>
         </div>
 
-        {/* Member Cards Grid with 3D Pop-In Staggered Entrance */}
+        {/* Member Cards Grid: Low Profile, Reveal details on hover */}
         {allMemberships.length === 0 ? (
           <div className="py-12 text-center text-slate-400 space-y-2">
             <Users className="w-10 h-10 mx-auto text-slate-500 opacity-60" />
             <div className="text-sm font-semibold">No membership records found.</div>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-            {allMemberships.map((m, idx) => (
-              <motion.div
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3.5">
+            {allMemberships.map((m) => (
+              <div
                 key={m.id}
-                initial={{ opacity: 0, scale: 0.92, y: 20 }}
-                whileInView={{ opacity: 1, scale: 1, y: 0 }}
-                viewport={{ once: false, margin: "-40px" }}
-                whileHover={{ scale: 1.025, y: -4, transition: { type: "spring", stiffness: 450, damping: 20 } }}
-                transition={{
-                  type: "spring",
-                  stiffness: 85,
-                  damping: 15,
-                  mass: 0.85,
-                  delay: Math.min(idx * 0.05, 0.3),
-                }}
-                style={{ transformPerspective: 1000 }}
-                className="glass-card p-5 rounded-2xl flex flex-col justify-between gap-4 border border-white/10 hover:border-blue-400/40 hover:bg-white/[0.06] hover:shadow-xl hover:shadow-blue-500/10 transition-all group cursor-default"
+                className="glass-card p-4 rounded-2xl border border-white/10 hover:border-blue-400/50 hover:bg-white/[0.06] hover:shadow-xl hover:shadow-blue-500/10 transition-all duration-200 group cursor-default"
               >
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="w-11 h-11 rounded-2xl bg-gradient-to-tr from-blue-700 via-indigo-600 to-cyan-400 p-[1.5px] shadow-md shrink-0">
-                        <div className="w-full h-full bg-[#0a1124] rounded-[14px] flex items-center justify-center text-white text-sm font-black">
-                          {m.userFullName?.charAt(0) || "M"}
-                        </div>
-                      </div>
-                      <div className="min-w-0">
-                        <div className="text-base font-bold text-white group-hover:text-blue-300 transition truncate">
-                          {m.userFullName || "Student Member"}
-                        </div>
-                        <div className="text-xs text-slate-400 truncate mt-0.5 font-mono">
-                          {m.organizationName}
-                        </div>
+                {/* Low-Profile Primary Header (Always Visible) */}
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3 min-w-0">
+                    <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-700 via-indigo-600 to-cyan-400 p-[1.5px] shadow-sm shrink-0">
+                      <div className="w-full h-full bg-[#0a1124] rounded-[9px] flex items-center justify-center text-white text-sm font-black">
+                        {m.userFullName?.charAt(0) || "M"}
                       </div>
                     </div>
-
-                    <span
-                      className={`px-3 py-1 rounded-full text-xs font-bold uppercase border shrink-0 ${
-                        m.status === "approved"
-                          ? "bg-emerald-500/20 text-emerald-300 border-emerald-500/30"
-                          : m.status === "rejected"
-                          ? "bg-rose-500/20 text-rose-300 border-rose-500/30"
-                          : "bg-amber-500/20 text-amber-300 border-amber-500/30"
-                      }`}
-                    >
-                      {m.status}
-                    </span>
+                    <div className="min-w-0">
+                      <div className="text-sm font-bold text-white group-hover:text-cyan-300 transition truncate">
+                        {m.userFullName || "Student Member"}
+                      </div>
+                      <div className="text-xs text-slate-400 truncate font-mono">
+                        {m.organizationName}
+                      </div>
+                    </div>
                   </div>
 
-                  <div className="flex items-center justify-between text-xs pt-1 border-t border-white/5">
-                    <span className="font-mono text-cyan-300 font-semibold uppercase px-2.5 py-0.5 rounded-lg bg-blue-500/10 border border-blue-400/20">
+                  <span
+                    className={`px-2.5 py-0.5 rounded-full text-[11px] font-bold uppercase border shrink-0 ${
+                      m.status === "approved"
+                        ? "bg-emerald-500/20 text-emerald-300 border-emerald-500/30"
+                        : m.status === "rejected"
+                        ? "bg-rose-500/20 text-rose-300 border-rose-500/30"
+                        : "bg-amber-500/20 text-amber-300 border-amber-500/30"
+                    }`}
+                  >
+                    {m.status}
+                  </span>
+                </div>
+
+                {/* Progressive Disclosure: Full details reveal ONLY on cursor hover */}
+                <div className="overflow-hidden max-h-0 opacity-0 group-hover:max-h-28 group-hover:opacity-100 group-hover:mt-3 group-hover:pt-3 group-hover:border-t group-hover:border-white/10 transition-all duration-300 ease-out space-y-2.5">
+                  <div className="flex items-center justify-between text-xs">
+                    <span className="font-mono text-cyan-300 font-semibold uppercase px-2 py-0.5 rounded-md bg-blue-500/15 border border-blue-400/25">
                       {m.membershipType} TIER
                     </span>
-                    <span className="text-slate-400 text-xs">
+                    <span className="text-slate-400 font-mono text-[11px]">
                       Joined {new Date(m.requestedAt).toLocaleDateString()}
                     </span>
                   </div>
-                </div>
 
-                {canReview && m.status === "pending" && (
-                  <div className="pt-2 border-t border-white/10 flex items-center gap-2">
-                    <button
-                      onClick={() => handleReviewMembership(m.id, "approved")}
-                      disabled={loading}
-                      className="flex-1 py-2 px-3 rounded-xl bg-emerald-600/25 hover:bg-emerald-600/40 text-emerald-300 border border-emerald-500/40 text-xs font-bold transition flex items-center justify-center gap-1.5"
-                    >
-                      <Check className="w-4 h-4" />
-                      <span>Approve</span>
-                    </button>
-                    <button
-                      onClick={() => handleReviewMembership(m.id, "rejected")}
-                      disabled={loading}
-                      className="flex-1 py-2 px-3 rounded-xl bg-rose-600/25 hover:bg-rose-600/40 text-rose-300 border border-rose-500/40 text-xs font-bold transition flex items-center justify-center gap-1.5"
-                    >
-                      <X className="w-4 h-4" />
-                      <span>Reject</span>
-                    </button>
-                  </div>
-                )}
-              </motion.div>
+                  {canReview && m.status === "pending" && (
+                    <div className="flex items-center gap-2 pt-1">
+                      <button
+                        onClick={() => handleReviewMembership(m.id, "approved")}
+                        disabled={loading}
+                        className="flex-1 py-1.5 px-3 rounded-xl bg-emerald-600/25 hover:bg-emerald-600/40 text-emerald-300 border border-emerald-500/40 text-xs font-bold transition flex items-center justify-center gap-1.5"
+                      >
+                        <Check className="w-3.5 h-3.5" />
+                        <span>Approve</span>
+                      </button>
+                      <button
+                        onClick={() => handleReviewMembership(m.id, "rejected")}
+                        disabled={loading}
+                        className="flex-1 py-1.5 px-3 rounded-xl bg-rose-600/25 hover:bg-rose-600/40 text-rose-300 border border-rose-500/40 text-xs font-bold transition flex items-center justify-center gap-1.5"
+                      >
+                        <X className="w-3.5 h-3.5" />
+                        <span>Reject</span>
+                      </button>
+                    </div>
+                  )}
+                </div>
+              </div>
             ))}
           </div>
         )}
-      </motion.div>
+      </div>
 
       {/* Minimal Membership Modal */}
       {selectedOrg && (
