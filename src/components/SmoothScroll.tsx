@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { ReactLenis, useLenis } from "lenis/react";
 import "lenis/dist/lenis.css";
 
@@ -50,17 +50,21 @@ function LenisProgressBar() {
 
 /**
  * Root SmoothScrollProvider using official darkroom.engineering ReactLenis wrapper.
+ * Configured with signature fluid inertia (lenis.dev).
  */
 export function SmoothScrollProvider({ children }: { children: React.ReactNode }) {
   return (
     <ReactLenis
       root
       options={{
-        lerp: 0.1,
-        duration: 1.2,
-        smoothWheel: true,
+        lerp: 0.08,             // Buttery smooth inertia
+        duration: 1.2,          // Duration for programmatic jumps
+        smoothWheel: true,      // Smooth mouse wheel scrolling
+        syncTouch: true,        // Touch & trackpad momentum synchronization
+        syncTouchLerp: 0.08,    // Touch lerp
+        touchMultiplier: 1.5,
         wheelMultiplier: 1,
-        touchMultiplier: 1.8,
+        anchors: true,          // Intercept native #hash anchor links automatically
       }}
     >
       <LenisProgressBar />
