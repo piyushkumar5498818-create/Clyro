@@ -1,20 +1,81 @@
 import crypto from "crypto";
 
 const AUTH_SECRET = process.env.AUTH_SECRET || "clyro-mirai-session-secret-2024-msot";
+export const GOOGLE_WORKSPACE_DOMAIN =
+  process.env.GOOGLE_WORKSPACE_DOMAIN ||
+  process.env.NEXT_PUBLIC_GOOGLE_WORKSPACE_DOMAIN ||
+  "mirai.edu";
 
 export interface SessionPayload {
   userId: string;
   email: string;
   role: string;
+  authProvider?: "google_workspace" | "credentials";
   issuedAt: number;
   expiresAt: number;
+}
+
+/**
+ * Validates that an email belongs to the authorized Google Workspace domain.
+ */
+export function validateGoogleWorkspaceEmail(email: string): { valid: boolean; error?: string } {
+  if (!email || typeof email !== "string") {
+    return { valid: false, error: "Email address is required." };
+  }
+
+  const normalized = email.trim().toLowerCase();
+  const domain = normalized.split("@")[1];
+
+  if (!domain) {
+    return { valid: false, error: "Invalid email format." };
+  }
+
+  if (domain !== GOOGLE_WORKSPACE_DOMAIN.toLowerCase()) {
+    return {
+      valid: false,
+      error: `Access restricted: Only institutional Google Workspace accounts (@${GOOGLE_WORKSPACE_DOMAIN}) are permitted. Personal email domains (@${domain}) cannot access MSOT Clyro.`,
+    };
+  }
+
+  return { valid: true };
+}
+
+/**
+ * Checks if live Google Cloud OAuth credentials are configured.
+ */
+export function isGoogleOAuthLive(): boolean {
+  return Boolean(process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET);
+}
+
+/**
+ * Builds the official Google OAuth 2.0 authorization URL with Google Workspace hosted domain (hd) restriction.
+ */
+export function getGoogleOAuthUrl(redirectUri: string, state?: string): string {
+  const clientId = process.env.GOOGLE_CLIENT_ID || "";
+  const params = new URLSearchParams({
+    client_id: clientId,
+    redirect_uri: redirectUri,
+    response_type: "code",
+    scope: "openid email profile",
+    access_type: "online",
+    prompt: "select_account",
+    hd: GOOGLE_WORKSPACE_DOMAIN, // Restricts Google account selector to Workspace domain
+    state: state || "clyro-msot-google-auth",
+  });
+
+  return `https://accounts.google.com/o/oauth2/v2/auth?${params.toString()}`;
 }
 
 /**
  * Creates a cryptographically signed HMAC-SHA256 session token.
  * Format: base64(payload).base64(hmacSignature)
  */
-export function signSessionToken(userId: string, email: string, role: string): string {
+export function signSessionToken(
+  userId: string,
+  email: string,
+  role: string,
+  authProvider: "google_workspace" | "credentials" = "credentials"
+): string {
   const issuedAt = Date.now();
   const expiresAt = issuedAt + 7 * 24 * 60 * 60 * 1000; // 7 days
 
@@ -22,6 +83,7 @@ export function signSessionToken(userId: string, email: string, role: string): s
     userId,
     email,
     role,
+    authProvider,
     issuedAt,
     expiresAt,
   };

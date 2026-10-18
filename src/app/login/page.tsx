@@ -2,9 +2,8 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { loginAction } from "@/actions/auth";
+import { loginAction, googleWorkspaceAuthAction } from "@/actions/auth";
 import {
   Mail,
   Lock,
@@ -16,6 +15,8 @@ import {
   CheckCircle2,
   Shield,
   Users,
+  X,
+  ExternalLink,
 } from "lucide-react";
 
 const QUICK_PERSONAS = [
@@ -77,14 +78,70 @@ const QUICK_PERSONAS = [
   },
 ];
 
+const GOOGLE_WORKSPACE_ACCOUNTS = [
+  {
+    name: "Alex Rivera",
+    email: "alex.student@mirai.edu",
+    role: "Student Member",
+    sub: "Computer Science & Engineering · Year 2",
+    initials: "AR",
+    color: "from-blue-500 to-indigo-600",
+  },
+  {
+    name: "Rishav Raj",
+    email: "rishav.president@mirai.edu",
+    role: "President — Kaizen Tech",
+    sub: "Technical Club Executive",
+    initials: "RR",
+    color: "from-indigo-500 to-purple-600",
+  },
+  {
+    name: "Aarav Pathak",
+    email: "aarav.vp@mirai.edu",
+    role: "Vice President — Kaizen Tech",
+    sub: "AI & Data Science Domain Mentor",
+    initials: "AP",
+    color: "from-purple-500 to-pink-600",
+  },
+  {
+    name: "Arman Mehta",
+    email: "arman.president@mirai.edu",
+    role: "President — NEX-CELL",
+    sub: "Entrepreneurship Club Executive",
+    initials: "AM",
+    color: "from-amber-500 to-orange-600",
+  },
+  {
+    name: "Elena Rostova",
+    email: "elena.president@mirai.edu",
+    role: "President — MALHAR",
+    sub: "Cultural Society Executive",
+    initials: "ER",
+    color: "from-pink-500 to-rose-600",
+  },
+  {
+    name: "Campus Administrator",
+    email: "admin@mirai.edu",
+    role: "Dean of Student Affairs",
+    sub: "MSOT Central Administration",
+    initials: "CA",
+    color: "from-emerald-500 to-teal-600",
+  },
+];
+
 export default function LoginPage() {
-  const router = useRouter();
   const [email, setEmail] = useState("alex.student@mirai.edu");
   const [password, setPassword] = useState("••••••••••••");
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+
+  // Google Workspace SSO modal state
+  const [showGoogleModal, setShowGoogleModal] = useState(false);
+  const [customGoogleEmail, setCustomGoogleEmail] = useState("");
+  const [customGoogleName, setCustomGoogleName] = useState("");
+  const [showCustomGoogleInput, setShowCustomGoogleInput] = useState(false);
 
   const handleLogin = async (targetEmail: string) => {
     setLoading(true);
@@ -103,9 +160,34 @@ export default function LoginPage() {
     }
   };
 
+  const handleGoogleWorkspaceLogin = async (targetEmail: string, fullName?: string) => {
+    setLoading(true);
+    setError(null);
+    setSuccess(null);
+
+    const res = await googleWorkspaceAuthAction(targetEmail, fullName);
+    if (res.success && res.user) {
+      setShowGoogleModal(false);
+      setSuccess(
+        `Google Workspace Single Sign-On Verified: ${res.user.fullName} (${res.user.email}). Redirecting to campus portal...`
+      );
+      setTimeout(() => {
+        window.location.href = "/dashboard";
+      }, 400);
+    } else {
+      setLoading(false);
+      setError(res.error || "Google Workspace authentication was rejected.");
+    }
+  };
+
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     await handleLogin(email);
+  };
+
+  const onCustomGoogleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    await handleGoogleWorkspaceLogin(customGoogleEmail, customGoogleName);
   };
 
   return (
@@ -159,7 +241,7 @@ export default function LoginPage() {
               Welcome to Mirai Clyro
             </h1>
             <p className="text-xs text-slate-300 mt-1.5">
-              Sign in with your campus account or use quick institutional access.
+              Sign in with your campus Google Workspace account or institutional credentials.
             </p>
           </div>
 
@@ -188,6 +270,48 @@ export default function LoginPage() {
               </motion.div>
             )}
           </AnimatePresence>
+
+          {/* Google Workspace Button */}
+          <button
+            type="button"
+            onClick={() => setShowGoogleModal(true)}
+            disabled={loading}
+            className="w-full py-3 px-4 rounded-2xl bg-white hover:bg-slate-100 text-slate-900 font-bold text-xs shadow-lg shadow-black/20 flex items-center justify-center gap-3 transition-all duration-200 border border-slate-200 group active:scale-[0.99]"
+          >
+            {/* Google Multi-Color SVG Logo */}
+            <svg className="w-4 h-4" viewBox="0 0 24 24">
+              <path
+                fill="#4285F4"
+                d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
+              />
+              <path
+                fill="#34A853"
+                d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+              />
+              <path
+                fill="#FBBC05"
+                d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"
+              />
+              <path
+                fill="#EA4335"
+                d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"
+              />
+            </svg>
+            <span className="text-slate-800 group-hover:text-black">
+              Sign in with Google Workspace
+            </span>
+            <span className="text-[10px] font-semibold text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded-full border border-indigo-200">
+              @mirai.edu SSO
+            </span>
+          </button>
+
+          {/* Divider */}
+          <div className="relative my-5 flex items-center justify-center">
+            <div className="border-t border-white/10 w-full" />
+            <span className="bg-slate-900/90 px-3 text-[10px] font-semibold text-slate-400 uppercase tracking-wider absolute">
+              or campus password
+            </span>
+          </div>
 
           {/* Credentials Form */}
           <form onSubmit={onSubmit} className="space-y-4">
@@ -245,7 +369,7 @@ export default function LoginPage() {
                 <span>Signing in...</span>
               ) : (
                 <>
-                  <span>Sign In to Clyro</span>
+                  <span>Sign In with Credentials</span>
                   <ArrowRight className="w-4 h-4" />
                 </>
               )}
@@ -257,9 +381,9 @@ export default function LoginPage() {
             <div className="flex items-center justify-between mb-3">
               <span className="text-[11px] font-bold text-slate-300 uppercase tracking-wider flex items-center gap-1.5">
                 <Users className="w-3.5 h-3.5 text-indigo-400" />
-                One-Click Quick Persona Access
+                One-Click Role Preview
               </span>
-              <span className="text-[10px] text-slate-400 font-mono">Demo Ready</span>
+              <span className="text-[10px] text-slate-400 font-mono">Instant Auth</span>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
@@ -290,9 +414,153 @@ export default function LoginPage() {
         </motion.div>
       </div>
 
+      {/* Google Workspace Account Chooser Modal */}
+      <AnimatePresence>
+        {showGoogleModal && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 bg-black/70 backdrop-blur-md flex items-center justify-center p-4"
+          >
+            <motion.div
+              initial={{ scale: 0.95, opacity: 0, y: 10 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.95, opacity: 0, y: 10 }}
+              className="bg-slate-900 border border-white/15 rounded-3xl max-w-md w-full p-6 sm:p-7 shadow-2xl relative overflow-hidden"
+            >
+              {/* Close Button */}
+              <button
+                type="button"
+                onClick={() => setShowGoogleModal(false)}
+                className="absolute top-5 right-5 p-1.5 rounded-full text-slate-400 hover:text-white hover:bg-white/10 transition"
+              >
+                <X className="w-4 h-4" />
+              </button>
+
+              {/* Google Header */}
+              <div className="text-center pb-4 border-b border-white/10">
+                <div className="inline-flex items-center justify-center w-10 h-10 rounded-2xl bg-white shadow-md mb-2.5">
+                  <svg className="w-5 h-5" viewBox="0 0 24 24">
+                    <path
+                      fill="#4285F4"
+                      d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
+                    />
+                    <path
+                      fill="#34A853"
+                      d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+                    />
+                    <path
+                      fill="#FBBC05"
+                      d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"
+                    />
+                    <path
+                      fill="#EA4335"
+                      d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"
+                    />
+                  </svg>
+                </div>
+                <h3 className="text-lg font-black text-white">Google Workspace</h3>
+                <p className="text-xs text-slate-300 mt-0.5">
+                  Choose a verified <strong className="text-indigo-400">@mirai.edu</strong> account to continue to Clyro
+                </p>
+                <div className="mt-2 inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-500/15 text-emerald-300 text-[10px] font-semibold border border-emerald-500/30">
+                  <Shield className="w-3 h-3 text-emerald-400" />
+                  Institutional Domain Enforced: @mirai.edu
+                </div>
+              </div>
+
+              {/* Account List */}
+              <div className="py-4 space-y-2 max-h-72 overflow-y-auto">
+                {GOOGLE_WORKSPACE_ACCOUNTS.map((acc) => (
+                  <button
+                    key={acc.email}
+                    type="button"
+                    onClick={() => handleGoogleWorkspaceLogin(acc.email, acc.name)}
+                    disabled={loading}
+                    className="w-full p-2.5 rounded-2xl border border-white/10 bg-white/[0.04] hover:bg-white/[0.08] hover:border-indigo-400/50 transition flex items-center gap-3 text-left group"
+                  >
+                    <div
+                      className={`w-9 h-9 rounded-xl bg-gradient-to-tr ${acc.color} text-white font-black text-xs flex items-center justify-center shadow-md shrink-0`}
+                    >
+                      {acc.initials}
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <div className="text-xs font-bold text-white group-hover:text-indigo-300 transition truncate">
+                        {acc.name}
+                      </div>
+                      <div className="text-[11px] font-mono text-slate-300 truncate">
+                        {acc.email}
+                      </div>
+                      <div className="text-[10px] text-slate-400 truncate">
+                        {acc.role}
+                      </div>
+                    </div>
+                  </button>
+                ))}
+              </div>
+
+              {/* Custom Google Workspace Account Toggle */}
+              <div className="pt-3 border-t border-white/10">
+                {!showCustomGoogleInput ? (
+                  <button
+                    type="button"
+                    onClick={() => setShowCustomGoogleInput(true)}
+                    className="w-full py-2 px-3 text-xs font-semibold text-indigo-300 hover:text-indigo-200 hover:bg-white/5 rounded-xl transition flex items-center justify-center gap-1.5"
+                  >
+                    <span>Use another @mirai.edu account</span>
+                    <ArrowRight className="w-3.5 h-3.5" />
+                  </button>
+                ) : (
+                  <form onSubmit={onCustomGoogleSubmit} className="space-y-3 pt-1">
+                    <div className="text-xs font-bold text-slate-200">
+                      Sign in with institutional Google Workspace email
+                    </div>
+                    <div>
+                      <input
+                        type="text"
+                        value={customGoogleName}
+                        onChange={(e) => setCustomGoogleName(e.target.value)}
+                        placeholder="Full Name (e.g. Diya Sen)"
+                        className="w-full text-xs rounded-xl border border-white/15 p-2 bg-slate-800 text-white placeholder-slate-500 focus:border-indigo-400 focus:outline-none mb-2"
+                        required
+                      />
+                      <input
+                        type="email"
+                        value={customGoogleEmail}
+                        onChange={(e) => setCustomGoogleEmail(e.target.value)}
+                        placeholder="username@mirai.edu"
+                        className="w-full text-xs font-mono rounded-xl border border-white/15 p-2 bg-slate-800 text-white placeholder-slate-500 focus:border-indigo-400 focus:outline-none"
+                        required
+                      />
+                    </div>
+                    <div className="flex gap-2 justify-end">
+                      <button
+                        type="button"
+                        onClick={() => setShowCustomGoogleInput(false)}
+                        className="px-3 py-1.5 rounded-xl text-xs text-slate-400 hover:text-white"
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        type="submit"
+                        disabled={loading}
+                        className="glass-btn-primary px-4 py-1.5 rounded-xl text-xs font-bold"
+                      >
+                        Continue with Google SSO
+                      </button>
+                    </div>
+                  </form>
+                )}
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* Footer */}
       <footer className="text-center text-xs text-slate-400 z-10 py-2">
-        Mirai School of Technology &middot; Clyro Co-Curricular Platform
+        Mirai School of Technology &middot; Google Workspace SSO Integration &middot; Clyro Platform
       </footer>
     </main>
   );

@@ -1,5 +1,5 @@
 import { db } from "../src/lib/store";
-import { signSessionToken, verifySessionToken } from "../src/lib/auth";
+import { signSessionToken, verifySessionToken, validateGoogleWorkspaceEmail } from "../src/lib/auth";
 
 let testsPassed = 0;
 let testsFailed = 0;
@@ -259,6 +259,25 @@ async function runTests() {
   const tamperedToken = sessionToken.slice(0, -6) + "xyz999";
   const verifiedTampered = verifySessionToken(tamperedToken);
   assert(verifiedTampered === null, "Tampered session token signature rejected by auth utility");
+
+  // 12. Google Workspace Authentication & Domain Restriction
+  console.log("\n12. Google Workspace Authentication & Domain Restriction:");
+  const validWorkspace = validateGoogleWorkspaceEmail("diya.sen@mirai.edu");
+  assert(validWorkspace.valid === true, "Valid @mirai.edu Google Workspace email accepted");
+
+  const personalGoogle = validateGoogleWorkspaceEmail("diya.sen@gmail.com");
+  assert(personalGoogle.valid === false, "Personal @gmail.com domain blocked with institutional restriction error");
+
+  const otherDomain = validateGoogleWorkspaceEmail("hacker@external.org");
+  assert(otherDomain.valid === false, "Unauthorized non-mirai domain rejected");
+
+  const googleUser = db.findOrCreateGoogleProfile("diya.sen@mirai.edu", "Diya Sen");
+  assert(googleUser.email === "diya.sen@mirai.edu", "Google Workspace student profile provisioned successfully");
+  assert(googleUser.role === "member", "Google Workspace student assigned member role by default");
+
+  const googleSessionToken = signSessionToken(googleUser.id, googleUser.email, googleUser.role, "google_workspace");
+  const verifiedGoogleSession = verifySessionToken(googleSessionToken);
+  assert(verifiedGoogleSession?.authProvider === "google_workspace", "Session records google_workspace authentication provider");
 
   console.log(`\n======================================================`);
   console.log(`TEST SUMMARY: ${testsPassed} PASSED, ${testsFailed} FAILED`);

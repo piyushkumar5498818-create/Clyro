@@ -652,6 +652,37 @@ export const db = {
     return getDatabase().profiles;
   },
 
+  findOrCreateGoogleProfile(email: string, fullName?: string, avatarUrl?: string): Profile {
+    const state = getDatabase();
+    const normalized = email.trim().toLowerCase();
+    const existing = state.profiles.find((p) => p.email.toLowerCase() === normalized);
+    if (existing) {
+      if (fullName && !existing.fullName) existing.fullName = fullName;
+      if (avatarUrl && !existing.avatarUrl) existing.avatarUrl = avatarUrl;
+      return existing;
+    }
+
+    const newProfile: Profile = {
+      id: `u${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
+      email: normalized,
+      fullName:
+        fullName ||
+        normalized
+          .split("@")[0]
+          .replace(/[._]/g, " ")
+          .replace(/\b\w/g, (c) => c.toUpperCase()),
+      role: "member",
+      campusId: state.campuses[0]?.id || "c0000000-0000-0000-0000-000000000001",
+      studentId: `STU-${new Date().getFullYear()}-${Math.floor(100 + Math.random() * 900)}`,
+      title: "Student Member (Google Workspace)",
+      avatarUrl,
+      createdAt: new Date().toISOString(),
+    };
+
+    state.profiles.push(newProfile);
+    return newProfile;
+  },
+
   // --- Organizations & Units ---
   getAllOrganizations(): Organization[] {
     const state = getDatabase();

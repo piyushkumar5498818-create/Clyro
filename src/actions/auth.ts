@@ -3,7 +3,14 @@
 import { db } from "@/lib/store";
 import { Profile } from "@/types/database";
 import { cookies } from "next/headers";
-import { signSessionToken, verifySessionToken } from "@/lib/auth";
+import {
+  signSessionToken,
+  verifySessionToken,
+  validateGoogleWorkspaceEmail,
+  isGoogleOAuthLive,
+  getGoogleOAuthUrl,
+  GOOGLE_WORKSPACE_DOMAIN,
+} from "@/lib/auth";
 
 const SESSION_COOKIE = "clyro_session";
 const LEGACY_COOKIE = "clyro_user_id";
@@ -57,7 +64,7 @@ export async function loginAction(
   }
 
   // Generate cryptographically signed HMAC-SHA256 session token
-  const token = signSessionToken(user.id, user.email, user.role);
+  const token = signSessionToken(user.id, user.email, user.role, "credentials");
 
   // Set active user in memory store and persist signed cookie
   db.setActiveUser(user.id);
@@ -71,6 +78,58 @@ export async function loginAction(
   });
 
   return { success: true, user };
+}
+
+/**
+ * Authenticates a user via Mirai Google Workspace Single Sign-On (SSO).
+ * Strictly restricts access to the authorized Google Workspace institutional domain.
+ */
+export async function googleWorkspaceAuthAction(
+  email: string,
+  fullName?: string,
+  avatarUrl?: string
+): Promise<{ success: boolean; user?: Profile; error?: string }> {
+  const validation = validateGoogleWorkspaceEmail(email);
+  if (!validation.valid) {
+    return { success: false, error: validation.error };
+  }
+
+  // Find or Just-In-Time provision the student profile for this Google Workspace identity
+  const user = db.findOrCreateGoogleProfile(email, fullName, avatarUrl);
+
+  // Generate HMAC-SHA256 session token with Google Workspace provider marker
+  const token = signSessionToken(user.id, user.email, user.role, "google_workspace");
+
+  db.setActiveUser(user.id);
+
+  cookies().set(SESSION_COOKIE, token, {
+    path: "/",
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax",
+    maxAge: 60 * 60 * 24 * 7,
+  });
+
+  return { success: true, user };
+}
+
+/**
+ * Returns Google Workspace SSO configuration for client rendering.
+ */
+export async function getGoogleAuthMetadataAction(): Promise<{
+  domain: string;
+  isLive: boolean;
+  oauthUrl: string | null;
+}> {
+  const isLive = isGoogleOAuthLive();
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+  const redirectUri = `${appUrl}/api/auth/google/callback`;
+
+  return {
+    domain: GOOGLE_WORKSPACE_DOMAIN,
+    isLive,
+    oauthUrl: isLive ? getGoogleOAuthUrl(redirectUri) : null,
+  };
 }
 
 export async function logoutAction(): Promise<{ success: boolean }> {
