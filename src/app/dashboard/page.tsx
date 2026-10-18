@@ -35,15 +35,7 @@ import { CertificatesView } from "@/components/CertificatesView";
 import { GitclubLogo } from "@/components/GitclubLogo";
 import { scrollToSection } from "@/components/SmoothScroll";
 import { ScrollFadeIn } from "@/components/ScrollFadeIn";
-import {
-  Users,
-  QrCode,
-  Award,
-  Loader2,
-  Sparkles,
-  Layers,
-  CheckCircle2,
-} from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { motion } from "framer-motion";
 
 export default function DashboardPage() {
@@ -175,50 +167,6 @@ export default function DashboardPage() {
 
       {/* Main Single Scrollable Canvas (Full Width & Spacious, Unicorn Studio aesthetic) */}
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-24">
-        {/* Quick Club Operations Ribbon Bar */}
-        <ScrollFadeIn direction="down" distance={18}>
-          <div className="glass-panel rounded-3xl p-5 sm:p-6 border border-white/10 flex flex-col lg:flex-row lg:items-center justify-between gap-5 bg-gradient-to-r from-blue-950/40 via-slate-900/40 to-indigo-950/40">
-            <div className="space-y-1">
-              <div className="flex items-center gap-2">
-                <span className="w-2.5 h-2.5 rounded-full bg-cyan-400 animate-pulse" />
-                <span className="font-mono text-xs font-bold text-cyan-300 uppercase tracking-widest">
-                  CAMPUS CLUBS OPERATIONS HUB
-                </span>
-              </div>
-              <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
-                Gitclub &bull; <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-cyan-300 to-indigo-300">Co-Curricular Matrix</span>
-              </h1>
-              <p className="text-sm text-slate-300 max-w-2xl font-medium">
-                Unified workspace for NEX-CELL (6 Tracks), Kaizen Tech (CP, Web, AI &amp; Data Science), and MALHAR (5 Cultural Depts).
-              </p>
-            </div>
-
-            <div className="flex flex-wrap items-center gap-2.5 shrink-0">
-              <button
-                onClick={() => scrollToSection("clubs")}
-                className="px-4 py-2.5 rounded-2xl bg-blue-600/20 hover:bg-blue-600/30 text-cyan-300 border border-blue-400/30 text-xs font-bold transition flex items-center gap-2"
-              >
-                <Users className="w-4 h-4" />
-                <span>3 Clubs &amp; 8 Units</span>
-              </button>
-              <button
-                onClick={() => scrollToSection("attendance")}
-                className="px-4 py-2.5 rounded-2xl bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-300 border border-emerald-400/30 text-xs font-bold transition flex items-center gap-2"
-              >
-                <QrCode className="w-4 h-4" />
-                <span>Live QR Check-In</span>
-              </button>
-              <button
-                onClick={() => scrollToSection("certificates")}
-                className="px-4 py-2.5 rounded-2xl bg-amber-600/20 hover:bg-amber-600/30 text-amber-300 border border-amber-400/30 text-xs font-bold transition flex items-center gap-2"
-              >
-                <Award className="w-4 h-4" />
-                <span>Transcripts Ledger</span>
-              </button>
-            </div>
-          </div>
-        </ScrollFadeIn>
-
         {/* Section 01: [01] / OVERVIEW & CAMPUS CLUBS METRICS */}
         <ScrollFadeIn direction="up">
           <section id="overview" className="scroll-mt-28 space-y-5">

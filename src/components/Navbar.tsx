@@ -3,16 +3,9 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { Profile, UserRole } from "@/types/database";
-import {
-  ShieldCheck,
-  Menu,
-  ChevronRight,
-  Sparkles,
-} from "lucide-react";
+import { Menu } from "lucide-react";
 import { GitclubLogo } from "./GitclubLogo";
-import { scrollToSection } from "./SmoothScroll";
 import { RightNavbarDrawer } from "./RightNavbarDrawer";
-import { motion } from "framer-motion";
 
 interface NavbarProps {
   currentUser: Profile;
@@ -32,8 +25,17 @@ const ROLE_LABELS: Record<UserRole, { label: string; badge: string }> = {
   faculty_advisor: { label: "Advisor", badge: "bg-amber-500/20 text-amber-300 border-amber-400/30" },
   society_admin: { label: "President", badge: "bg-blue-500/20 text-blue-300 border-blue-400/30" },
   student_coordinator: { label: "Student Lead", badge: "bg-emerald-500/20 text-emerald-300 border-emerald-400/30" },
-  unit_lead: { label: "Domain / Dept Lead", badge: "bg-teal-500/20 text-teal-300 border-teal-400/30" },
+  unit_lead: { label: "Domain Lead", badge: "bg-teal-500/20 text-teal-300 border-teal-400/30" },
   student: { label: "Member", badge: "bg-cyan-500/20 text-cyan-300 border-cyan-400/30" },
+};
+
+const SECTION_MAP: Record<string, { tag: string; label: string }> = {
+  overview: { tag: "01", label: "Overview & Campus Metrics" },
+  clubs: { tag: "02", label: "Clubs & Specialized Units" },
+  attendance: { tag: "03", label: "Sessions & Smart Check-In" },
+  activities: { tag: "04", label: "Proposals & Approvals" },
+  submissions: { tag: "05", label: "Deliverables & Rubrics" },
+  certificates: { tag: "06", label: "Transcripts & Ledger" },
 };
 
 export function Navbar({
@@ -49,96 +51,55 @@ export function Navbar({
     badge: "bg-slate-500/20 text-slate-300 border-slate-500/30",
   };
 
-  const sectionLinks = [
-    { id: "overview", label: "Overview", tag: "01" },
-    { id: "clubs", label: "Clubs & Units", tag: "02" },
-    { id: "attendance", label: "Sessions & QR", tag: "03" },
-    { id: "activities", label: "Approvals", tag: "04" },
-    { id: "submissions", label: "Submissions", tag: "05" },
-    { id: "certificates", label: "Transcripts", tag: "06" },
-  ];
+  const activeSec = SECTION_MAP[activeSection] || SECTION_MAP.overview;
 
   return (
     <>
-      {/* Top Ribbon Header (Unicorn Studio inspired, spacious & clear) */}
-      <header className="sticky top-0 z-40 bg-[#070b16]/85 backdrop-blur-2xl border-b border-white/10 shadow-lg">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-20">
-            {/* Left: Brand Logo & Title */}
-            <div className="flex items-center gap-6">
-              <Link href="/" className="flex items-center gap-3">
-                <GitclubLogo size="md" showText={true} />
-              </Link>
+      {/* Sleek, Uncluttered Top Ribbon Header */}
+      <header className="sticky top-0 z-40 bg-[#070b16]/75 backdrop-blur-2xl border-b border-white/10 transition-all">
+        <div className="max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between h-16">
+            {/* Left: Clean Brand Logo */}
+            <Link href="/" className="flex items-center gap-3 group">
+              <GitclubLogo size="md" showText={true} />
+            </Link>
 
-              {/* Center Quick Anchor Links on Desktop */}
-              <nav className="hidden lg:flex items-center gap-1.5 bg-white/[0.04] p-1.5 rounded-2xl border border-white/10 backdrop-blur-md">
-                {sectionLinks.map((sec) => {
-                  const isActive = activeSection === sec.id;
-                  return (
-                    <button
-                      key={sec.id}
-                      onClick={() => scrollToSection(sec.id)}
-                      className="relative px-3.5 py-2 rounded-xl text-xs font-semibold transition-colors"
-                    >
-                      {isActive && (
-                        <motion.div
-                          layoutId="activeRibbonPill"
-                          className="absolute inset-0 bg-blue-600/35 border border-blue-400/40 rounded-xl shadow-md"
-                          transition={{ type: "spring", stiffness: 450, damping: 35 }}
-                        />
-                      )}
-                      <span className="relative z-10 flex items-center gap-1.5">
-                        <span className={`text-[11px] font-mono ${isActive ? "text-cyan-300 font-bold" : "text-slate-500"}`}>
-                          [{sec.tag}]
-                        </span>
-                        <span className={isActive ? "text-white font-bold" : "text-slate-300 hover:text-white"}>
-                          {sec.label}
-                        </span>
-                      </span>
-                    </button>
-                  );
-                })}
-              </nav>
+            {/* Center: Clean Live Scroll Position Pill (Zero clutter, dynamic context) */}
+            <div className="hidden md:flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/[0.04] border border-white/10 text-xs backdrop-blur-md shadow-sm">
+              <span className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse" />
+              <span className="font-mono text-[11px] text-cyan-300 font-bold uppercase tracking-wider">
+                [{activeSec.tag}]
+              </span>
+              <span className="text-white font-semibold tracking-tight">
+                {activeSec.label}
+              </span>
             </div>
 
-            {/* Right: Quick Action Ribbon & Prompt Button for Hidden Navbar */}
-            <div className="flex items-center gap-3">
-              <Link
-                href="/verify"
-                className="hidden md:inline-flex items-center gap-2 px-4 py-2 rounded-2xl text-xs font-bold bg-white/[0.05] hover:bg-white/[0.1] text-slate-200 hover:text-white transition border border-white/10"
-              >
-                <ShieldCheck className="w-4 h-4 text-cyan-400" />
-                <span>Verify ID</span>
-              </Link>
-
-              {/* User Persona Chip */}
-              <div
-                onClick={() => setDrawerOpen(true)}
-                className="hidden sm:flex items-center gap-3 px-3.5 py-1.5 rounded-2xl bg-white/[0.05] border border-white/10 cursor-pointer hover:border-blue-400/40 transition"
-              >
-                <div className="w-8 h-8 rounded-xl bg-blue-600/25 border border-blue-400/30 flex items-center justify-center text-blue-300 text-xs font-black">
+            {/* Right: Single Unified Menu & Persona Capsule (Prompt for Hidden Drawer) */}
+            <button
+              onClick={() => setDrawerOpen(true)}
+              className="flex items-center gap-2.5 pl-2 pr-3.5 py-1.5 rounded-2xl bg-white/[0.05] hover:bg-white/[0.1] border border-white/10 hover:border-blue-400/40 transition-all group shadow-sm"
+              aria-label="Open Navigation & Role Switcher Drawer"
+            >
+              <div className="w-7 h-7 rounded-xl bg-gradient-to-tr from-blue-600 via-indigo-600 to-cyan-400 p-[1.5px] shrink-0">
+                <div className="w-full h-full bg-[#0a1124] rounded-[9px] flex items-center justify-center text-cyan-300 text-xs font-black">
                   {currentUser.fullName.charAt(0)}
-                </div>
-                <div className="flex flex-col text-left">
-                  <span className="text-xs font-bold text-white leading-tight">
-                    {currentUser.fullName}
-                  </span>
-                  <span className="text-[11px] text-cyan-300 font-semibold">
-                    {roleInfo.label}
-                  </span>
                 </div>
               </div>
 
-              {/* The Ribbon Prompt Button: Opens the Hidden Right Navbar Drawer */}
-              <button
-                onClick={() => setDrawerOpen(true)}
-                className="flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-gradient-to-r from-blue-700 to-indigo-600 text-white font-bold text-xs shadow-lg shadow-blue-600/25 hover:from-blue-600 hover:to-indigo-500 transition hover:scale-[1.02] active:scale-[0.98] border border-white/20"
-                aria-label="Open Navigation & Role Switcher Drawer"
-              >
-                <Menu className="w-4 h-4" />
-                <span className="hidden sm:inline">Menu &amp; Switcher</span>
-              </button>
-            </div>
+              <div className="flex items-center gap-2 text-left">
+                <span className="text-xs font-bold text-white group-hover:text-cyan-300 transition leading-tight">
+                  {currentUser.fullName.split(" ")[0]}
+                </span>
+                <span className="text-[10px] font-mono text-cyan-300 font-bold px-2 py-0.5 rounded-md bg-blue-500/15 border border-blue-400/25 uppercase">
+                  {roleInfo.label}
+                </span>
+              </div>
+
+              <div className="ml-1 pl-2 border-l border-white/10 flex items-center text-slate-400 group-hover:text-white transition">
+                <Menu className="w-4 h-4 text-cyan-400" />
+              </div>
+            </button>
           </div>
         </div>
       </header>

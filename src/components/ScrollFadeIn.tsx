@@ -14,13 +14,15 @@ interface ScrollFadeInProps {
   variant?: AnimationVariant;
   scaleStart?: number;
   blur?: boolean;
+  once?: boolean;
+  amount?: number | "some" | "all";
 }
 
 /**
- * ScrollFadeIn provides cinematic 3D perspective scroll entrances:
- * "pop" / "depth" (default): fades in from deep in the z-axis background,
- * scaling from 0.88 -> 1.0 with a soft blur-to-sharp focus transition
- * and spring dynamics that physically "pops out" towards the viewer.
+ * ScrollFadeIn provides repeatable 3D perspective scroll entrances:
+ * Animates on scroll continuously throughout the user session (once: false).
+ * Elements pop forward from z-axis background into crisp focus whenever
+ * scrolled into view, from either direction.
  */
 export function ScrollFadeIn({
   children,
@@ -29,8 +31,10 @@ export function ScrollFadeIn({
   direction = "up",
   distance = 36,
   variant = "pop",
-  scaleStart = 0.88,
+  scaleStart = 0.9,
   blur = true,
+  once = false,
+  amount = 0.12,
 }: ScrollFadeInProps) {
   const getOffset = () => {
     switch (direction) {
@@ -57,13 +61,13 @@ export function ScrollFadeIn({
           opacity: 0,
           scale: scaleStart,
           y: distance,
-          rotateX: 4,
+          rotateX: 3,
           filter: blur ? "blur(8px)" : "blur(0px)",
         };
       case "zoom":
         return {
           opacity: 0,
-          scale: 0.82,
+          scale: 0.85,
           y: 0,
           filter: blur ? "blur(10px)" : "blur(0px)",
         };
@@ -71,8 +75,8 @@ export function ScrollFadeIn({
         return {
           opacity: 0,
           scale: 0.9,
-          rotateX: 18,
-          y: 40,
+          rotateX: 14,
+          y: 36,
           filter: blur ? "blur(6px)" : "blur(0px)",
         };
       case "slide":
@@ -100,12 +104,12 @@ export function ScrollFadeIn({
     <motion.div
       initial={getInitial()}
       whileInView={getAnimate()}
-      viewport={{ once: true, margin: "-70px" }}
+      viewport={{ once, margin: "-50px", amount }}
       transition={{
         type: "spring",
-        stiffness: 75,
-        damping: 15,
-        mass: 0.85,
+        stiffness: 80,
+        damping: 16,
+        mass: 0.8,
         delay,
       }}
       style={{
@@ -121,24 +125,26 @@ export function ScrollFadeIn({
 
 /**
  * PopCard provides an interactive card component that pops in from the back
- * on viewport scroll, and dynamically lifts / pops forward on hover.
+ * on viewport scroll (active throughout the session) and dynamically lifts on hover.
  */
 export function PopCard({
   children,
   className = "",
   delay = 0,
   hoverPop = true,
+  once = false,
 }: {
   children: React.ReactNode;
   className?: string;
   delay?: number;
   hoverPop?: boolean;
+  once?: boolean;
 }) {
   return (
     <motion.div
-      initial={{ opacity: 0, scale: 0.88, y: 24, filter: "blur(4px)" }}
+      initial={{ opacity: 0, scale: 0.9, y: 22, filter: "blur(4px)" }}
       whileInView={{ opacity: 1, scale: 1, y: 0, filter: "blur(0px)" }}
-      viewport={{ once: true, margin: "-50px" }}
+      viewport={{ once, margin: "-40px", amount: 0.1 }}
       whileHover={
         hoverPop
           ? {
@@ -168,18 +174,20 @@ interface StaggerContainerProps {
   children: React.ReactNode;
   className?: string;
   staggerDelay?: number;
+  once?: boolean;
 }
 
 export function StaggerContainer({
   children,
   className = "",
   staggerDelay = 0.08,
+  once = false,
 }: StaggerContainerProps) {
   return (
     <motion.div
       initial="hidden"
       whileInView="visible"
-      viewport={{ once: true, margin: "-60px" }}
+      viewport={{ once, margin: "-50px", amount: 0.1 }}
       variants={{
         hidden: { opacity: 0 },
         visible: {
@@ -208,7 +216,7 @@ export function StaggerItem({
   return (
     <motion.div
       variants={{
-        hidden: { opacity: 0, scale: 0.88, y: 26, filter: "blur(4px)" },
+        hidden: { opacity: 0, scale: 0.9, y: 24, filter: "blur(4px)" },
         visible: {
           opacity: 1,
           scale: 1,
