@@ -14,70 +14,11 @@ import {
   AlertCircle,
   CheckCircle2,
   Shield,
-  Users,
   X,
-  ExternalLink,
+  Building2,
+  Check,
 } from "lucide-react";
 import { GitclubLogo } from "@/components/GitclubLogo";
-
-const QUICK_PERSONAS = [
-  {
-    role: "President",
-    name: "Rishav Raj",
-    org: "Kaizen Tech",
-    email: "rishav.president@mirai.edu",
-    badge: "bg-indigo-500/20 text-indigo-300 border-indigo-500/30",
-    icon: "👑",
-  },
-  {
-    role: "Vice President",
-    name: "Aarav Pathak",
-    org: "Kaizen Tech",
-    email: "aarav.vp@mirai.edu",
-    badge: "bg-violet-500/20 text-violet-300 border-violet-500/30",
-    icon: "⚡",
-  },
-  {
-    role: "President",
-    name: "Arman Mehta",
-    org: "NEX-CELL",
-    email: "arman.president@mirai.edu",
-    badge: "bg-amber-500/20 text-amber-300 border-amber-500/30",
-    icon: "🚀",
-  },
-  {
-    role: "President",
-    name: "Elena Rostova",
-    org: "MALHAR",
-    email: "elena.president@mirai.edu",
-    badge: "bg-pink-500/20 text-pink-300 border-pink-500/30",
-    icon: "🎭",
-  },
-  {
-    role: "Lead",
-    name: "Sagar Kumar",
-    org: "CP Lead",
-    email: "sagar.lead@mirai.edu",
-    badge: "bg-teal-500/20 text-teal-300 border-teal-500/30",
-    icon: "🛠️",
-  },
-  {
-    role: "Member",
-    name: "Alex Rivera",
-    org: "Student",
-    email: "alex.student@mirai.edu",
-    badge: "bg-sky-500/20 text-sky-300 border-sky-500/30",
-    icon: "🎓",
-  },
-  {
-    role: "Admin",
-    name: "Campus Admin",
-    org: "Dean Office",
-    email: "admin@mirai.edu",
-    badge: "bg-purple-500/20 text-purple-300 border-purple-500/30",
-    icon: "🛡️",
-  },
-];
 
 const GOOGLE_WORKSPACE_ACCOUNTS = [
   {
@@ -86,39 +27,39 @@ const GOOGLE_WORKSPACE_ACCOUNTS = [
     role: "Student Member",
     sub: "Computer Science & Engineering · Year 2",
     initials: "AR",
-    color: "from-blue-500 to-indigo-600",
+    color: "from-blue-600 to-cyan-500",
   },
   {
     name: "Rishav Raj",
     email: "rishav.president@mirai.edu",
     role: "President — Kaizen Tech",
-    sub: "Technical Club Executive",
+    sub: "Technical Club Executive (CP, Web, AI & DS)",
     initials: "RR",
-    color: "from-indigo-500 to-purple-600",
+    color: "from-blue-700 to-indigo-600",
   },
   {
     name: "Aarav Pathak",
     email: "aarav.vp@mirai.edu",
     role: "Vice President — Kaizen Tech",
-    sub: "AI & Data Science Domain Mentor",
+    sub: "AI & Data Science Domain Lead",
     initials: "AP",
-    color: "from-purple-500 to-pink-600",
+    color: "from-indigo-600 to-blue-500",
   },
   {
     name: "Arman Mehta",
     email: "arman.president@mirai.edu",
     role: "President — NEX-CELL",
-    sub: "Entrepreneurship Club Executive",
+    sub: "Entrepreneurship Club Executive (6 Tracks)",
     initials: "AM",
-    color: "from-amber-500 to-orange-600",
+    color: "from-amber-600 to-orange-500",
   },
   {
     name: "Elena Rostova",
     email: "elena.president@mirai.edu",
     role: "President — MALHAR",
-    sub: "Cultural Society Executive",
+    sub: "Cultural Society Executive (5 Departments)",
     initials: "ER",
-    color: "from-pink-500 to-rose-600",
+    color: "from-rose-600 to-pink-500",
   },
   {
     name: "Campus Administrator",
@@ -126,7 +67,7 @@ const GOOGLE_WORKSPACE_ACCOUNTS = [
     role: "Dean of Student Affairs",
     sub: "MSOT Central Administration",
     initials: "CA",
-    color: "from-emerald-500 to-teal-600",
+    color: "from-purple-600 to-indigo-600",
   },
 ];
 
@@ -151,7 +92,7 @@ export default function LoginPage() {
 
     const res = await loginAction(targetEmail, password);
     if (res.success && res.user) {
-      setSuccess(`Authenticated as ${res.user.fullName} (${res.user.title || res.user.role})! Redirecting...`);
+      setSuccess(`Authenticated as ${res.user.fullName} (${res.user.title || res.user.role}). Redirecting...`);
       setTimeout(() => {
         window.location.href = "/dashboard";
       }, 400);
@@ -170,7 +111,7 @@ export default function LoginPage() {
     if (res.success && res.user) {
       setShowGoogleModal(false);
       setSuccess(
-        `Google Workspace Single Sign-On Verified: ${res.user.fullName} (${res.user.email}). Redirecting to campus portal...`
+        `Google Workspace Verified: ${res.user.fullName} (${res.user.email}). Redirecting...`
       );
       setTimeout(() => {
         window.location.href = "/dashboard";
@@ -192,53 +133,57 @@ export default function LoginPage() {
   };
 
   return (
-    <main className="min-h-screen flex flex-col justify-between py-8 px-4 relative overflow-hidden">
-      {/* Background Ambient Glows */}
-      <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-gradient-to-tr from-indigo-500/20 via-purple-500/20 to-pink-500/20 rounded-full blur-3xl pointer-events-none" />
+    <main className="min-h-screen bg-[#070b16] text-slate-100 flex flex-col justify-between py-6 px-4 sm:px-6 relative overflow-hidden selection:bg-blue-600 selection:text-white">
+      {/* Background Ambient Glows & Grid Mesh */}
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[450px] bg-gradient-to-b from-blue-700/15 via-indigo-600/10 to-transparent rounded-full blur-3xl pointer-events-none" />
+      <div className="absolute -bottom-40 right-1/4 w-[600px] h-[400px] bg-cyan-500/10 rounded-full blur-3xl pointer-events-none" />
 
-      {/* Top Bar */}
-      <header className="max-w-6xl w-full mx-auto flex items-center justify-between z-10">
+      {/* Top Header */}
+      <header className="max-w-6xl w-full mx-auto flex items-center justify-between z-10 py-2">
         <Link href="/" className="flex items-center gap-3 group">
-          <GitclubLogo size="sm" showText={true} />
+          <GitclubLogo size="md" showText={true} />
         </Link>
 
         <Link
           href="/"
-          className="text-xs font-semibold text-slate-300 hover:text-white px-3.5 py-1.5 rounded-xl bg-white/[0.05] hover:bg-white/[0.1] transition border border-white/10 backdrop-blur-md"
+          className="text-xs font-semibold text-slate-300 hover:text-white px-4 py-2 rounded-2xl bg-white/[0.05] hover:bg-white/[0.1] transition border border-white/10 backdrop-blur-md flex items-center gap-2"
         >
-          &larr; Back to Home
+          <span>&larr; Public Portal</span>
         </Link>
       </header>
 
-      {/* Main Login Card */}
+      {/* Main Login Card (Matching Dashboard Glass UI) */}
       <div className="max-w-md w-full mx-auto my-auto z-10 py-6">
         <motion.div
-          initial={{ opacity: 0, y: 16, scale: 0.98 }}
-          animate={{ opacity: 1, y: 0, scale: 1 }}
-          transition={{ duration: 0.35, ease: "easeOut" }}
-          className="glass-panel rounded-3xl p-7 sm:p-9 shadow-2xl border border-white/15 backdrop-blur-2xl relative"
+          initial={{ opacity: 0, scale: 0.95, y: 18 }}
+          animate={{ opacity: 1, scale: 1, y: 0 }}
+          transition={{ type: "spring", stiffness: 90, damping: 18 }}
+          className="glass-panel rounded-3xl p-7 sm:p-9 shadow-2xl shadow-blue-950/60 border border-white/15 backdrop-blur-2xl relative space-y-6"
         >
           {/* Header */}
-          <div className="text-center mb-6">
-            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-500/15 text-cyan-300 text-[11px] font-bold mb-3 border border-blue-500/25">
-              <Sparkles className="w-3.5 h-3.5 text-cyan-400" />
-              Institutional Sign-In Portal
+          <div className="text-center space-y-2">
+            <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-blue-500/15 text-cyan-300 text-xs font-mono font-bold border border-blue-400/30">
+              <span className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse" />
+              <span>@MIRAI.EDU INSTITUTIONAL ACCESS</span>
             </div>
-            <h1 className="text-2xl font-black text-white tracking-tight">
-              Welcome to Gitclub
+
+            <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
+              Sign In to <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-cyan-300 to-indigo-300">Gitclub</span>
             </h1>
-            <p className="text-xs text-slate-300 mt-1.5">
-              Sign in with your campus Google Workspace account or institutional credentials.
+
+            <p className="text-xs text-slate-300 font-medium max-w-sm mx-auto">
+              Co-curricular operations &bull; NEX-CELL, Kaizen Tech, and MALHAR societies.
             </p>
           </div>
 
+          {/* Feedback Banners */}
           <AnimatePresence>
             {error && (
               <motion.div
                 initial={{ opacity: 0, y: -6 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -6 }}
-                className="mb-4 p-3 rounded-2xl bg-rose-500/15 border border-rose-500/30 text-rose-200 text-xs font-semibold flex items-center gap-2.5 backdrop-blur-md"
+                className="p-3.5 rounded-2xl bg-rose-500/15 border border-rose-500/30 text-rose-200 text-xs font-semibold flex items-center gap-2.5 backdrop-blur-md"
               >
                 <AlertCircle className="w-4 h-4 text-rose-400 shrink-0" />
                 <span>{error}</span>
@@ -250,7 +195,7 @@ export default function LoginPage() {
                 initial={{ opacity: 0, y: -6 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -6 }}
-                className="mb-4 p-3 rounded-2xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-200 text-xs font-semibold flex items-center gap-2.5 backdrop-blur-md"
+                className="p-3.5 rounded-2xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-200 text-xs font-semibold flex items-center gap-2.5 backdrop-blur-md"
               >
                 <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
                 <span>{success}</span>
@@ -258,44 +203,45 @@ export default function LoginPage() {
             )}
           </AnimatePresence>
 
-          {/* Google Workspace Button */}
-          <button
-            type="button"
-            onClick={() => setShowGoogleModal(true)}
-            disabled={loading}
-            className="w-full py-3 px-4 rounded-2xl bg-white hover:bg-slate-100 text-slate-900 font-bold text-xs shadow-lg shadow-black/20 flex items-center justify-center gap-3 transition-all duration-200 border border-slate-200 group active:scale-[0.99]"
-          >
-            {/* Google Multi-Color SVG Logo */}
-            <svg className="w-4 h-4" viewBox="0 0 24 24">
-              <path
-                fill="#4285F4"
-                d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
-              />
-              <path
-                fill="#34A853"
-                d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
-              />
-              <path
-                fill="#FBBC05"
-                d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"
-              />
-              <path
-                fill="#EA4335"
-                d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"
-              />
-            </svg>
-            <span className="text-slate-800 group-hover:text-black">
-              Sign in with Google Workspace
-            </span>
-            <span className="text-[10px] font-semibold text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded-full border border-indigo-200">
-              @mirai.edu SSO
-            </span>
-          </button>
+          {/* Primary Action: Google Workspace SSO Button */}
+          <div className="space-y-3">
+            <button
+              type="button"
+              onClick={() => setShowGoogleModal(true)}
+              disabled={loading}
+              className="w-full py-3.5 px-4 rounded-2xl bg-white hover:bg-slate-100 text-slate-900 font-bold text-xs shadow-xl shadow-black/20 flex items-center justify-center gap-3 transition-all duration-200 border border-slate-200 group active:scale-[0.99]"
+            >
+              <svg className="w-4 h-4 shrink-0" viewBox="0 0 24 24">
+                <path
+                  fill="#4285F4"
+                  d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
+                />
+                <path
+                  fill="#34A853"
+                  d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+                />
+                <path
+                  fill="#FBBC05"
+                  d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"
+                />
+                <path
+                  fill="#EA4335"
+                  d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"
+                />
+              </svg>
+              <span className="text-slate-900 group-hover:text-black">
+                Continue with Google Workspace
+              </span>
+              <span className="text-[10px] font-mono font-bold text-blue-700 bg-blue-50 px-2 py-0.5 rounded-lg border border-blue-200">
+                SSO
+              </span>
+            </button>
+          </div>
 
-          {/* Divider */}
-          <div className="relative my-5 flex items-center justify-center">
+          {/* Clean Minimalist Divider */}
+          <div className="relative flex items-center justify-center my-4">
             <div className="border-t border-white/10 w-full" />
-            <span className="bg-slate-900/90 px-3 text-[10px] font-semibold text-slate-400 uppercase tracking-wider absolute">
+            <span className="bg-[#0a1124] px-3 text-[10px] font-mono text-slate-400 uppercase tracking-wider absolute">
               or campus password
             </span>
           </div>
@@ -315,7 +261,7 @@ export default function LoginPage() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="student@mirai.edu"
-                  className="w-full text-xs font-medium rounded-xl border border-white/15 pl-10 pr-3 py-2.5 bg-slate-900/80 text-white placeholder-slate-500 backdrop-blur-md focus:border-indigo-400 focus:outline-none transition"
+                  className="w-full text-xs font-medium rounded-2xl border border-white/15 pl-10 pr-3.5 py-3 bg-white/[0.04] text-white placeholder-slate-500 backdrop-blur-md focus:border-cyan-400 focus:bg-white/[0.08] focus:outline-none transition"
                   required
                 />
               </div>
@@ -323,7 +269,7 @@ export default function LoginPage() {
 
             <div>
               <label className="block text-xs font-semibold text-slate-300 mb-1.5">
-                Password
+                Account Password
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
@@ -334,13 +280,14 @@ export default function LoginPage() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="Enter password"
-                  className="w-full text-xs font-medium rounded-xl border border-white/15 pl-10 pr-10 py-2.5 bg-slate-900/80 text-white placeholder-slate-500 backdrop-blur-md focus:border-indigo-400 focus:outline-none transition"
+                  className="w-full text-xs font-medium rounded-2xl border border-white/15 pl-10 pr-10 py-3 bg-white/[0.04] text-white placeholder-slate-500 backdrop-blur-md focus:border-cyan-400 focus:bg-white/[0.08] focus:outline-none transition"
                   required
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
                   className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-400 hover:text-white transition"
+                  aria-label="Toggle password visibility"
                 >
                   {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>
@@ -350,10 +297,10 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full glass-btn-primary py-2.5 rounded-xl font-bold text-xs shadow-lg flex items-center justify-center gap-2 transition duration-200 mt-2"
+              className="w-full py-3.5 px-4 rounded-2xl bg-gradient-to-r from-blue-700 via-blue-600 to-indigo-600 hover:from-blue-600 hover:to-indigo-500 text-white font-bold text-xs shadow-lg shadow-blue-600/30 flex items-center justify-center gap-2 transition duration-200 mt-2 active:scale-[0.99] border border-white/20"
             >
               {loading ? (
-                <span>Signing in...</span>
+                <span>Authenticating with MSOT Directory...</span>
               ) : (
                 <>
                   <span>Sign In with Credentials</span>
@@ -363,71 +310,45 @@ export default function LoginPage() {
             </button>
           </form>
 
-          {/* Quick Persona Access Section */}
-          <div className="mt-6 pt-5 border-t border-white/10">
-            <div className="flex items-center justify-between mb-3">
-              <span className="text-[11px] font-bold text-slate-300 uppercase tracking-wider flex items-center gap-1.5">
-                <Users className="w-3.5 h-3.5 text-indigo-400" />
-                One-Click Role Preview
-              </span>
-              <span className="text-[10px] text-slate-400 font-mono">Instant Auth</span>
+          {/* Security & Organization Ledger Footer */}
+          <div className="pt-4 border-t border-white/10 flex items-center justify-between text-[11px] text-slate-400 font-mono">
+            <div className="flex items-center gap-1.5">
+              <Shield className="w-3.5 h-3.5 text-cyan-400" />
+              <span>HMAC-SHA256 Sessions</span>
             </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-              {QUICK_PERSONAS.map((p) => (
-                <button
-                  key={p.email}
-                  type="button"
-                  onClick={() => {
-                    setEmail(p.email);
-                    handleLogin(p.email);
-                  }}
-                  disabled={loading}
-                  className="p-2 rounded-xl text-left border border-white/10 bg-white/[0.04] hover:bg-white/[0.09] hover:border-indigo-400/40 transition duration-150 flex items-center gap-2.5 group"
-                >
-                  <span className="text-base select-none">{p.icon}</span>
-                  <div className="min-w-0 flex-1">
-                    <div className="text-xs font-bold text-white truncate group-hover:text-indigo-200 transition">
-                      {p.name}
-                    </div>
-                    <div className="text-[10px] text-slate-400 truncate">
-                      {p.role} &middot; {p.org}
-                    </div>
-                  </div>
-                </button>
-              ))}
-            </div>
+            <span className="text-slate-300">Mirai Campus SSO</span>
           </div>
         </motion.div>
       </div>
 
-      {/* Google Workspace Account Chooser Modal */}
+      {/* Google Workspace Account Chooser Modal (Matching Dark Cobalt Theme) */}
       <AnimatePresence>
         {showGoogleModal && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 bg-black/70 backdrop-blur-md flex items-center justify-center p-4"
+            className="fixed inset-0 z-50 bg-black/75 backdrop-blur-md flex items-center justify-center p-4"
           >
             <motion.div
               initial={{ scale: 0.95, opacity: 0, y: 10 }}
               animate={{ scale: 1, opacity: 1, y: 0 }}
               exit={{ scale: 0.95, opacity: 0, y: 10 }}
-              className="bg-slate-900 border border-white/15 rounded-3xl max-w-md w-full p-6 sm:p-7 shadow-2xl relative overflow-hidden"
+              className="bg-[#0a1124] border border-white/15 rounded-3xl max-w-md w-full p-6 sm:p-7 shadow-2xl relative overflow-hidden"
             >
               {/* Close Button */}
               <button
                 type="button"
                 onClick={() => setShowGoogleModal(false)}
-                className="absolute top-5 right-5 p-1.5 rounded-full text-slate-400 hover:text-white hover:bg-white/10 transition"
+                className="absolute top-5 right-5 p-2 rounded-xl text-slate-400 hover:text-white hover:bg-white/10 transition"
+                aria-label="Close modal"
               >
                 <X className="w-4 h-4" />
               </button>
 
               {/* Google Header */}
               <div className="text-center pb-4 border-b border-white/10">
-                <div className="inline-flex items-center justify-center w-10 h-10 rounded-2xl bg-white shadow-md mb-2.5">
+                <div className="inline-flex items-center justify-center w-11 h-11 rounded-2xl bg-white shadow-lg mb-3">
                   <svg className="w-5 h-5" viewBox="0 0 24 24">
                     <path
                       fill="#4285F4"
@@ -447,17 +368,17 @@ export default function LoginPage() {
                     />
                   </svg>
                 </div>
-                <h3 className="text-lg font-black text-white">Google Workspace</h3>
-                <p className="text-xs text-slate-300 mt-0.5">
-                  Choose a verified <strong className="text-blue-400">@mirai.edu</strong> account to continue to Gitclub
+                <h3 className="text-xl font-black text-white">Google Workspace</h3>
+                <p className="text-xs text-slate-300 mt-1">
+                  Select an authorized <strong className="text-cyan-400">@mirai.edu</strong> account to sign in
                 </p>
-                <div className="mt-2 inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-500/15 text-emerald-300 text-[10px] font-semibold border border-emerald-500/30">
+                <div className="mt-2.5 inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/15 text-emerald-300 text-[10px] font-semibold border border-emerald-500/30">
                   <Shield className="w-3 h-3 text-emerald-400" />
-                  Institutional Domain Enforced: @mirai.edu
+                  <span>Institutional Domain Enforced: @mirai.edu</span>
                 </div>
               </div>
 
-              {/* Account List */}
+              {/* Verified Institutional Accounts */}
               <div className="py-4 space-y-2 max-h-72 overflow-y-auto">
                 {GOOGLE_WORKSPACE_ACCOUNTS.map((acc) => (
                   <button
@@ -465,15 +386,15 @@ export default function LoginPage() {
                     type="button"
                     onClick={() => handleGoogleWorkspaceLogin(acc.email, acc.name)}
                     disabled={loading}
-                    className="w-full p-2.5 rounded-2xl border border-white/10 bg-white/[0.04] hover:bg-white/[0.08] hover:border-indigo-400/50 transition flex items-center gap-3 text-left group"
+                    className="w-full p-3 rounded-2xl border border-white/10 bg-white/[0.04] hover:bg-white/[0.08] hover:border-cyan-400/40 transition flex items-center gap-3.5 text-left group"
                   >
                     <div
-                      className={`w-9 h-9 rounded-xl bg-gradient-to-tr ${acc.color} text-white font-black text-xs flex items-center justify-center shadow-md shrink-0`}
+                      className={`w-10 h-10 rounded-xl bg-gradient-to-tr ${acc.color} text-white font-black text-xs flex items-center justify-center shadow-md shrink-0`}
                     >
                       {acc.initials}
                     </div>
                     <div className="min-w-0 flex-1">
-                      <div className="text-xs font-bold text-white group-hover:text-indigo-300 transition truncate">
+                      <div className="text-xs font-bold text-white group-hover:text-cyan-300 transition truncate">
                         {acc.name}
                       </div>
                       <div className="text-[11px] font-mono text-slate-300 truncate">
@@ -487,13 +408,13 @@ export default function LoginPage() {
                 ))}
               </div>
 
-              {/* Custom Google Workspace Account Toggle */}
+              {/* Custom Google Workspace Email Entry */}
               <div className="pt-3 border-t border-white/10">
                 {!showCustomGoogleInput ? (
                   <button
                     type="button"
                     onClick={() => setShowCustomGoogleInput(true)}
-                    className="w-full py-2 px-3 text-xs font-semibold text-indigo-300 hover:text-indigo-200 hover:bg-white/5 rounded-xl transition flex items-center justify-center gap-1.5"
+                    className="w-full py-2.5 px-3 text-xs font-semibold text-cyan-300 hover:text-white hover:bg-white/5 rounded-xl transition flex items-center justify-center gap-1.5"
                   >
                     <span>Use another @mirai.edu account</span>
                     <ArrowRight className="w-3.5 h-3.5" />
@@ -501,7 +422,7 @@ export default function LoginPage() {
                 ) : (
                   <form onSubmit={onCustomGoogleSubmit} className="space-y-3 pt-1">
                     <div className="text-xs font-bold text-slate-200">
-                      Sign in with institutional Google Workspace email
+                      Sign in with custom institutional Google account
                     </div>
                     <div>
                       <input
@@ -509,7 +430,7 @@ export default function LoginPage() {
                         value={customGoogleName}
                         onChange={(e) => setCustomGoogleName(e.target.value)}
                         placeholder="Full Name (e.g. Diya Sen)"
-                        className="w-full text-xs rounded-xl border border-white/15 p-2 bg-slate-800 text-white placeholder-slate-500 focus:border-indigo-400 focus:outline-none mb-2"
+                        className="w-full text-xs rounded-xl border border-white/15 p-2.5 bg-slate-800 text-white placeholder-slate-500 focus:border-cyan-400 focus:outline-none mb-2"
                         required
                       />
                       <input
@@ -517,7 +438,7 @@ export default function LoginPage() {
                         value={customGoogleEmail}
                         onChange={(e) => setCustomGoogleEmail(e.target.value)}
                         placeholder="username@mirai.edu"
-                        className="w-full text-xs font-mono rounded-xl border border-white/15 p-2 bg-slate-800 text-white placeholder-slate-500 focus:border-indigo-400 focus:outline-none"
+                        className="w-full text-xs font-mono rounded-xl border border-white/15 p-2.5 bg-slate-800 text-white placeholder-slate-500 focus:border-cyan-400 focus:outline-none"
                         required
                       />
                     </div>
@@ -532,7 +453,7 @@ export default function LoginPage() {
                       <button
                         type="submit"
                         disabled={loading}
-                        className="glass-btn-primary px-4 py-1.5 rounded-xl text-xs font-bold"
+                        className="glass-btn-primary px-4 py-2 rounded-xl text-xs font-bold shadow"
                       >
                         Continue with Google SSO
                       </button>
@@ -546,8 +467,8 @@ export default function LoginPage() {
       </AnimatePresence>
 
       {/* Footer */}
-      <footer className="text-center text-xs text-slate-400 z-10 py-2">
-        Mirai School of Technology &middot; Google Workspace SSO Integration &middot; Gitclub Platform
+      <footer className="text-center text-xs text-slate-400 z-10 py-3 font-mono">
+        Mirai School of Technology &bull; Google Workspace SSO Integration &bull; Gitclub Matrix
       </footer>
     </main>
   );

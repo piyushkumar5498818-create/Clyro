@@ -445,11 +445,11 @@ export function ClubsHierarchyView({
 
       {/* Member Section with 3D Pop Out from Back Animations */}
       <motion.div
-        initial={{ opacity: 0, scale: 0.9, y: 36, filter: "blur(8px)" }}
-        whileInView={{ opacity: 1, scale: 1, y: 0, filter: "blur(0px)" }}
+        initial={{ opacity: 0, scale: 0.94, y: 24 }}
+        whileInView={{ opacity: 1, scale: 1, y: 0 }}
         viewport={{ once: false, margin: "-60px" }}
-        transition={{ type: "spring", stiffness: 75, damping: 15, mass: 0.85 }}
-        style={{ transformPerspective: 1200 }}
+        transition={{ type: "spring", stiffness: 90, damping: 18, mass: 0.8 }}
+        style={{ transformPerspective: 1200, willChange: "transform, opacity" }}
         className="glass-panel rounded-3xl p-6 sm:p-8 space-y-6"
       >
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-white/10">
@@ -481,8 +481,8 @@ export function ClubsHierarchyView({
             {allMemberships.map((m, idx) => (
               <motion.div
                 key={m.id}
-                initial={{ opacity: 0, scale: 0.88, y: 28, filter: "blur(6px)" }}
-                whileInView={{ opacity: 1, scale: 1, y: 0, filter: "blur(0px)" }}
+                initial={{ opacity: 0, scale: 0.92, y: 20 }}
+                whileInView={{ opacity: 1, scale: 1, y: 0 }}
                 viewport={{ once: false, margin: "-40px" }}
                 whileHover={{ scale: 1.025, y: -4, transition: { type: "spring", stiffness: 450, damping: 20 } }}
                 transition={{

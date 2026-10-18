@@ -3,7 +3,7 @@
 import React from "react";
 import { motion } from "framer-motion";
 
-export type AnimationVariant = "pop" | "depth" | "slide" | "zoom" | "flipUp";
+export type AnimationVariant = "pop" | "depth" | "slide" | "zoom";
 
 interface ScrollFadeInProps {
   children: React.ReactNode;
@@ -13,26 +13,23 @@ interface ScrollFadeInProps {
   distance?: number;
   variant?: AnimationVariant;
   scaleStart?: number;
-  blur?: boolean;
   once?: boolean;
   amount?: number | "some" | "all";
 }
 
 /**
- * ScrollFadeIn provides repeatable 3D perspective scroll entrances:
- * Animates on scroll continuously throughout the user session (once: false).
- * Elements pop forward from z-axis background into crisp focus whenever
- * scrolled into view, from either direction.
+ * ScrollFadeIn: High-performance, hardware-accelerated 3D scroll entrance.
+ * Uses composite-only properties (transform & opacity) with will-change to
+ * maintain buttery 120 FPS performance even during high-velocity scrolling.
  */
 export function ScrollFadeIn({
   children,
   className = "",
   delay = 0,
   direction = "up",
-  distance = 36,
+  distance = 28,
   variant = "pop",
-  scaleStart = 0.9,
-  blur = true,
+  scaleStart = 0.94,
   once = false,
   amount = 0.12,
 }: ScrollFadeInProps) {
@@ -61,23 +58,12 @@ export function ScrollFadeIn({
           opacity: 0,
           scale: scaleStart,
           y: distance,
-          rotateX: 3,
-          filter: blur ? "blur(8px)" : "blur(0px)",
         };
       case "zoom":
         return {
           opacity: 0,
-          scale: 0.85,
+          scale: 0.88,
           y: 0,
-          filter: blur ? "blur(10px)" : "blur(0px)",
-        };
-      case "flipUp":
-        return {
-          opacity: 0,
-          scale: 0.9,
-          rotateX: 14,
-          y: 36,
-          filter: blur ? "blur(6px)" : "blur(0px)",
         };
       case "slide":
       default:
@@ -85,8 +71,6 @@ export function ScrollFadeIn({
           opacity: 0,
           ...offset,
           scale: 1,
-          rotateX: 0,
-          filter: "blur(0px)",
         };
     }
   };
@@ -96,8 +80,6 @@ export function ScrollFadeIn({
     scale: 1,
     x: 0,
     y: 0,
-    rotateX: 0,
-    filter: "blur(0px)",
   });
 
   return (
@@ -107,14 +89,14 @@ export function ScrollFadeIn({
       viewport={{ once, margin: "-50px", amount }}
       transition={{
         type: "spring",
-        stiffness: 80,
-        damping: 16,
-        mass: 0.8,
+        stiffness: 90,
+        damping: 18,
+        mass: 0.75,
         delay,
       }}
       style={{
         transformPerspective: 1200,
-        transformStyle: "preserve-3d",
+        willChange: "transform, opacity",
       }}
       className={className}
     >
@@ -124,8 +106,7 @@ export function ScrollFadeIn({
 }
 
 /**
- * PopCard provides an interactive card component that pops in from the back
- * on viewport scroll (active throughout the session) and dynamically lifts on hover.
+ * PopCard: Interactive card that animates on scroll and lifts on hover.
  */
 export function PopCard({
   children,
@@ -142,27 +123,30 @@ export function PopCard({
 }) {
   return (
     <motion.div
-      initial={{ opacity: 0, scale: 0.9, y: 22, filter: "blur(4px)" }}
-      whileInView={{ opacity: 1, scale: 1, y: 0, filter: "blur(0px)" }}
+      initial={{ opacity: 0, scale: 0.93, y: 20 }}
+      whileInView={{ opacity: 1, scale: 1, y: 0 }}
       viewport={{ once, margin: "-40px", amount: 0.1 }}
       whileHover={
         hoverPop
           ? {
               scale: 1.025,
-              y: -5,
-              transition: { type: "spring", stiffness: 450, damping: 20 },
+              y: -4,
+              transition: { type: "spring", stiffness: 450, damping: 22 },
             }
           : undefined
       }
       whileTap={hoverPop ? { scale: 0.98 } : undefined}
       transition={{
         type: "spring",
-        stiffness: 85,
-        damping: 16,
-        mass: 0.8,
+        stiffness: 90,
+        damping: 18,
+        mass: 0.75,
         delay,
       }}
-      style={{ transformPerspective: 1000 }}
+      style={{
+        transformPerspective: 1000,
+        willChange: "transform, opacity",
+      }}
       className={className}
     >
       {children}
@@ -180,14 +164,14 @@ interface StaggerContainerProps {
 export function StaggerContainer({
   children,
   className = "",
-  staggerDelay = 0.08,
+  staggerDelay = 0.06,
   once = false,
 }: StaggerContainerProps) {
   return (
     <motion.div
       initial="hidden"
       whileInView="visible"
-      viewport={{ once, margin: "-50px", amount: 0.1 }}
+      viewport={{ once, margin: "-40px", amount: 0.1 }}
       variants={{
         hidden: { opacity: 0 },
         visible: {
@@ -216,17 +200,16 @@ export function StaggerItem({
   return (
     <motion.div
       variants={{
-        hidden: { opacity: 0, scale: 0.9, y: 24, filter: "blur(4px)" },
+        hidden: { opacity: 0, scale: 0.93, y: 20 },
         visible: {
           opacity: 1,
           scale: 1,
           y: 0,
-          filter: "blur(0px)",
           transition: {
             type: "spring",
-            stiffness: 85,
-            damping: 16,
-            mass: 0.8,
+            stiffness: 90,
+            damping: 18,
+            mass: 0.75,
           },
         },
       }}
@@ -239,7 +222,10 @@ export function StaggerItem({
             }
           : undefined
       }
-      style={{ transformPerspective: 1000 }}
+      style={{
+        transformPerspective: 1000,
+        willChange: "transform, opacity",
+      }}
       className={className}
     >
       {children}

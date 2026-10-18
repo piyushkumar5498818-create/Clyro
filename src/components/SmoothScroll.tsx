@@ -57,13 +57,12 @@ export function SmoothScrollProvider({ children }: { children: React.ReactNode }
     <ReactLenis
       root
       options={{
-        lerp: 0.08,             // Buttery smooth inertia
-        duration: 1.2,          // Duration for programmatic jumps
-        smoothWheel: true,      // Smooth mouse wheel scrolling
-        syncTouch: true,        // Touch & trackpad momentum synchronization
-        syncTouchLerp: 0.08,    // Touch lerp
-        touchMultiplier: 1.5,
-        wheelMultiplier: 1,
+        lerp: 0.1,              // Responsive, crisp inertia that stays buttery even during fast scrolling
+        duration: 0.9,          // Fast, precise programmatic anchor scrolls
+        smoothWheel: true,      // Smooth mouse wheel interpolation
+        syncTouch: false,       // Do NOT intercept macOS trackpad inertia to prevent jitter on fast swipes
+        wheelMultiplier: 0.85,  // Natural wheel deceleration curve
+        touchMultiplier: 1.0,   // Standard native touch multiplier
         anchors: true,          // Intercept native #hash anchor links automatically
       }}
     >

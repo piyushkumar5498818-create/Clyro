@@ -160,8 +160,6 @@ export default function DashboardPage() {
       {/* Top Ribbon Header with Hidden Right Drawer Prompt Button */}
       <Navbar
         currentUser={currentUser}
-        profiles={profiles}
-        onSwitchUser={handleSwitchUser}
         activeSection={activeSection}
       />
 

@@ -9,8 +9,6 @@ import { RightNavbarDrawer } from "./RightNavbarDrawer";
 
 interface NavbarProps {
   currentUser: Profile;
-  profiles: Profile[];
-  onSwitchUser: (userId: string) => void;
   activeSection: string;
 }
 
@@ -40,8 +38,6 @@ const SECTION_MAP: Record<string, { tag: string; label: string }> = {
 
 export function Navbar({
   currentUser,
-  profiles,
-  onSwitchUser,
   activeSection,
 }: NavbarProps) {
   const [drawerOpen, setDrawerOpen] = useState(false);
@@ -79,7 +75,7 @@ export function Navbar({
             <button
               onClick={() => setDrawerOpen(true)}
               className="flex items-center gap-2.5 pl-2 pr-3.5 py-1.5 rounded-2xl bg-white/[0.05] hover:bg-white/[0.1] border border-white/10 hover:border-blue-400/40 transition-all group shadow-sm"
-              aria-label="Open Navigation & Role Switcher Drawer"
+              aria-label="Open Navigation Drawer"
             >
               <div className="w-7 h-7 rounded-xl bg-gradient-to-tr from-blue-600 via-indigo-600 to-cyan-400 p-[1.5px] shrink-0">
                 <div className="w-full h-full bg-[#0a1124] rounded-[9px] flex items-center justify-center text-cyan-300 text-xs font-black">
@@ -109,8 +105,6 @@ export function Navbar({
         isOpen={drawerOpen}
         onClose={() => setDrawerOpen(false)}
         currentUser={currentUser}
-        profiles={profiles}
-        onSwitchUser={onSwitchUser}
         activeSection={activeSection}
       />
     </>
