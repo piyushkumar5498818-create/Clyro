@@ -95,8 +95,8 @@ export default function LoginPage() {
     if (res.success && res.user) {
       setSuccess(`Authenticated as ${res.user.fullName} (${res.user.title || res.user.role})! Redirecting...`);
       setTimeout(() => {
-        router.push("/dashboard");
-      }, 700);
+        window.location.href = "/dashboard";
+      }, 400);
     } else {
       setLoading(false);
       setError(res.error || "Authentication failed. Please verify your email.");

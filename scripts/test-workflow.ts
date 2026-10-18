@@ -1,4 +1,5 @@
 import { db } from "../src/lib/store";
+import { signSessionToken, verifySessionToken } from "../src/lib/auth";
 
 let testsPassed = 0;
 let testsFailed = 0;
@@ -245,6 +246,19 @@ async function runTests() {
 
   const switchedPres = db.setActiveUser(president!.id);
   assert(db.getActiveUser().id === president!.id, "Active user switches successfully upon president login");
+
+  // 11. Backend Cryptographic Session Integrity
+  console.log("\n11. Backend Cryptographic Session Tokens:");
+  const sessionToken = signSessionToken(student!.id, student!.email, student!.role);
+  assert(typeof sessionToken === "string" && sessionToken.includes("."), "Session token generated with HMAC-SHA256 signature");
+
+  const verifiedSession = verifySessionToken(sessionToken);
+  assert(verifiedSession?.userId === student!.id, "Cryptographic verification validates authentic token payload");
+  assert(verifiedSession?.email === student!.email, "Token preserves verified campus identity");
+
+  const tamperedToken = sessionToken.slice(0, -6) + "xyz999";
+  const verifiedTampered = verifySessionToken(tamperedToken);
+  assert(verifiedTampered === null, "Tampered session token signature rejected by auth utility");
 
   console.log(`\n======================================================`);
   console.log(`TEST SUMMARY: ${testsPassed} PASSED, ${testsFailed} FAILED`);
