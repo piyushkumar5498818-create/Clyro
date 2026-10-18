@@ -12,14 +12,17 @@ import {
   GOOGLE_WORKSPACE_DOMAIN,
 } from "@/lib/auth";
 
-const SESSION_COOKIE = "clyro_session";
+const SESSION_COOKIE = "gitclub_session";
+const LEGACY_SESSION_COOKIE = "clyro_session";
 const LEGACY_COOKIE = "clyro_user_id";
 
 export async function getCurrentUserAction(): Promise<Profile> {
   const cookieStore = cookies();
 
   // 1. Check cryptographic session token
-  const sessionToken = cookieStore.get(SESSION_COOKIE)?.value;
+  const sessionToken =
+    cookieStore.get(SESSION_COOKIE)?.value ||
+    cookieStore.get(LEGACY_SESSION_COOKIE)?.value;
   if (sessionToken) {
     const verifiedSession = verifySessionToken(sessionToken);
     if (verifiedSession) {
@@ -134,6 +137,7 @@ export async function getGoogleAuthMetadataAction(): Promise<{
 
 export async function logoutAction(): Promise<{ success: boolean }> {
   cookies().delete(SESSION_COOKIE);
+  cookies().delete(LEGACY_SESSION_COOKIE);
   cookies().delete(LEGACY_COOKIE);
   return { success: true };
 }

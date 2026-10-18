@@ -1,6 +1,6 @@
 import crypto from "crypto";
 
-const AUTH_SECRET = process.env.AUTH_SECRET || "clyro-mirai-session-secret-2024-msot";
+const AUTH_SECRET = process.env.AUTH_SECRET || "gitclub-mirai-session-secret-2024-msot";
 export const GOOGLE_WORKSPACE_DOMAIN =
   process.env.GOOGLE_WORKSPACE_DOMAIN ||
   process.env.NEXT_PUBLIC_GOOGLE_WORKSPACE_DOMAIN ||
@@ -33,7 +33,7 @@ export function validateGoogleWorkspaceEmail(email: string): { valid: boolean; e
   if (domain !== GOOGLE_WORKSPACE_DOMAIN.toLowerCase()) {
     return {
       valid: false,
-      error: `Access restricted: Only institutional Google Workspace accounts (@${GOOGLE_WORKSPACE_DOMAIN}) are permitted. Personal email domains (@${domain}) cannot access MSOT Clyro.`,
+      error: `Access restricted: Only institutional Google Workspace accounts (@${GOOGLE_WORKSPACE_DOMAIN}) are permitted. Personal email domains (@${domain}) cannot access MSOT Gitclub.`,
     };
   }
 
@@ -60,7 +60,7 @@ export function getGoogleOAuthUrl(redirectUri: string, state?: string): string {
     access_type: "online",
     prompt: "select_account",
     hd: GOOGLE_WORKSPACE_DOMAIN, // Restricts Google account selector to Workspace domain
-    state: state || "clyro-msot-google-auth",
+    state: state || "gitclub-msot-google-auth",
   });
 
   return `https://accounts.google.com/o/oauth2/v2/auth?${params.toString()}`;
