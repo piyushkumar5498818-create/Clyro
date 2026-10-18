@@ -211,16 +211,16 @@ export function CertificatesView({
                 Recipient: <strong className="text-white">{cert.userFullName}</strong>
               </p>
 
-              {/* Progressive Disclosure: Revealed on cursor hover with smooth cooldown */}
-              <div className="overflow-hidden max-h-0 opacity-0 group-hover:max-h-36 group-hover:opacity-100 group-hover:mt-3 group-hover:pt-3 group-hover:border-t group-hover:border-white/10 transition-all duration-500 ease-out space-y-2">
-                <div className="p-3 rounded-2xl glass-card text-xs font-mono text-slate-300 space-y-1.5">
-                  <div className="flex justify-between">
-                    <span className="text-slate-400">Ledger Code:</span>
-                    <strong className="text-cyan-400">{cert.verificationCode}</strong>
+              {/* Ledger Metadata: Direct readability on mobile */}
+              <div className="mt-3 pt-3 border-t border-white/10 space-y-1.5">
+                <div className="p-2.5 rounded-xl glass-card text-xs font-mono text-slate-300 space-y-1">
+                  <div className="flex justify-between items-center">
+                    <span className="text-slate-400 text-[11px]">Ledger Code:</span>
+                    <strong className="text-cyan-400 text-[11px] select-all">{cert.verificationCode}</strong>
                   </div>
-                  <div className="flex justify-between">
-                    <span className="text-slate-400">Issue Date:</span>
-                    <span>{cert.issueDate}</span>
+                  <div className="flex justify-between items-center">
+                    <span className="text-slate-400 text-[11px]">Issue Date:</span>
+                    <span className="text-[11px]">{cert.issueDate}</span>
                   </div>
                 </div>
               </div>

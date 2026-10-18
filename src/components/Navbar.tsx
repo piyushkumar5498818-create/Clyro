@@ -51,50 +51,43 @@ export function Navbar({
 
   return (
     <>
-      {/* Sleek, Uncluttered Top Ribbon Header */}
-      <header className="sticky top-0 z-40 bg-[#070b16]/75 backdrop-blur-2xl border-b border-white/10 transition-all">
-        <div className="max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
+      {/* Sleek Mobile-Targeted Top Ribbon Header */}
+      <header className="sticky top-0 z-40 bg-[#070b16]/85 backdrop-blur-2xl border-b border-white/10 transition-all">
+        <div className="max-w-md w-full mx-auto px-3.5 sm:px-4">
+          <div className="flex items-center justify-between h-14">
             {/* Left: Clean Brand Logo */}
-            <Link href="/" className="flex items-center gap-3 group">
-              <GitclubLogo size="md" showText={true} />
+            <Link href="/" className="flex items-center gap-2 group active:scale-95 transition-transform">
+              <GitclubLogo size="sm" showText={true} />
             </Link>
 
-            {/* Center: Clean Live Scroll Position Pill (Zero clutter, dynamic context) */}
-            <div className="hidden md:flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/[0.04] border border-white/10 text-xs backdrop-blur-md shadow-sm">
-              <span className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse" />
-              <span className="font-mono text-[11px] text-cyan-300 font-bold uppercase tracking-wider">
+            {/* Center: Live Scroll Position Pill */}
+            <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/[0.04] border border-white/10 text-[11px] backdrop-blur-md shadow-sm">
+              <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse shrink-0" />
+              <span className="font-mono text-[10px] text-cyan-300 font-bold uppercase tracking-wider">
                 [{activeSec.tag}]
               </span>
-              <span className="text-white font-semibold tracking-tight">
+              <span className="text-white font-semibold tracking-tight text-[11px] max-w-[120px] sm:max-w-[160px] truncate">
                 {activeSec.label}
               </span>
             </div>
 
-            {/* Right: Single Unified Menu & Persona Capsule (Prompt for Hidden Drawer) */}
+            {/* Right: Unified Avatar & Drawer Trigger */}
             <button
               onClick={() => setDrawerOpen(true)}
-              className="flex items-center gap-2.5 pl-2 pr-3.5 py-1.5 rounded-2xl bg-white/[0.05] hover:bg-white/[0.1] border border-white/10 hover:border-blue-400/40 transition-all group shadow-sm"
+              className="flex items-center gap-2 pl-1.5 pr-2.5 py-1 rounded-2xl bg-white/[0.05] hover:bg-white/[0.1] active:scale-95 border border-white/10 hover:border-cyan-400/40 transition-all group shadow-sm"
               aria-label="Open Navigation Drawer"
             >
-              <div className="w-7 h-7 rounded-xl bg-gradient-to-tr from-blue-600 via-indigo-600 to-cyan-400 p-[1.5px] shrink-0">
-                <div className="w-full h-full bg-[#0a1124] rounded-[9px] flex items-center justify-center text-cyan-300 text-xs font-black">
+              <div className="w-6 h-6 rounded-lg bg-gradient-to-tr from-blue-600 via-indigo-600 to-cyan-400 p-[1.5px] shrink-0">
+                <div className="w-full h-full bg-[#0a1124] rounded-[6px] flex items-center justify-center text-cyan-300 text-[10px] font-black">
                   {currentUser.fullName.charAt(0)}
                 </div>
               </div>
 
-              <div className="flex items-center gap-2 text-left">
-                <span className="text-xs font-bold text-white group-hover:text-cyan-300 transition leading-tight">
-                  {currentUser.fullName.split(" ")[0]}
-                </span>
-                <span className="text-[10px] font-mono text-cyan-300 font-bold px-2 py-0.5 rounded-md bg-blue-500/15 border border-blue-400/25 uppercase">
-                  {roleInfo.label}
-                </span>
-              </div>
+              <span className="text-xs font-bold text-white group-hover:text-cyan-300 transition leading-tight hidden xs:inline">
+                {currentUser.fullName.split(" ")[0]}
+              </span>
 
-              <div className="ml-1 pl-2 border-l border-white/10 flex items-center text-slate-400 group-hover:text-white transition">
-                <Menu className="w-4 h-4 text-cyan-400" />
-              </div>
+              <Menu className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
             </button>
           </div>
         </div>

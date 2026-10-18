@@ -133,14 +133,14 @@ function ClubMembersGrid({
             </span>
           </div>
 
-          {/* Progressive Disclosure on Hover with 500ms Smooth Cooldown */}
-          <div className="overflow-hidden max-h-0 opacity-0 group-hover:max-h-32 group-hover:opacity-100 group-hover:mt-2.5 group-hover:pt-2.5 group-hover:border-t group-hover:border-white/10 transition-all duration-500 ease-out space-y-1.5 text-[11px]">
+          {/* Member Details: Direct readability on mobile touchscreens */}
+          <div className="mt-2.5 pt-2 border-t border-white/10 space-y-1 text-[11px]">
             <div className="flex items-center justify-between text-slate-400">
-              <span className="font-mono uppercase text-slate-300 font-semibold">
+              <span className="font-mono uppercase text-slate-300 font-semibold text-[10px]">
                 {m.membershipType} TIER
               </span>
               {m.studentId && (
-                <span className="font-mono text-slate-400">
+                <span className="font-mono text-slate-400 text-[10px]">
                   {m.studentId}
                 </span>
               )}
@@ -153,14 +153,14 @@ function ClubMembersGrid({
             )}
 
             {canReview && m.status === "pending" && (
-              <div className="flex items-center gap-1.5 pt-1">
+              <div className="flex items-center gap-1.5 pt-1.5">
                 <button
                   onClick={(e) => {
                     e.stopPropagation();
                     onReview(m.id, "approved");
                   }}
                   disabled={loading}
-                  className="flex-1 py-1 px-2 rounded-xl bg-emerald-600/25 hover:bg-emerald-600/40 text-emerald-300 border border-emerald-500/40 text-[10px] font-bold transition flex items-center justify-center gap-1"
+                  className="flex-1 py-1.5 px-2 rounded-xl bg-emerald-600/25 hover:bg-emerald-600/40 text-emerald-300 border border-emerald-500/40 text-[10px] font-bold transition flex items-center justify-center gap-1 active:scale-95"
                 >
                   <Check className="w-3 h-3" />
                   <span>Approve</span>
@@ -171,7 +171,7 @@ function ClubMembersGrid({
                     onReview(m.id, "rejected");
                   }}
                   disabled={loading}
-                  className="flex-1 py-1 px-2 rounded-xl bg-rose-600/25 hover:bg-rose-600/40 text-rose-300 border border-rose-500/40 text-[10px] font-bold transition flex items-center justify-center gap-1"
+                  className="flex-1 py-1.5 px-2 rounded-xl bg-rose-600/25 hover:bg-rose-600/40 text-rose-300 border border-rose-500/40 text-[10px] font-bold transition flex items-center justify-center gap-1 active:scale-95"
                 >
                   <X className="w-3 h-3" />
                   <span>Reject</span>
@@ -676,9 +676,9 @@ export function ClubsHierarchyView({
                                 {init.format}
                               </span>
                             </div>
-                            {/* Full info revealed on hover with 500ms cooldown */}
-                            <div className="overflow-hidden max-h-0 opacity-0 group-hover:max-h-24 group-hover:opacity-100 group-hover:mt-2.5 group-hover:pt-2.5 group-hover:border-t group-hover:border-white/10 transition-all duration-500 ease-out">
-                              <p className="text-xs text-slate-300 leading-relaxed">{init.description}</p>
+                            {/* Direct Mobile Description */}
+                            <div className="mt-2 pt-2 border-t border-white/10">
+                              <p className="text-xs text-slate-300 leading-relaxed line-clamp-2">{init.description}</p>
                             </div>
                           </div>
                         ))}
@@ -833,9 +833,9 @@ export function ClubsHierarchyView({
                                 {dept.code}
                               </span>
                             </div>
-                            {/* Full info revealed on hover with 500ms cooldown */}
-                            <div className="overflow-hidden max-h-0 opacity-0 group-hover:max-h-24 group-hover:opacity-100 group-hover:mt-2.5 group-hover:pt-2.5 group-hover:border-t group-hover:border-white/10 transition-all duration-500 ease-out">
-                              <p className="text-xs text-slate-300 leading-relaxed">{dept.description}</p>
+                            {/* Direct Mobile Description */}
+                            <div className="mt-2 pt-2 border-t border-white/10">
+                              <p className="text-xs text-slate-300 leading-relaxed line-clamp-2">{dept.description}</p>
                             </div>
                           </div>
                         ))}
@@ -952,8 +952,8 @@ export function ClubsHierarchyView({
                   </span>
                 </div>
 
-                {/* Progressive Disclosure: Full details reveal on cursor hover with smooth cooldown */}
-                <div className="overflow-hidden max-h-0 opacity-0 group-hover:max-h-28 group-hover:opacity-100 group-hover:mt-2.5 group-hover:pt-2.5 group-hover:border-t group-hover:border-white/10 transition-all duration-500 ease-out space-y-2">
+                {/* Member Meta: Direct mobile readability */}
+                <div className="mt-2.5 pt-2 border-t border-white/10 space-y-1.5 text-[11px]">
                   <div className="flex items-center justify-between text-[11px]">
                     <span className="font-mono text-cyan-300 font-semibold uppercase px-2 py-0.5 rounded-md bg-blue-500/15 border border-blue-400/25 text-[10px]">
                       {m.membershipType} TIER
@@ -968,7 +968,7 @@ export function ClubsHierarchyView({
                       <button
                         onClick={() => handleReviewMembership(m.id, "approved")}
                         disabled={loading}
-                        className="flex-1 py-1 px-2.5 rounded-xl bg-emerald-600/25 hover:bg-emerald-600/40 text-emerald-300 border border-emerald-500/40 text-[10px] font-bold transition flex items-center justify-center gap-1"
+                        className="flex-1 py-1.5 px-2.5 rounded-xl bg-emerald-600/25 hover:bg-emerald-600/40 text-emerald-300 border border-emerald-500/40 text-[10px] font-bold transition flex items-center justify-center gap-1 active:scale-95"
                       >
                         <Check className="w-3 h-3" />
                         <span>Approve</span>
@@ -976,7 +976,7 @@ export function ClubsHierarchyView({
                       <button
                         onClick={() => handleReviewMembership(m.id, "rejected")}
                         disabled={loading}
-                        className="flex-1 py-1 px-2.5 rounded-xl bg-rose-600/25 hover:bg-rose-600/40 text-rose-300 border border-rose-500/40 text-[10px] font-bold transition flex items-center justify-center gap-1"
+                        className="flex-1 py-1.5 px-2.5 rounded-xl bg-rose-600/25 hover:bg-rose-600/40 text-rose-300 border border-rose-500/40 text-[10px] font-bold transition flex items-center justify-center gap-1 active:scale-95"
                       >
                         <X className="w-3 h-3" />
                         <span>Reject</span>

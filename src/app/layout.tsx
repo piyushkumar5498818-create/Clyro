@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import { SmoothScrollProvider } from "@/components/SmoothScroll";
 
@@ -6,6 +6,15 @@ export const metadata: Metadata = {
   title: "Gitclub — College Club Activities & Student Leadership Tracker",
   description:
     "Unified co-curricular platform for Mirai School of Technology (MSOT): NEX-CELL, Kaizen Tech (CP, Web, AI & Data Science), and MALHAR. Real-time QR check-in, rubric grading, and verifiable transcripts.",
+};
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
+  viewportFit: "cover",
+  themeColor: "#070b16",
 };
 
 export default function RootLayout({

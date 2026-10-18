@@ -306,16 +306,16 @@ export function ActivityManagementView({
                 <span>{act.scheduledDate} &bull; {act.startTime}</span>
               </div>
 
-              {/* Progressive Disclosure: Revealed on cursor hover with smooth cooldown */}
-              <div className="overflow-hidden max-h-0 opacity-0 group-hover:max-h-48 group-hover:opacity-100 group-hover:mt-3 group-hover:pt-3 group-hover:border-t group-hover:border-white/10 transition-all duration-500 ease-out space-y-2">
-                <p className="text-xs text-indigo-300 font-medium">
+              {/* Event Details: Directly readable on mobile */}
+              <div className="mt-3 pt-3 border-t border-white/10 space-y-2 text-xs">
+                <p className="text-indigo-300 font-medium">
                   Topic: {act.topic}
                 </p>
-                <div className="flex items-center gap-2 text-xs text-slate-300">
+                <div className="flex items-center gap-2 text-slate-300">
                   <MapPin className="w-3.5 h-3.5 text-rose-400 shrink-0" />
                   <span>{act.venue}</span>
                 </div>
-                <div className="p-2.5 rounded-xl glass-card text-xs text-slate-300 leading-relaxed">
+                <div className="p-2.5 rounded-xl glass-card text-slate-300 leading-relaxed text-[11px]">
                   <strong className="text-white">Deliverable:</strong> {act.deliverableDescription}
                 </div>
               </div>

@@ -90,35 +90,33 @@ export function OverviewView({
       <motion.div variants={itemVariants} className="glass-panel rounded-3xl p-6 sm:p-7 relative overflow-hidden">
         <div className="absolute top-0 right-0 w-80 h-80 bg-gradient-to-bl from-indigo-500/15 via-purple-500/10 to-transparent rounded-full blur-3xl pointer-events-none" />
 
-        <div className="relative z-10 flex flex-col sm:flex-row sm:items-center justify-between gap-5">
+        <div className="relative z-10 flex flex-col gap-4">
           <div>
-            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/10 text-indigo-300 text-xs font-semibold mb-2.5 border border-white/10 backdrop-blur-md">
+            <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-white/10 text-indigo-300 text-[11px] font-semibold mb-2 border border-white/10 backdrop-blur-md">
               <Sparkles className="w-3 h-3 text-indigo-400" />
               Mirai Campus
             </div>
-            <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
+            <h1 className="text-xl sm:text-2xl font-black text-white tracking-tight">
               Welcome, <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-200 via-purple-200 to-pink-200">{currentUser.fullName}</span>
             </h1>
-            <p className="text-slate-400 text-xs sm:text-sm mt-1">
+            <p className="text-slate-400 text-xs mt-0.5 font-medium">
               {currentUser.title || "Student Leadership"} &bull; Activity Ledger
             </p>
           </div>
 
-          <div className="flex gap-2.5">
+          <div className="flex gap-2">
             <motion.button
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
+              whileTap={{ scale: 0.96 }}
               onClick={() => navigateTo(isStudent ? "attendance" : "activities")}
-              className="glass-btn-primary px-4 py-2 rounded-xl font-bold text-xs shadow-md flex items-center gap-1.5"
+              className="flex-1 glass-btn-primary px-3.5 py-2 rounded-xl font-bold text-xs shadow-md flex items-center justify-center gap-1.5 active:scale-95"
             >
-              {isStudent ? "Check In" : "Manage Activities"}
+              {isStudent ? "Check In" : "Activities"}
               <ArrowRight className="w-3.5 h-3.5" />
             </motion.button>
             <motion.button
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
+              whileTap={{ scale: 0.96 }}
               onClick={() => navigateTo("clubs")}
-              className="glass-btn-secondary px-3.5 py-2 rounded-xl font-semibold text-xs flex items-center gap-1.5"
+              className="flex-1 glass-btn-secondary px-3.5 py-2 rounded-xl font-semibold text-xs flex items-center justify-center gap-1.5 active:scale-95"
             >
               Clubs
             </motion.button>
@@ -126,61 +124,57 @@ export function OverviewView({
         </div>
 
         {/* Global Metric Summary with 3D Pop Out */}
-        <div className="mt-6 pt-6 border-t border-white/10 grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div className="mt-5 pt-5 border-t border-white/10 grid grid-cols-2 gap-2.5">
           <motion.div
             initial={{ opacity: 0, scale: 0.9, y: 16 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             transition={{ type: "spring", stiffness: 90, damping: 15, delay: 0.05 }}
-            whileHover={{ scale: 1.035, y: -4, transition: { type: "spring", stiffness: 450, damping: 18 } }}
-            className="glass-card p-5 rounded-2xl border border-white/10 hover:border-blue-400/40 hover:shadow-xl hover:shadow-blue-500/10 cursor-default transition-all"
+            className="glass-card p-3.5 rounded-2xl border border-white/10 cursor-default"
           >
-            <div className="text-xs font-bold text-slate-400 uppercase tracking-wider">Active Clubs</div>
-            <div className="text-3xl font-black text-white mt-1">
+            <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Active Clubs</div>
+            <div className="text-2xl font-black text-white mt-0.5">
               {institutionalMetrics?.totalOrganizations || 3}
             </div>
-            <div className="text-xs text-blue-300 font-semibold mt-1">NEX-CELL &bull; Kaizen &bull; MALHAR</div>
+            <div className="text-[10px] text-blue-300 font-semibold mt-0.5 truncate">NEX-CELL &bull; Kaizen &bull; MALHAR</div>
           </motion.div>
 
           <motion.div
             initial={{ opacity: 0, scale: 0.9, y: 16 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             transition={{ type: "spring", stiffness: 90, damping: 15, delay: 0.1 }}
-            whileHover={{ scale: 1.035, y: -4, transition: { type: "spring", stiffness: 450, damping: 18 } }}
-            className="glass-card p-5 rounded-2xl border border-white/10 hover:border-cyan-400/40 hover:shadow-xl hover:shadow-cyan-500/10 cursor-default transition-all"
+            className="glass-card p-3.5 rounded-2xl border border-white/10 cursor-default"
           >
-            <div className="text-xs font-bold text-slate-400 uppercase tracking-wider">Specialized Units</div>
-            <div className="text-3xl font-black text-white mt-1">
+            <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Specialized Units</div>
+            <div className="text-2xl font-black text-white mt-0.5">
               {institutionalMetrics?.totalUnits || 8}
             </div>
-            <div className="text-xs text-slate-300 font-medium mt-1">3 Tech Domains &bull; 5 Cultural Depts</div>
+            <div className="text-[10px] text-slate-300 font-medium mt-0.5 truncate">3 Domains &bull; 5 Depts</div>
           </motion.div>
 
           <motion.div
             initial={{ opacity: 0, scale: 0.9, y: 16 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             transition={{ type: "spring", stiffness: 90, damping: 15, delay: 0.15 }}
-            whileHover={{ scale: 1.035, y: -4, transition: { type: "spring", stiffness: 450, damping: 18 } }}
-            className="glass-card p-5 rounded-2xl border border-white/10 hover:border-emerald-400/40 hover:shadow-xl hover:shadow-emerald-500/10 cursor-default transition-all"
+            className="glass-card p-3.5 rounded-2xl border border-white/10 cursor-default"
           >
-            <div className="text-xs font-bold text-slate-400 uppercase tracking-wider">Enrolled Members</div>
-            <div className="text-3xl font-black text-emerald-400 mt-1">
+            <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Enrolled Members</div>
+            <div className="text-2xl font-black text-emerald-400 mt-0.5">
               {institutionalMetrics?.totalEnrolledStudents || 1}
             </div>
-            <div className="text-xs text-emerald-400 font-semibold mt-1">Verified distinct students</div>
+            <div className="text-[10px] text-emerald-400 font-semibold mt-0.5 truncate">Verified Students</div>
           </motion.div>
 
           <motion.div
             initial={{ opacity: 0, scale: 0.9, y: 16 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             transition={{ type: "spring", stiffness: 90, damping: 15, delay: 0.2 }}
-            whileHover={{ scale: 1.035, y: -4, transition: { type: "spring", stiffness: 450, damping: 18 } }}
-            className="glass-card p-5 rounded-2xl border border-white/10 hover:border-amber-400/40 hover:shadow-xl hover:shadow-amber-500/10 cursor-default transition-all"
+            className="glass-card p-3.5 rounded-2xl border border-white/10 cursor-default"
           >
-            <div className="text-xs font-bold text-slate-400 uppercase tracking-wider">Venture Tracks</div>
-            <div className="text-3xl font-black text-amber-400 mt-1">
+            <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Venture Tracks</div>
+            <div className="text-2xl font-black text-amber-400 mt-0.5">
               {institutionalMetrics?.totalInitiatives || 6}
             </div>
-            <div className="text-xs text-amber-300 font-medium mt-1">Active flagship initiatives</div>
+            <div className="text-[10px] text-amber-300 font-medium mt-0.5 truncate">6 Flagship Tracks</div>
           </motion.div>
         </div>
       </motion.div>
