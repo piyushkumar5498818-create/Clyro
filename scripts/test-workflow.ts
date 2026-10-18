@@ -228,6 +228,24 @@ async function runTests() {
   const tampered = db.verifyCertificate("FAKE-TAMPERED-CERT-9999");
   assert(tampered === undefined, "Tampered/fraudulent code is rejected by verification service");
 
+  // 10. Login Portal & Authentication Verification
+  console.log("\n10. Login Portal & Authentication Verification:");
+  const profiles = db.getAllProfiles();
+  const student = profiles.find((p) => p.email.toLowerCase() === "alex.student@mirai.edu");
+  assert(!!student, "Student member profile exists for login");
+
+  const president = profiles.find((p) => p.email.toLowerCase() === "rishav.president@mirai.edu");
+  assert(!!president, "Kaizen Tech President profile exists for login");
+
+  const admin = profiles.find((p) => p.email.toLowerCase() === "admin@mirai.edu");
+  assert(!!admin, "Campus Administrator profile exists for login");
+
+  const switchedUser = db.setActiveUser(student!.id);
+  assert(db.getActiveUser().id === student!.id, "Active user switches successfully upon student login");
+
+  const switchedPres = db.setActiveUser(president!.id);
+  assert(db.getActiveUser().id === president!.id, "Active user switches successfully upon president login");
+
   console.log(`\n======================================================`);
   console.log(`TEST SUMMARY: ${testsPassed} PASSED, ${testsFailed} FAILED`);
   console.log(`======================================================\n`);

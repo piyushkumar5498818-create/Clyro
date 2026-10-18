@@ -1,8 +1,10 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Profile, UserRole } from "@/types/database";
-import { ShieldCheck, UserCheck } from "lucide-react";
+import { ShieldCheck, UserCheck, LogOut } from "lucide-react";
+import { logoutAction } from "@/actions/auth";
 
 import { motion } from "framer-motion";
 
@@ -37,9 +39,15 @@ export function Navbar({
   activeTab,
   setActiveTab,
 }: NavbarProps) {
+  const router = useRouter();
   const roleInfo = ROLE_LABELS[currentUser.role] || {
     label: currentUser.role,
     badge: "bg-slate-500/15 text-slate-300 border-slate-500/30",
+  };
+
+  const handleLogout = async () => {
+    await logoutAction();
+    router.push("/login");
   };
 
   return (
@@ -133,6 +141,15 @@ export function Navbar({
               <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
               Verify
             </Link>
+
+            <button
+              onClick={handleLogout}
+              className="text-xs font-semibold text-slate-300 hover:text-rose-300 flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/[0.04] hover:bg-rose-500/10 hover:border-rose-500/30 transition border border-white/10 backdrop-blur-md shadow-sm"
+              title="Sign out of Clyro"
+            >
+              <LogOut className="w-3.5 h-3.5" />
+              <span className="hidden sm:inline">Sign Out</span>
+            </button>
           </div>
         </div>
 

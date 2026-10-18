@@ -31,13 +31,19 @@ export default function HomePage() {
               href="/verify"
               className="text-xs font-semibold text-slate-300 hover:text-white px-3.5 py-2 rounded-xl bg-white/[0.05] hover:bg-white/[0.1] transition border border-white/10 backdrop-blur-md"
             >
-              Verify Certificate
+              Verify
+            </Link>
+            <Link
+              href="/login"
+              className="text-xs font-semibold text-slate-300 hover:text-white px-3.5 py-2 rounded-xl bg-white/[0.05] hover:bg-white/[0.1] transition border border-white/10 backdrop-blur-md"
+            >
+              Sign In
             </Link>
             <Link
               href="/dashboard"
               className="glass-btn-primary inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold shadow-md transition"
             >
-              Launch Dashboard <ArrowRight className="w-3.5 h-3.5" />
+              Dashboard <ArrowRight className="w-3.5 h-3.5" />
             </Link>
           </nav>
         </div>
@@ -83,10 +89,16 @@ export default function HomePage() {
           className="mt-10 flex flex-wrap justify-center gap-4"
         >
           <Link
-            href="/dashboard"
+            href="/login"
             className="glass-btn-primary px-8 py-3.5 rounded-2xl font-bold text-sm shadow-xl flex items-center gap-2 transition"
           >
-            Access Mirai Portal <ArrowRight className="w-4 h-4" />
+            Sign In to Portal <ArrowRight className="w-4 h-4" />
+          </Link>
+          <Link
+            href="/dashboard"
+            className="glass-btn-secondary px-6 py-3.5 rounded-2xl font-semibold text-sm transition"
+          >
+            Open Dashboard
           </Link>
           <Link
             href="/verify"
