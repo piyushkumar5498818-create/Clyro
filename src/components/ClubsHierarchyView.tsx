@@ -352,16 +352,16 @@ export function ClubsHierarchyView({
             {nexcell.initiatives?.map((init) => (
               <div
                 key={init.id}
-                className="glass-card p-4 rounded-2xl border border-white/10 hover:border-amber-400/40 hover:bg-white/[0.06] transition-all duration-200 group cursor-default"
+                className="glass-card p-4 rounded-2xl border border-white/10 hover:border-amber-400/40 hover:bg-white/[0.06] transition-all duration-500 ease-out group cursor-default"
               >
                 <div className="flex items-center justify-between text-sm font-bold text-white">
-                  <span className="group-hover:text-amber-300 transition truncate pr-2">{init.name}</span>
+                  <span className="group-hover:text-amber-300 transition-colors duration-300 truncate pr-2">{init.name}</span>
                   <span className="text-[10px] font-mono text-amber-300 bg-amber-500/20 px-2 py-0.5 rounded-full border border-amber-500/30 shrink-0">
                     {init.format}
                   </span>
                 </div>
-                {/* Full info revealed ONLY on hover */}
-                <div className="overflow-hidden max-h-0 opacity-0 group-hover:max-h-24 group-hover:opacity-100 group-hover:mt-2.5 group-hover:pt-2.5 group-hover:border-t group-hover:border-white/10 transition-all duration-300 ease-out">
+                {/* Full info revealed on hover with smooth cooldown */}
+                <div className="overflow-hidden max-h-0 opacity-0 group-hover:max-h-24 group-hover:opacity-100 group-hover:mt-2.5 group-hover:pt-2.5 group-hover:border-t group-hover:border-white/10 transition-all duration-500 ease-out">
                   <p className="text-xs text-slate-300 leading-relaxed">{init.description}</p>
                 </div>
               </div>
@@ -414,16 +414,16 @@ export function ClubsHierarchyView({
             {malhar.units?.map((dept) => (
               <div
                 key={dept.id}
-                className="glass-card p-4 rounded-2xl border border-white/10 hover:border-rose-400/40 hover:bg-white/[0.06] transition-all duration-200 group cursor-default"
+                className="glass-card p-4 rounded-2xl border border-white/10 hover:border-rose-400/40 hover:bg-white/[0.06] transition-all duration-500 ease-out group cursor-default"
               >
                 <div className="flex items-center justify-between text-sm font-bold text-white">
-                  <span className="group-hover:text-rose-300 transition truncate pr-2">{dept.name}</span>
+                  <span className="group-hover:text-rose-300 transition-colors duration-300 truncate pr-2">{dept.name}</span>
                   <span className="text-[10px] font-mono text-rose-300 bg-rose-500/20 px-2 py-0.5 rounded-full border border-rose-500/30 shrink-0">
                     {dept.code}
                   </span>
                 </div>
-                {/* Full info revealed ONLY on hover */}
-                <div className="overflow-hidden max-h-0 opacity-0 group-hover:max-h-24 group-hover:opacity-100 group-hover:mt-2.5 group-hover:pt-2.5 group-hover:border-t group-hover:border-white/10 transition-all duration-300 ease-out">
+                {/* Full info revealed on hover with smooth cooldown */}
+                <div className="overflow-hidden max-h-0 opacity-0 group-hover:max-h-24 group-hover:opacity-100 group-hover:mt-2.5 group-hover:pt-2.5 group-hover:border-t group-hover:border-white/10 transition-all duration-500 ease-out">
                   <p className="text-xs text-slate-300 leading-relaxed">{dept.description}</p>
                 </div>
               </div>
@@ -463,21 +463,32 @@ export function ClubsHierarchyView({
             {allMemberships.map((m) => (
               <div
                 key={m.id}
-                className="glass-card p-4 rounded-2xl border border-white/10 hover:border-blue-400/50 hover:bg-white/[0.06] hover:shadow-xl hover:shadow-blue-500/10 transition-all duration-200 group cursor-default"
+                className="glass-card p-4 rounded-2xl border border-white/10 hover:border-blue-400/50 hover:bg-white/[0.06] hover:shadow-xl hover:shadow-blue-500/10 transition-all duration-500 ease-out group cursor-default"
               >
                 {/* Low-Profile Primary Header (Always Visible) */}
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3 min-w-0">
-                    <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-700 via-indigo-600 to-cyan-400 p-[1.5px] shadow-sm shrink-0">
-                      <div className="w-full h-full bg-[#0a1124] rounded-[9px] flex items-center justify-center text-white text-sm font-black">
-                        {m.userFullName?.charAt(0) || "M"}
+                    <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-700 via-indigo-600 to-cyan-400 p-[1.5px] shadow-sm shrink-0 overflow-hidden">
+                      <div className="w-full h-full bg-[#0a1124] rounded-[9px] flex items-center justify-center text-white text-sm font-black overflow-hidden">
+                        {m.userAvatarUrl ? (
+                          <img
+                            src={m.userAvatarUrl}
+                            alt={m.userFullName || "Avatar"}
+                            className="w-full h-full object-cover rounded-[9px]"
+                          />
+                        ) : (
+                          m.userFullName?.charAt(0) || "M"
+                        )}
                       </div>
                     </div>
                     <div className="min-w-0">
-                      <div className="text-sm font-bold text-white group-hover:text-cyan-300 transition truncate">
+                      <div className="text-sm font-bold text-white group-hover:text-cyan-300 transition-colors duration-300 truncate">
                         {m.userFullName || "Student Member"}
                       </div>
                       <div className="text-xs text-slate-400 truncate font-mono">
+                        {m.userTitle ? (
+                          <span className="text-cyan-300 font-semibold">{m.userTitle} &bull; </span>
+                        ) : null}
                         {m.organizationName}
                       </div>
                     </div>
@@ -496,8 +507,8 @@ export function ClubsHierarchyView({
                   </span>
                 </div>
 
-                {/* Progressive Disclosure: Full details reveal ONLY on cursor hover */}
-                <div className="overflow-hidden max-h-0 opacity-0 group-hover:max-h-28 group-hover:opacity-100 group-hover:mt-3 group-hover:pt-3 group-hover:border-t group-hover:border-white/10 transition-all duration-300 ease-out space-y-2.5">
+                {/* Progressive Disclosure: Full details reveal on cursor hover with smooth cooldown */}
+                <div className="overflow-hidden max-h-0 opacity-0 group-hover:max-h-28 group-hover:opacity-100 group-hover:mt-3 group-hover:pt-3 group-hover:border-t group-hover:border-white/10 transition-all duration-500 ease-out space-y-2.5">
                   <div className="flex items-center justify-between text-xs">
                     <span className="font-mono text-cyan-300 font-semibold uppercase px-2 py-0.5 rounded-md bg-blue-500/15 border border-blue-400/25">
                       {m.membershipType} TIER

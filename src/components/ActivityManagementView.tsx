@@ -275,7 +275,7 @@ export function ActivityManagementView({
         {activities.map((act) => (
           <div
             key={act.id}
-            className="glass-panel rounded-3xl p-5 sm:p-6 flex flex-col justify-between hover:border-indigo-400/50 hover:bg-white/[0.05] hover:shadow-xl hover:shadow-indigo-500/10 transition-all duration-200 group cursor-default"
+            className="glass-panel rounded-3xl p-5 sm:p-6 flex flex-col justify-between hover:border-indigo-400/50 hover:bg-white/[0.05] hover:shadow-xl hover:shadow-indigo-500/10 transition-all duration-500 ease-out group cursor-default"
           >
             <div>
               <div className="flex items-center justify-between mb-2.5">
@@ -297,7 +297,7 @@ export function ActivityManagementView({
                 </span>
               </div>
 
-              <h4 className="font-extrabold text-base text-white leading-snug group-hover:text-indigo-200 transition">
+              <h4 className="font-extrabold text-base text-white leading-snug group-hover:text-indigo-200 transition-colors duration-300">
                 {act.title}
               </h4>
 
@@ -306,8 +306,8 @@ export function ActivityManagementView({
                 <span>{act.scheduledDate} &bull; {act.startTime}</span>
               </div>
 
-              {/* Progressive Disclosure: Revealed on cursor hover */}
-              <div className="overflow-hidden max-h-0 opacity-0 group-hover:max-h-48 group-hover:opacity-100 group-hover:mt-3 group-hover:pt-3 group-hover:border-t group-hover:border-white/10 transition-all duration-300 ease-out space-y-2">
+              {/* Progressive Disclosure: Revealed on cursor hover with smooth cooldown */}
+              <div className="overflow-hidden max-h-0 opacity-0 group-hover:max-h-48 group-hover:opacity-100 group-hover:mt-3 group-hover:pt-3 group-hover:border-t group-hover:border-white/10 transition-all duration-500 ease-out space-y-2">
                 <p className="text-xs text-indigo-300 font-medium">
                   Topic: {act.topic}
                 </p>

@@ -137,6 +137,8 @@ export interface OrganizationMembership {
   organizationName?: string;
   userFullName?: string;
   userEmail?: string;
+  userAvatarUrl?: string;
+  userTitle?: string;
   studentId?: string;
 }
 

@@ -54,12 +54,20 @@ const GOOGLE_WORKSPACE_ACCOUNTS = [
     color: "from-amber-600 to-orange-500",
   },
   {
-    name: "Elena Rostova",
-    email: "elena.president@mirai.edu",
+    name: "Sapna Singh",
+    email: "sapna.president@mirai.edu",
     role: "President — MALHAR",
     sub: "Cultural Society Executive (5 Departments)",
-    initials: "ER",
+    initials: "SS",
     color: "from-rose-600 to-pink-500",
+  },
+  {
+    name: "Kiran Sinha",
+    email: "kiran.vp@mirai.edu",
+    role: "Vice President — MALHAR",
+    sub: "Cultural Society Executive (2nd Year)",
+    initials: "KS",
+    color: "from-pink-600 to-rose-400",
   },
   {
     name: "Campus Administrator",

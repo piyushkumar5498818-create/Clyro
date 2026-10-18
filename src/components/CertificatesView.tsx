@@ -192,7 +192,7 @@ export function CertificatesView({
         {certificates.map((cert) => (
           <div
             key={cert.id}
-            className="glass-panel rounded-3xl p-5 sm:p-6 flex flex-col justify-between hover:border-indigo-400/50 hover:bg-white/[0.05] hover:shadow-xl hover:shadow-indigo-500/10 transition-all duration-200 group cursor-default"
+            className="glass-panel rounded-3xl p-5 sm:p-6 flex flex-col justify-between hover:border-indigo-400/50 hover:bg-white/[0.05] hover:shadow-xl hover:shadow-indigo-500/10 transition-all duration-500 ease-out group cursor-default"
           >
             <div>
               <div className="flex items-center justify-between mb-2.5">
@@ -204,15 +204,15 @@ export function CertificatesView({
                 </span>
               </div>
 
-              <h4 className="font-extrabold text-base text-white leading-snug group-hover:text-indigo-200 transition">
+              <h4 className="font-extrabold text-base text-white leading-snug group-hover:text-indigo-200 transition-colors duration-300">
                 {cert.title}
               </h4>
               <p className="text-xs text-slate-300 mt-1">
                 Recipient: <strong className="text-white">{cert.userFullName}</strong>
               </p>
 
-              {/* Progressive Disclosure: Revealed on cursor hover */}
-              <div className="overflow-hidden max-h-0 opacity-0 group-hover:max-h-36 group-hover:opacity-100 group-hover:mt-3 group-hover:pt-3 group-hover:border-t group-hover:border-white/10 transition-all duration-300 ease-out space-y-2">
+              {/* Progressive Disclosure: Revealed on cursor hover with smooth cooldown */}
+              <div className="overflow-hidden max-h-0 opacity-0 group-hover:max-h-36 group-hover:opacity-100 group-hover:mt-3 group-hover:pt-3 group-hover:border-t group-hover:border-white/10 transition-all duration-500 ease-out space-y-2">
                 <div className="p-3 rounded-2xl glass-card text-xs font-mono text-slate-300 space-y-1.5">
                   <div className="flex justify-between">
                     <span className="text-slate-400">Ledger Code:</span>
