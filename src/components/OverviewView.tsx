@@ -125,39 +125,63 @@ export function OverviewView({
           </div>
         </div>
 
-        {/* Global Metric Summary */}
+        {/* Global Metric Summary with 3D Pop Out */}
         <div className="mt-6 pt-6 border-t border-white/10 grid grid-cols-2 md:grid-cols-4 gap-4">
-          <div className="glass-card-static p-5 rounded-2xl border border-white/10">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9, y: 16 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            transition={{ type: "spring", stiffness: 90, damping: 15, delay: 0.05 }}
+            whileHover={{ scale: 1.035, y: -4, transition: { type: "spring", stiffness: 450, damping: 18 } }}
+            className="glass-card p-5 rounded-2xl border border-white/10 hover:border-blue-400/40 hover:shadow-xl hover:shadow-blue-500/10 cursor-default transition-all"
+          >
             <div className="text-xs font-bold text-slate-400 uppercase tracking-wider">Active Clubs</div>
             <div className="text-3xl font-black text-white mt-1">
               {institutionalMetrics?.totalOrganizations || 3}
             </div>
             <div className="text-xs text-blue-300 font-semibold mt-1">NEX-CELL &bull; Kaizen &bull; MALHAR</div>
-          </div>
+          </motion.div>
 
-          <div className="glass-card-static p-5 rounded-2xl border border-white/10">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9, y: 16 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            transition={{ type: "spring", stiffness: 90, damping: 15, delay: 0.1 }}
+            whileHover={{ scale: 1.035, y: -4, transition: { type: "spring", stiffness: 450, damping: 18 } }}
+            className="glass-card p-5 rounded-2xl border border-white/10 hover:border-cyan-400/40 hover:shadow-xl hover:shadow-cyan-500/10 cursor-default transition-all"
+          >
             <div className="text-xs font-bold text-slate-400 uppercase tracking-wider">Specialized Units</div>
             <div className="text-3xl font-black text-white mt-1">
               {institutionalMetrics?.totalUnits || 8}
             </div>
             <div className="text-xs text-slate-300 font-medium mt-1">3 Tech Domains &bull; 5 Cultural Depts</div>
-          </div>
+          </motion.div>
 
-          <div className="glass-card-static p-5 rounded-2xl border border-white/10">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9, y: 16 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            transition={{ type: "spring", stiffness: 90, damping: 15, delay: 0.15 }}
+            whileHover={{ scale: 1.035, y: -4, transition: { type: "spring", stiffness: 450, damping: 18 } }}
+            className="glass-card p-5 rounded-2xl border border-white/10 hover:border-emerald-400/40 hover:shadow-xl hover:shadow-emerald-500/10 cursor-default transition-all"
+          >
             <div className="text-xs font-bold text-slate-400 uppercase tracking-wider">Enrolled Members</div>
             <div className="text-3xl font-black text-emerald-400 mt-1">
               {institutionalMetrics?.totalEnrolledStudents || 1}
             </div>
             <div className="text-xs text-emerald-400 font-semibold mt-1">Verified distinct students</div>
-          </div>
+          </motion.div>
 
-          <div className="glass-card-static p-5 rounded-2xl border border-white/10">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9, y: 16 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            transition={{ type: "spring", stiffness: 90, damping: 15, delay: 0.2 }}
+            whileHover={{ scale: 1.035, y: -4, transition: { type: "spring", stiffness: 450, damping: 18 } }}
+            className="glass-card p-5 rounded-2xl border border-white/10 hover:border-amber-400/40 hover:shadow-xl hover:shadow-amber-500/10 cursor-default transition-all"
+          >
             <div className="text-xs font-bold text-slate-400 uppercase tracking-wider">Venture Tracks</div>
             <div className="text-3xl font-black text-amber-400 mt-1">
               {institutionalMetrics?.totalInitiatives || 6}
             </div>
             <div className="text-xs text-amber-300 font-medium mt-1">Active flagship initiatives</div>
-          </div>
+          </motion.div>
         </div>
       </motion.div>
 
@@ -181,9 +205,10 @@ export function OverviewView({
           <div className="space-y-2.5">
             {/* NEX-CELL */}
             <motion.div
-              whileHover={{ y: -2 }}
+              whileHover={{ scale: 1.025, y: -4, transition: { type: "spring", stiffness: 450, damping: 20 } }}
+              whileTap={{ scale: 0.98 }}
               onClick={() => navigateTo("clubs")}
-              className="glass-card p-3.5 rounded-2xl cursor-pointer group"
+              className="glass-card p-3.5 rounded-2xl cursor-pointer group hover:border-amber-400/40 hover:shadow-lg hover:shadow-amber-500/10 transition-colors"
             >
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
@@ -205,9 +230,10 @@ export function OverviewView({
 
             {/* Kaizen Tech */}
             <motion.div
-              whileHover={{ y: -2 }}
+              whileHover={{ scale: 1.025, y: -4, transition: { type: "spring", stiffness: 450, damping: 20 } }}
+              whileTap={{ scale: 0.98 }}
               onClick={() => navigateTo("clubs")}
-              className="glass-card p-3.5 rounded-2xl cursor-pointer group"
+              className="glass-card p-3.5 rounded-2xl cursor-pointer group hover:border-indigo-400/40 hover:shadow-lg hover:shadow-indigo-500/10 transition-colors"
             >
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
@@ -229,9 +255,10 @@ export function OverviewView({
 
             {/* MALHAR */}
             <motion.div
-              whileHover={{ y: -2 }}
+              whileHover={{ scale: 1.025, y: -4, transition: { type: "spring", stiffness: 450, damping: 20 } }}
+              whileTap={{ scale: 0.98 }}
               onClick={() => navigateTo("clubs")}
-              className="glass-card p-3.5 rounded-2xl cursor-pointer group"
+              className="glass-card p-3.5 rounded-2xl cursor-pointer group hover:border-rose-400/40 hover:shadow-lg hover:shadow-rose-500/10 transition-colors"
             >
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">

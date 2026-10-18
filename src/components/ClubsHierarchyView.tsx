@@ -360,7 +360,11 @@ export function ClubsHierarchyView({
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5">
             {nexcell.initiatives?.map((init) => (
-              <div key={init.id} className="glass-card p-3 rounded-xl">
+              <motion.div
+                key={init.id}
+                whileHover={{ scale: 1.03, y: -3, transition: { type: "spring", stiffness: 450, damping: 20 } }}
+                className="glass-card p-3.5 rounded-2xl border border-white/10 hover:border-amber-400/40 hover:shadow-lg hover:shadow-amber-500/10 transition-colors"
+              >
                 <div className="flex items-center justify-between text-xs font-bold text-white mb-1">
                   <span>{init.name}</span>
                   <span className="text-[10px] text-amber-300 bg-amber-500/20 px-2 py-0.5 rounded-full">
@@ -368,7 +372,7 @@ export function ClubsHierarchyView({
                   </span>
                 </div>
                 <p className="text-[11px] text-slate-300">{init.description}</p>
-              </div>
+              </motion.div>
             ))}
           </div>
         </motion.div>
@@ -421,7 +425,11 @@ export function ClubsHierarchyView({
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5">
             {malhar.units?.map((dept) => (
-              <div key={dept.id} className="glass-card p-3 rounded-xl">
+              <motion.div
+                key={dept.id}
+                whileHover={{ scale: 1.03, y: -3, transition: { type: "spring", stiffness: 450, damping: 20 } }}
+                className="glass-card p-3.5 rounded-2xl border border-white/10 hover:border-rose-400/40 hover:shadow-lg hover:shadow-rose-500/10 transition-colors"
+              >
                 <div className="flex items-center justify-between text-xs font-bold text-white mb-1">
                   <span>{dept.name}</span>
                   <span className="text-[10px] text-rose-300 bg-rose-500/20 px-2 py-0.5 rounded-full">
@@ -429,18 +437,19 @@ export function ClubsHierarchyView({
                   </span>
                 </div>
                 <p className="text-[11px] text-slate-300">{dept.description}</p>
-              </div>
+              </motion.div>
             ))}
           </div>
         </motion.div>
       )}
 
-      {/* Member Section with Scroll Fade-In Animations */}
+      {/* Member Section with 3D Pop Out from Back Animations */}
       <motion.div
-        initial={{ opacity: 0, y: 28 }}
-        whileInView={{ opacity: 1, y: 0 }}
+        initial={{ opacity: 0, scale: 0.9, y: 36, filter: "blur(8px)" }}
+        whileInView={{ opacity: 1, scale: 1, y: 0, filter: "blur(0px)" }}
         viewport={{ once: true, margin: "-60px" }}
-        transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+        transition={{ type: "spring", stiffness: 75, damping: 15, mass: 0.85 }}
+        style={{ transformPerspective: 1200 }}
         className="glass-panel rounded-3xl p-6 sm:p-8 space-y-6"
       >
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-white/10">
@@ -461,7 +470,7 @@ export function ClubsHierarchyView({
           </div>
         </div>
 
-        {/* Member Cards Grid with Scroll-Triggered Staggered Fade-In */}
+        {/* Member Cards Grid with 3D Pop-In Staggered Entrance */}
         {allMemberships.length === 0 ? (
           <div className="py-12 text-center text-slate-400 space-y-2">
             <Users className="w-10 h-10 mx-auto text-slate-500 opacity-60" />
@@ -472,15 +481,19 @@ export function ClubsHierarchyView({
             {allMemberships.map((m, idx) => (
               <motion.div
                 key={m.id}
-                initial={{ opacity: 0, y: 24 }}
-                whileInView={{ opacity: 1, y: 0 }}
+                initial={{ opacity: 0, scale: 0.88, y: 28, filter: "blur(6px)" }}
+                whileInView={{ opacity: 1, scale: 1, y: 0, filter: "blur(0px)" }}
                 viewport={{ once: true, margin: "-40px" }}
+                whileHover={{ scale: 1.025, y: -4, transition: { type: "spring", stiffness: 450, damping: 20 } }}
                 transition={{
-                  duration: 0.5,
-                  delay: Math.min(idx * 0.06, 0.35),
-                  ease: [0.16, 1, 0.3, 1],
+                  type: "spring",
+                  stiffness: 85,
+                  damping: 15,
+                  mass: 0.85,
+                  delay: Math.min(idx * 0.05, 0.3),
                 }}
-                className="glass-card p-5 rounded-2xl flex flex-col justify-between gap-4 border border-white/10 hover:border-blue-400/40 hover:bg-white/[0.06] transition-all group"
+                style={{ transformPerspective: 1000 }}
+                className="glass-card p-5 rounded-2xl flex flex-col justify-between gap-4 border border-white/10 hover:border-blue-400/40 hover:bg-white/[0.06] hover:shadow-xl hover:shadow-blue-500/10 transition-all group cursor-default"
               >
                 <div className="space-y-3">
                   <div className="flex items-center justify-between">

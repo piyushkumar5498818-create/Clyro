@@ -203,11 +203,17 @@ export function CertificatesView({
           <motion.div
             key={cert.id}
             variants={{
-              hidden: { opacity: 0, y: 16 },
-              show: { opacity: 1, y: 0, transition: { duration: 0.3 } },
+              hidden: { opacity: 0, scale: 0.88, y: 28, filter: "blur(6px)" },
+              show: {
+                opacity: 1,
+                scale: 1,
+                y: 0,
+                filter: "blur(0px)",
+                transition: { type: "spring", stiffness: 85, damping: 16 },
+              },
             }}
-            whileHover={{ y: -3, transition: { duration: 0.2 } }}
-            className="glass-panel rounded-3xl p-6 flex flex-col justify-between hover:border-indigo-400/40 transition duration-300"
+            whileHover={{ scale: 1.025, y: -4, transition: { type: "spring", stiffness: 450, damping: 20 } }}
+            className="glass-panel rounded-3xl p-6 flex flex-col justify-between hover:border-indigo-400/40 hover:shadow-2xl hover:shadow-indigo-500/10 transition-all"
           >
             <div>
               <div className="flex items-center justify-between mb-3">
