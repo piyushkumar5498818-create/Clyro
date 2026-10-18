@@ -126,37 +126,37 @@ export function OverviewView({
         </div>
 
         {/* Global Metric Summary */}
-        <div className="mt-5 pt-5 border-t border-white/10 grid grid-cols-2 md:grid-cols-4 gap-3">
-          <div className="glass-card-static p-3.5 rounded-2xl">
-            <div className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Clubs</div>
-            <div className="text-xl font-black text-white mt-0.5">
+        <div className="mt-6 pt-6 border-t border-white/10 grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div className="glass-card-static p-5 rounded-2xl border border-white/10">
+            <div className="text-xs font-bold text-slate-400 uppercase tracking-wider">Active Clubs</div>
+            <div className="text-3xl font-black text-white mt-1">
               {institutionalMetrics?.totalOrganizations || 3}
             </div>
-            <div className="text-[10px] text-indigo-400 font-medium">NEX-CELL &middot; Kaizen &middot; MALHAR</div>
+            <div className="text-xs text-blue-300 font-semibold mt-1">NEX-CELL &bull; Kaizen &bull; MALHAR</div>
           </div>
 
-          <div className="glass-card-static p-3.5 rounded-2xl">
-            <div className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Units</div>
-            <div className="text-xl font-black text-white mt-0.5">
+          <div className="glass-card-static p-5 rounded-2xl border border-white/10">
+            <div className="text-xs font-bold text-slate-400 uppercase tracking-wider">Specialized Units</div>
+            <div className="text-3xl font-black text-white mt-1">
               {institutionalMetrics?.totalUnits || 8}
             </div>
-            <div className="text-[10px] text-slate-400">3 Domains &middot; 5 Depts</div>
+            <div className="text-xs text-slate-300 font-medium mt-1">3 Tech Domains &bull; 5 Cultural Depts</div>
           </div>
 
-          <div className="glass-card-static p-3.5 rounded-2xl">
-            <div className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Enrolled</div>
-            <div className="text-xl font-black text-emerald-400 mt-0.5">
+          <div className="glass-card-static p-5 rounded-2xl border border-white/10">
+            <div className="text-xs font-bold text-slate-400 uppercase tracking-wider">Enrolled Members</div>
+            <div className="text-3xl font-black text-emerald-400 mt-1">
               {institutionalMetrics?.totalEnrolledStudents || 1}
             </div>
-            <div className="text-[10px] text-emerald-400/80 font-medium">Distinct students</div>
+            <div className="text-xs text-emerald-400 font-semibold mt-1">Verified distinct students</div>
           </div>
 
-          <div className="glass-card-static p-3.5 rounded-2xl">
-            <div className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Initiatives</div>
-            <div className="text-xl font-black text-amber-400 mt-0.5">
+          <div className="glass-card-static p-5 rounded-2xl border border-white/10">
+            <div className="text-xs font-bold text-slate-400 uppercase tracking-wider">Venture Tracks</div>
+            <div className="text-3xl font-black text-amber-400 mt-1">
               {institutionalMetrics?.totalInitiatives || 6}
             </div>
-            <div className="text-[10px] text-amber-400/80">Venture tracks</div>
+            <div className="text-xs text-amber-300 font-medium mt-1">Active flagship initiatives</div>
           </div>
         </div>
       </motion.div>

@@ -435,84 +435,119 @@ export function ClubsHierarchyView({
         </motion.div>
       )}
 
-      {/* Membership Review Section */}
-      {canReview && (
-        <motion.div
-          initial={{ opacity: 0, y: 12 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.25, delay: 0.15 }}
-          className="glass-panel rounded-3xl p-5 sm:p-6 space-y-3"
-        >
-          <div className="flex items-center justify-between">
-            <h3 className="font-bold text-sm text-white flex items-center gap-2">
-              <Users className="w-4 h-4 text-indigo-400" />
-              Membership Queue ({allMemberships.length})
+      {/* Member Section with Scroll Fade-In Animations */}
+      <motion.div
+        initial={{ opacity: 0, y: 28 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, margin: "-60px" }}
+        transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+        className="glass-panel rounded-3xl p-6 sm:p-8 space-y-6"
+      >
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-white/10">
+          <div>
+            <h3 className="text-xl sm:text-2xl font-black text-white flex items-center gap-2.5">
+              <Users className="w-6 h-6 text-cyan-400" />
+              Student Members &amp; Enrolment Queue
             </h3>
+            <p className="text-sm text-slate-300 mt-1">
+              Active verified students across NEX-CELL, Kaizen Tech, and MALHAR.
+            </p>
           </div>
 
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs">
-              <thead className="bg-white/5 border-b border-white/10 text-slate-300 uppercase font-semibold">
-                <tr>
-                  <th className="py-2 px-3">Student</th>
-                  <th className="py-2 px-3">Club</th>
-                  <th className="py-2 px-3">Tier</th>
-                  <th className="py-2 px-3">Status</th>
-                  <th className="py-2 px-3">Date</th>
-                  <th className="py-2 px-3 text-right">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-white/5">
-                {allMemberships.map((m) => (
-                  <tr key={m.id} className="hover:bg-white/[0.04] transition">
-                    <td className="py-2 px-3 font-semibold text-white">
-                      {m.userFullName}
-                    </td>
-                    <td className="py-2 px-3 text-slate-200 font-bold">{m.organizationName}</td>
-                    <td className="py-2 px-3 uppercase text-indigo-300">{m.membershipType}</td>
-                    <td className="py-2 px-3">
-                      <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase border ${
+          <div className="flex items-center gap-2">
+            <span className="px-3.5 py-1.5 rounded-xl bg-blue-500/15 text-cyan-300 text-xs font-mono font-bold border border-blue-400/30">
+              {allMemberships.length} ENROLLED RECORDS
+            </span>
+          </div>
+        </div>
+
+        {/* Member Cards Grid with Scroll-Triggered Staggered Fade-In */}
+        {allMemberships.length === 0 ? (
+          <div className="py-12 text-center text-slate-400 space-y-2">
+            <Users className="w-10 h-10 mx-auto text-slate-500 opacity-60" />
+            <div className="text-sm font-semibold">No membership records found.</div>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+            {allMemberships.map((m, idx) => (
+              <motion.div
+                key={m.id}
+                initial={{ opacity: 0, y: 24 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: "-40px" }}
+                transition={{
+                  duration: 0.5,
+                  delay: Math.min(idx * 0.06, 0.35),
+                  ease: [0.16, 1, 0.3, 1],
+                }}
+                className="glass-card p-5 rounded-2xl flex flex-col justify-between gap-4 border border-white/10 hover:border-blue-400/40 hover:bg-white/[0.06] transition-all group"
+              >
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="w-11 h-11 rounded-2xl bg-gradient-to-tr from-blue-700 via-indigo-600 to-cyan-400 p-[1.5px] shadow-md shrink-0">
+                        <div className="w-full h-full bg-[#0a1124] rounded-[14px] flex items-center justify-center text-white text-sm font-black">
+                          {m.userFullName?.charAt(0) || "M"}
+                        </div>
+                      </div>
+                      <div className="min-w-0">
+                        <div className="text-base font-bold text-white group-hover:text-blue-300 transition truncate">
+                          {m.userFullName || "Student Member"}
+                        </div>
+                        <div className="text-xs text-slate-400 truncate mt-0.5 font-mono">
+                          {m.organizationName}
+                        </div>
+                      </div>
+                    </div>
+
+                    <span
+                      className={`px-3 py-1 rounded-full text-xs font-bold uppercase border shrink-0 ${
                         m.status === "approved"
                           ? "bg-emerald-500/20 text-emerald-300 border-emerald-500/30"
                           : m.status === "rejected"
                           ? "bg-rose-500/20 text-rose-300 border-rose-500/30"
                           : "bg-amber-500/20 text-amber-300 border-amber-500/30"
-                      }`}>
-                        {m.status}
-                      </span>
-                    </td>
-                    <td className="py-2 px-3 text-slate-400">
-                      {new Date(m.requestedAt).toLocaleDateString()}
-                    </td>
-                    <td className="py-2 px-3 text-right">
-                      {m.status === "pending" && (
-                        <div className="inline-flex items-center gap-1.5">
-                          <button
-                            onClick={() => handleReviewMembership(m.id, "approved")}
-                            disabled={loading}
-                            className="p-1 rounded-lg bg-emerald-500/20 text-emerald-300 hover:bg-emerald-500/30 transition"
-                            title="Approve"
-                          >
-                            <Check className="w-3.5 h-3.5" />
-                          </button>
-                          <button
-                            onClick={() => handleReviewMembership(m.id, "rejected")}
-                            disabled={loading}
-                            className="p-1 rounded-lg bg-rose-500/20 text-rose-300 hover:bg-rose-500/30 transition"
-                            title="Reject"
-                          >
-                            <X className="w-3.5 h-3.5" />
-                          </button>
-                        </div>
-                      )}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+                      }`}
+                    >
+                      {m.status}
+                    </span>
+                  </div>
+
+                  <div className="flex items-center justify-between text-xs pt-1 border-t border-white/5">
+                    <span className="font-mono text-cyan-300 font-semibold uppercase px-2.5 py-0.5 rounded-lg bg-blue-500/10 border border-blue-400/20">
+                      {m.membershipType} TIER
+                    </span>
+                    <span className="text-slate-400 text-xs">
+                      Joined {new Date(m.requestedAt).toLocaleDateString()}
+                    </span>
+                  </div>
+                </div>
+
+                {canReview && m.status === "pending" && (
+                  <div className="pt-2 border-t border-white/10 flex items-center gap-2">
+                    <button
+                      onClick={() => handleReviewMembership(m.id, "approved")}
+                      disabled={loading}
+                      className="flex-1 py-2 px-3 rounded-xl bg-emerald-600/25 hover:bg-emerald-600/40 text-emerald-300 border border-emerald-500/40 text-xs font-bold transition flex items-center justify-center gap-1.5"
+                    >
+                      <Check className="w-4 h-4" />
+                      <span>Approve</span>
+                    </button>
+                    <button
+                      onClick={() => handleReviewMembership(m.id, "rejected")}
+                      disabled={loading}
+                      className="flex-1 py-2 px-3 rounded-xl bg-rose-600/25 hover:bg-rose-600/40 text-rose-300 border border-rose-500/40 text-xs font-bold transition flex items-center justify-center gap-1.5"
+                    >
+                      <X className="w-4 h-4" />
+                      <span>Reject</span>
+                    </button>
+                  </div>
+                )}
+              </motion.div>
+            ))}
           </div>
-        </motion.div>
-      )}
+        )}
+      </motion.div>
 
       {/* Minimal Membership Modal */}
       {selectedOrg && (
