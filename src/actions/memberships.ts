@@ -2,13 +2,14 @@
 
 import { db } from "@/lib/store";
 import { OrganizationMembership } from "@/types/database";
+import { getCurrentUserAction } from "@/actions/auth";
 
 export async function requestMembershipAction(
   orgId: string,
   type: "primary" | "secondary" = "primary"
 ): Promise<{ success: boolean; data?: OrganizationMembership; error?: string }> {
   try {
-    const activeUser = db.getActiveUser();
+    const activeUser = await getCurrentUserAction();
     if (activeUser.role !== "student" && activeUser.role !== "member") {
       return { success: false, error: "Only student members can request organization memberships." };
     }
@@ -24,7 +25,7 @@ export async function getClubMembershipsAction(orgId: string): Promise<Organizat
 }
 
 export async function getMyMembershipsAction(): Promise<OrganizationMembership[]> {
-  const activeUser = db.getActiveUser();
+  const activeUser = await getCurrentUserAction();
   return db.getMembershipsByUser(activeUser.id);
 }
 
@@ -33,7 +34,7 @@ export async function reviewMembershipAction(
   status: "approved" | "rejected"
 ): Promise<{ success: boolean; data?: OrganizationMembership; error?: string }> {
   try {
-    const activeUser = db.getActiveUser();
+    const activeUser = await getCurrentUserAction();
     const canReview = [
       "president",
       "vice_president",

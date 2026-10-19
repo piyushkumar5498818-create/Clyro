@@ -2,6 +2,7 @@
 
 import { db } from "@/lib/store";
 import { Submission, SubmissionType } from "@/types/database";
+import { getCurrentUserAction } from "@/actions/auth";
 
 export async function submitWorkAction(
   activityId: string,
@@ -9,12 +10,33 @@ export async function submitWorkAction(
   payload: { linkUrl?: string; fileUrl?: string; notes?: string }
 ): Promise<{ success: boolean; data?: Submission; error?: string }> {
   try {
-    const activeUser = db.getActiveUser();
-    if (activeUser.role !== "student") {
-      return { success: false, error: "Only enrolled students can submit activity work." };
+    const activeUser = await getCurrentUserAction();
+    if (!activeUser) {
+      return { success: false, error: "Authentication required to submit work." };
     }
 
-    if (submissionType === "link" && !payload.linkUrl) {
+    const canSubmit = [
+      "student",
+      "member",
+      "lead",
+      "unit_lead",
+      "president",
+      "vice_president",
+      "admin",
+      "student_coordinator",
+      "society_admin",
+      "college_admin",
+    ].includes(activeUser.role);
+
+    if (!canSubmit) {
+      return { success: false, error: "Only enrolled club participants can submit activity deliverables." };
+    }
+
+    if (!activityId || !activityId.trim()) {
+      return { success: false, error: "Please select a valid activity for submission." };
+    }
+
+    if (submissionType === "link" && (!payload.linkUrl || !payload.linkUrl.trim())) {
       return { success: false, error: "Please provide a valid submission URL/link." };
     }
 

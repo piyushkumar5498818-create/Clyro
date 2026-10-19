@@ -2,6 +2,7 @@
 
 import { db } from "@/lib/store";
 import { Evaluation } from "@/types/database";
+import { getCurrentUserAction } from "@/actions/auth";
 
 export async function evaluateSubmissionAction(
   submissionId: string,
@@ -9,7 +10,7 @@ export async function evaluateSubmissionAction(
   legacyFeedback?: string
 ): Promise<{ success: boolean; data?: Evaluation; error?: string }> {
   try {
-    const activeUser = db.getActiveUser();
+    const activeUser = await getCurrentUserAction();
     const canEvaluate = [
       "president",
       "vice_president",

@@ -2,13 +2,14 @@
 
 import { db } from "@/lib/store";
 import { AttendanceToken, AttendanceRecord } from "@/types/database";
+import { getCurrentUserAction } from "@/actions/auth";
 
 export async function generateTokenAction(
   activityId: string,
   minutes = 60
 ): Promise<{ success: boolean; data?: AttendanceToken; error?: string }> {
   try {
-    const activeUser = db.getActiveUser();
+    const activeUser = await getCurrentUserAction();
     const canManage = [
       "president",
       "vice_president",
@@ -41,7 +42,7 @@ export async function checkInStudentAction(
   method: "qr_code" | "passcode" = "qr_code"
 ): Promise<{ success: boolean; data?: AttendanceRecord; error?: string }> {
   try {
-    const activeUser = db.getActiveUser();
+    const activeUser = await getCurrentUserAction();
     if (activeUser.role !== "student" && activeUser.role !== "member") {
       return { success: false, error: "Only student members can check in to sessions." };
     }
@@ -59,7 +60,7 @@ export async function correctAttendanceAction(
   reason: string
 ): Promise<{ success: boolean; data?: AttendanceRecord; error?: string }> {
   try {
-    const activeUser = db.getActiveUser();
+    const activeUser = await getCurrentUserAction();
     const canCorrect = [
       "president",
       "vice_president",
