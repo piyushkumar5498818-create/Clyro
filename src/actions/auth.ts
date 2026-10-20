@@ -166,6 +166,16 @@ export async function logoutAction(): Promise<{ success: boolean }> {
 }
 
 export async function switchUserAction(userId: string): Promise<Profile> {
+  // Gracefully close previous active user session if switching personas
+  try {
+    const prevUser = await getCurrentUserAction();
+    if (prevUser && prevUser.id !== userId) {
+      testingStore.endSession(prevUser.id);
+    }
+  } catch (err) {
+    console.error("[switchUserAction] Error ending previous session:", err);
+  }
+
   const user = db.setActiveUser(userId);
   const token = signSessionToken(user.id, user.email, user.role);
 

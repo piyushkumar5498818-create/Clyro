@@ -71,15 +71,11 @@ export async function checkInStudentAction(
       return { success: false, error: "Authentication required to check in." };
     }
 
-    if (activeUser.role !== "student" && activeUser.role !== "member") {
-      return { success: false, error: "Only student members can check in to sessions." };
-    }
-
     const record = db.checkInStudent(activityId, activeUser.id, code, method);
-    const activity = db.getActivityById(activityId);
+    const activity = db.getActivityById(record.activityId);
 
     // Verify attendance persisted in backend store
-    const allRecords = db.getAttendanceRecords(activityId);
+    const allRecords = db.getAttendanceRecords(record.activityId);
     const verified = Boolean(allRecords.some((r) => r.id === record.id && r.userId === activeUser.id));
 
     try {

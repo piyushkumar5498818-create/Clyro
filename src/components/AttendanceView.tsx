@@ -48,7 +48,7 @@ export function AttendanceView({
   const [newStatus, setNewStatus] = useState<AttendanceRecord["status"]>("present");
   const [correctionReason, setCorrectionReason] = useState("");
 
-  const isStudent = currentUser.role === "member" || currentUser.role === "student";
+  const canCheckIn = Boolean(currentUser);
   const canManage =
     currentUser.role === "president" ||
     currentUser.role === "vice_president" ||
@@ -63,7 +63,9 @@ export function AttendanceView({
     const token = await getActiveTokenAction(actId);
     setActiveToken(token || null);
     if (token) {
-      const url = await QRCode.toDataURL(token.tokenCode, { margin: 2, width: 220 });
+      const origin = typeof window !== "undefined" ? window.location.origin : "https://clyro-brown.vercel.app";
+      const checkInUrl = `${origin}/dashboard?checkin=${token.tokenCode}&activityId=${actId}`;
+      const url = await QRCode.toDataURL(checkInUrl, { margin: 2, width: 220 });
       setQrDataUrl(url);
     } else {
       setQrDataUrl("");
@@ -81,13 +83,15 @@ export function AttendanceView({
   const handleGenerateToken = async () => {
     setLoading(true);
     setMessage(null);
-    const res = await generateTokenAction(selectedActId, 60);
+    const res = await generateTokenAction(selectedActId, 1440);
     setLoading(false);
     if (res.success && res.data) {
       setActiveToken(res.data);
-      const url = await QRCode.toDataURL(res.data.tokenCode, { margin: 2, width: 220 });
+      const origin = typeof window !== "undefined" ? window.location.origin : "https://clyro-brown.vercel.app";
+      const checkInUrl = `${origin}/dashboard?checkin=${res.data.tokenCode}&activityId=${selectedActId}`;
+      const url = await QRCode.toDataURL(checkInUrl, { margin: 2, width: 220 });
       setQrDataUrl(url);
-      setMessage({ text: "New 60-minute dynamic attendance token activated!", type: "success" });
+      setMessage({ text: "Dynamic attendance window active (24-hour verification window).", type: "success" });
     } else {
       setMessage({ text: res.error || "Failed to generate token", type: "error" });
     }
@@ -231,32 +235,56 @@ export function AttendanceView({
 
         {/* Right Columns: Student Check-In Form & Real-Time Roster */}
         <div className="lg:col-span-2 space-y-6">
-          {/* Student Fast Check-In Form */}
-          {isStudent && (
+          {/* Student / Attendee Fast Check-In Form */}
+          {canCheckIn && (
             <div className="glass-panel rounded-3xl p-6 space-y-4">
-              <div className="flex items-center gap-2">
-                <KeyRound className="w-5 h-5 text-indigo-400" />
-                <h3 className="font-extrabold text-base text-white">
-                  Student Instant Check-In
-                </h3>
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                <div className="flex items-center gap-2">
+                  <KeyRound className="w-5 h-5 text-indigo-400" />
+                  <h3 className="font-extrabold text-base text-white">
+                    Instant Attendance Check-In
+                  </h3>
+                </div>
+                {activeToken && (
+                  <button
+                    type="button"
+                    onClick={() => setPasscode(activeToken.tokenCode)}
+                    className="self-start sm:self-auto px-2.5 py-1 rounded-xl text-[11px] font-mono font-bold bg-indigo-500/20 text-indigo-300 hover:bg-indigo-500/30 border border-indigo-400/30 transition flex items-center gap-1.5 active:scale-95"
+                    title="Tap to autofill current session passcode on phone"
+                  >
+                    <span>Auto-Fill:</span>
+                    <span className="text-white underline">{activeToken.tokenCode}</span>
+                  </button>
+                )}
               </div>
+
+              {records.some((r) => r.userId === currentUser.id) && (
+                <div className="p-3 rounded-2xl bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-between text-xs">
+                  <div className="flex items-center gap-2 text-emerald-300 font-bold">
+                    <CheckCircle className="w-4 h-4 text-emerald-400 shrink-0" />
+                    <span>You are marked present for this session</span>
+                  </div>
+                  <span className="text-[10px] font-mono text-emerald-400">VERIFIED</span>
+                </div>
+              )}
+
               <p className="text-xs text-slate-300">
-                Enter the 6-character session passcode displayed by your coordinator on the screen.
+                Enter the session passcode displayed on the screen or scan the QR code with your phone camera.
               </p>
 
-              <form onSubmit={handleCheckIn} className="flex gap-2">
+              <form onSubmit={handleCheckIn} className="flex flex-col sm:flex-row gap-2">
                 <input
                   type="text"
-                  placeholder="e.g. GITCLUB-7492"
+                  placeholder={activeToken ? `e.g. ${activeToken.tokenCode}` : "e.g. GITCLUB-7492"}
                   value={passcode}
                   onChange={(e) => setPasscode(e.target.value)}
-                  className="flex-1 font-mono uppercase tracking-wider text-sm rounded-xl border border-white/15 p-2.5 bg-slate-900/60 text-white font-bold backdrop-blur-md focus:border-blue-400 focus:outline-none"
+                  className="flex-1 font-mono uppercase tracking-wider text-sm rounded-xl border border-white/15 p-2.5 bg-slate-900/60 text-white font-bold backdrop-blur-md focus:border-indigo-400 focus:outline-none"
                   required
                 />
                 <button
                   type="submit"
                   disabled={loading}
-                  className="glass-btn-primary px-6 py-2.5 rounded-xl font-bold text-xs shadow-md"
+                  className="glass-btn-primary px-6 py-2.5 rounded-xl font-bold text-xs shadow-md whitespace-nowrap"
                 >
                   {loading ? "Checking..." : "Confirm Presence"}
                 </button>

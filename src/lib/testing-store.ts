@@ -2,55 +2,85 @@ import fs from "fs";
 import path from "path";
 import { TestingSession, TestingActionRecord, TestingOutcome } from "@/types/database";
 
-const DATA_DIR = path.join(process.cwd(), "data");
-const STORE_FILE = path.join(DATA_DIR, "testing-log.json");
-
 interface TestingLogData {
   sessions: TestingSession[];
   actions: TestingActionRecord[];
 }
 
-// In-memory cache for ultra-fast access, persisted to disk on every change
-let cache: TestingLogData | null = null;
+declare global {
+  // eslint-disable-next-line no-var
+  var __gitclub_testing_cache: TestingLogData | undefined;
+}
+
+const IS_SERVERLESS = Boolean(
+  process.env.VERCEL ||
+  process.env.AWS_LAMBDA_FUNCTION_NAME ||
+  process.env.NODE_ENV === "production"
+);
+
+// If running on Vercel/serverless, use writable /tmp directory
+const DATA_DIR = IS_SERVERLESS ? "/tmp/gitclub-data" : path.join(process.cwd(), "data");
+const STORE_FILE = path.join(DATA_DIR, "testing-log.json");
+const BUNDLED_FILE = path.join(process.cwd(), "data", "testing-log.json");
 
 function ensureLoaded(): TestingLogData {
-  if (cache) return cache;
+  if (globalThis.__gitclub_testing_cache) return globalThis.__gitclub_testing_cache;
 
   try {
-    if (!fs.existsSync(DATA_DIR)) {
-      fs.mkdirSync(DATA_DIR, { recursive: true });
-    }
-
+    // 1. Try reading from runtime STORE_FILE (/tmp or data/)
     if (fs.existsSync(STORE_FILE)) {
       const raw = fs.readFileSync(STORE_FILE, "utf-8");
-      cache = JSON.parse(raw);
-      if (cache && Array.isArray(cache.sessions) && Array.isArray(cache.actions)) {
-        return cache;
+      const parsed = JSON.parse(raw);
+      if (parsed && Array.isArray(parsed.sessions) && Array.isArray(parsed.actions)) {
+        globalThis.__gitclub_testing_cache = parsed;
+        return parsed;
+      }
+    }
+
+    // 2. Fallback to bundled seed file
+    if (fs.existsSync(BUNDLED_FILE)) {
+      const raw = fs.readFileSync(BUNDLED_FILE, "utf-8");
+      const parsed = JSON.parse(raw);
+      if (parsed && Array.isArray(parsed.sessions) && Array.isArray(parsed.actions)) {
+        globalThis.__gitclub_testing_cache = parsed;
+        saveToDisk();
+        return parsed;
       }
     }
   } catch (err) {
     console.error("[TestingStore] Failed to read store file, reinitializing:", err);
   }
 
-  cache = {
+  globalThis.__gitclub_testing_cache = {
     sessions: [],
     actions: [],
   };
   saveToDisk();
-  return cache;
+  return globalThis.__gitclub_testing_cache;
 }
 
 function saveToDisk(): void {
+  const cache = globalThis.__gitclub_testing_cache;
   if (!cache) return;
   try {
     if (!fs.existsSync(DATA_DIR)) {
       fs.mkdirSync(DATA_DIR, { recursive: true });
     }
-    const tempFile = `${STORE_FILE}.tmp.${Date.now()}`;
+    const tempFile = `${STORE_FILE}.tmp.${Date.now()}.${Math.random().toString(36).substring(2, 6)}`;
     fs.writeFileSync(tempFile, JSON.stringify(cache, null, 2), "utf-8");
     fs.renameSync(tempFile, STORE_FILE);
   } catch (err) {
-    console.error("[TestingStore] Failed to write store file:", err);
+    // If primary write failed (e.g. read-only in production), fallback to /tmp
+    try {
+      const fallbackDir = "/tmp/gitclub-data";
+      if (!fs.existsSync(fallbackDir)) {
+        fs.mkdirSync(fallbackDir, { recursive: true });
+      }
+      const fallbackFile = path.join(fallbackDir, "testing-log.json");
+      fs.writeFileSync(fallbackFile, JSON.stringify(cache, null, 2), "utf-8");
+    } catch (tmpErr) {
+      console.error("[TestingStore] Failed to write fallback tmp file:", tmpErr);
+    }
   }
 }
 
@@ -84,17 +114,24 @@ export function formatRoleLabel(role: string): string {
 export const testingStore = {
   /**
    * Starts a new authenticated testing session upon login.
+   * Auto-closes any previous open sessions for this user so ghost sessions never stack.
    */
   startSession(userId: string, role: string, userFullName: string, userAgent?: string): TestingSession {
     const data = ensureLoaded();
     const now = new Date().toISOString();
 
-    // Check if there is an existing unconfirmed session for this user and close it
-    const existingActive = data.sessions.find(
+    // Close any previous open session for this user to guarantee clean synchronization
+    const openSessions = data.sessions.filter(
       (s) => s.userId === userId && !s.loggedOutAt
     );
-    if (existingActive) {
-      existingActive.lastActiveAt = now;
+    for (const openSess of openSessions) {
+      openSess.loggedOutAt = now;
+      openSess.isConfirmedLogout = false;
+      for (const act of data.actions) {
+        if (act.sessionId === openSess.id && !act.loggedOutAt) {
+          act.loggedOutAt = now;
+        }
+      }
     }
 
     const session: TestingSession = {
@@ -132,36 +169,39 @@ export const testingStore = {
   },
 
   /**
-   * Confirms logout for an active testing session.
+   * Confirms logout for all active sessions of this user.
    */
   endSession(userId: string): { success: boolean; session?: TestingSession } {
     const data = ensureLoaded();
     const now = new Date().toISOString();
 
-    // Find the latest active session for this user
-    const session = data.sessions.find(
+    // Find all active sessions for this user
+    const activeSessions = data.sessions.filter(
       (s) => s.userId === userId && !s.loggedOutAt
     );
 
-    if (session) {
-      session.loggedOutAt = now;
-      session.isConfirmedLogout = true;
-      session.lastActiveAt = now;
+    if (activeSessions.length > 0) {
+      for (const session of activeSessions) {
+        session.loggedOutAt = now;
+        session.isConfirmedLogout = true;
+        session.lastActiveAt = now;
 
-      // Update all past action records in this session with the confirmed logout timestamp
-      for (const act of data.actions) {
-        if (act.sessionId === session.id) {
-          act.loggedOutAt = now;
+        // Update all past action records in this session with the confirmed logout timestamp
+        for (const act of data.actions) {
+          if (act.sessionId === session.id && !act.loggedOutAt) {
+            act.loggedOutAt = now;
+          }
         }
       }
 
+      const primary = activeSessions[0];
       // Record the explicit logout action
       const logoutAction: TestingActionRecord = {
         id: "tact_" + Math.random().toString(36).substring(2, 9),
-        sessionId: session.id,
-        userId,
-        role: formatRoleLabel(session.role),
-        loggedInAt: session.loggedInAt,
+        sessionId: primary.id,
+        userId: primary.userId,
+        role: formatRoleLabel(primary.role),
+        loggedInAt: primary.loggedInAt,
         doneWhatExactly: "Logged out of the application",
         loggedOutAt: now,
         successfulOrNot: "Successful",
@@ -170,10 +210,10 @@ export const testingStore = {
 
       data.actions.unshift(logoutAction);
       saveToDisk();
-      return { success: true, session };
+      return { success: true, session: primary };
     }
 
-    // Even if no active session in memory, record logout event safely
+    // Fallback: If no open session found in memory, record logout safely
     const fallbackAction: TestingActionRecord = {
       id: "tact_" + Math.random().toString(36).substring(2, 9),
       sessionId: "tsess_fallback",
@@ -248,6 +288,7 @@ export const testingStore = {
 
   /**
    * Returns all testing action records with optional filtering.
+   * Auto-reconciles idle sessions (>20 min inactive) so they don't linger as "Active Session".
    */
   getActions(filter?: {
     role?: string;
@@ -256,6 +297,26 @@ export const testingStore = {
     limit?: number;
   }): TestingActionRecord[] {
     const data = ensureLoaded();
+
+    // Auto-reconcile idle sessions (>20 min inactive)
+    const IDLE_TIMEOUT_MS = 20 * 60 * 1000;
+    const nowTime = Date.now();
+    for (const sess of data.sessions) {
+      if (!sess.loggedOutAt) {
+        const lastActivityTime = new Date(sess.lastActiveAt || sess.createdAt).getTime();
+        if (nowTime - lastActivityTime > IDLE_TIMEOUT_MS) {
+          const timeoutTime = new Date(lastActivityTime + IDLE_TIMEOUT_MS).toISOString();
+          sess.loggedOutAt = timeoutTime;
+          sess.isConfirmedLogout = false;
+          for (const act of data.actions) {
+            if (act.sessionId === sess.id && !act.loggedOutAt) {
+              act.loggedOutAt = timeoutTime;
+            }
+          }
+        }
+      }
+    }
+
     let result = [...data.actions];
 
     // Ensure loggedOutAt is synchronized with session state
@@ -268,7 +329,7 @@ export const testingStore = {
       const sess = sessionMap.get(act.sessionId);
       return {
         ...act,
-        loggedOutAt: sess?.loggedOutAt || null,
+        loggedOutAt: sess?.loggedOutAt || act.loggedOutAt || null,
       };
     });
 
@@ -303,14 +364,21 @@ export const testingStore = {
    */
   getActiveSessions(): TestingSession[] {
     const data = ensureLoaded();
-    return data.sessions.filter((s) => !s.loggedOutAt);
+    const nowTime = Date.now();
+    const IDLE_TIMEOUT_MS = 20 * 60 * 1000;
+
+    return data.sessions.filter((s) => {
+      if (s.loggedOutAt || s.isConfirmedLogout) return false;
+      const lastActivityTime = new Date(s.lastActiveAt || s.createdAt).getTime();
+      return nowTime - lastActivityTime <= IDLE_TIMEOUT_MS;
+    });
   },
 
   /**
    * Clears testing records (used in test setup / reset).
    */
   resetStore(): void {
-    cache = { sessions: [], actions: [] };
+    globalThis.__gitclub_testing_cache = { sessions: [], actions: [] };
     saveToDisk();
   },
 };

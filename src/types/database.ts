@@ -306,3 +306,18 @@ export interface TestingActionRecord {
   timestamp: string;
 }
 
+export interface FormattedTestingLogEntry {
+  id: string;
+  role: string; // Field 1: Role
+  loggedInOn: string; // Field 2: Logged in on (formatted fallback)
+  doneWhatExactly: string; // Field 3: Done what exactly
+  loggedOutOn: string; // Field 4: Logged out on (formatted fallback)
+  successfulOrNot?: TestingOutcome; // Field 5: Successful or not
+  loggedInAt?: string; // Raw ISO timestamp for local client timezone rendering
+  loggedOutAt?: string | null; // Raw ISO timestamp for local client timezone rendering
+  timestamp: string;
+  userFullName: string;
+  userId: string;
+  sessionId: string;
+}
+

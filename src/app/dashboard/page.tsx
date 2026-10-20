@@ -21,6 +21,7 @@ import {
 import { getActivitiesAction } from "@/actions/activities";
 import { getSubmissionsAction } from "@/actions/submissions";
 import { getCertificatesAction } from "@/actions/certificates";
+import { checkInStudentAction } from "@/actions/attendance";
 import {
   getMyMembershipsAction,
   getClubMembershipsAction,
@@ -101,6 +102,32 @@ export default function DashboardPage() {
   useEffect(() => {
     loadAllData();
   }, []);
+
+  // Auto check-in if tester arrived via phone camera QR scan (?checkin=CODE&activityId=ID)
+  useEffect(() => {
+    if (typeof window === "undefined" || !currentUser) return;
+    const params = new URLSearchParams(window.location.search);
+    const checkinCode = params.get("checkin");
+    const actId = params.get("activityId");
+
+    if (checkinCode) {
+      scrollToSection("attendance");
+      checkInStudentAction(actId || "", checkinCode, "qr_code")
+        .then((res) => {
+          if (res.success) {
+            alert(`QR Check-In Verified! Attendance recorded for: ${checkinCode}`);
+            loadAllData();
+          } else {
+            console.log("[QR Check-In] Result:", res.error);
+          }
+        })
+        .finally(() => {
+          // Clean URL params cleanly without refreshing
+          const cleanUrl = window.location.pathname;
+          window.history.replaceState({}, "", cleanUrl);
+        });
+    }
+  }, [currentUser]);
 
   // Track active section for Lenis smooth scroll indicators
   useEffect(() => {

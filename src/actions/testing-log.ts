@@ -1,21 +1,10 @@
 "use server";
 
-import { testingStore, formatRoleLabel } from "@/lib/testing-store";
+import { testingStore } from "@/lib/testing-store";
 import { getCurrentUserAction } from "@/actions/auth";
-import { TestingActionRecord, TestingOutcome, TestingSession } from "@/types/database";
+import { TestingSession, FormattedTestingLogEntry } from "@/types/database";
 
-export interface FormattedTestingLogEntry {
-  id: string;
-  role: string; // Field 1: Role
-  loggedInOn: string; // Field 2: Logged in on
-  doneWhatExactly: string; // Field 3: Done what exactly
-  loggedOutOn: string; // Field 4: Logged out on
-  successfulOrNot?: TestingOutcome; // Field 5: Successful or not
-  timestamp: string;
-  userFullName: string;
-  userId: string;
-  sessionId: string;
-}
+export type { FormattedTestingLogEntry };
 
 export async function getTestingLogAction(filter?: {
   role?: string;
@@ -33,7 +22,7 @@ export async function getTestingLogAction(filter?: {
     const records = testingStore.getActions(filter);
 
     return records.map((r) => {
-      // Format timestamps cleanly for human readability
+      // Server fallback strings
       const loginDate = new Date(r.loggedInAt);
       const formattedLogin = !isNaN(loginDate.getTime())
         ? loginDate.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit" }) +
@@ -60,6 +49,8 @@ export async function getTestingLogAction(filter?: {
         doneWhatExactly: r.doneWhatExactly,
         loggedOutOn: formattedLogout,
         successfulOrNot: r.successfulOrNot,
+        loggedInAt: r.loggedInAt,
+        loggedOutAt: r.loggedOutAt,
         timestamp: r.timestamp,
         userFullName: r.userId,
         userId: r.userId,
