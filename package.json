@@ -8,6 +8,7 @@
     "start": "next start",
     "lint": "next lint",
     "test": "npx tsx scripts/test-workflow.ts",
+    "test:multi": "npx tsx scripts/test-multi-user-workflow.ts",
     "test:load": "npx tsx scripts/load-test.ts"
   },
   "dependencies": {

@@ -73,6 +73,7 @@ export function RightNavbarDrawer({
     { id: "activities", label: "Activity Proposals & Approvals", tag: "04", icon: CheckSquare },
     { id: "submissions", label: "Submissions & Rubrics", tag: "05", icon: FileSpreadsheet },
     { id: "certificates", label: "Verified Transcripts & Certs", tag: "06", icon: Award },
+    { id: "testing-log", label: "Multi-User Testing Log", tag: "07", icon: ShieldCheck },
   ];
 
   const handleNavClick = (sectionId: string) => {

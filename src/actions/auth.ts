@@ -3,6 +3,7 @@
 import { db } from "@/lib/store";
 import { Profile } from "@/types/database";
 import { cookies } from "next/headers";
+import { testingStore } from "@/lib/testing-store";
 import {
   signSessionToken,
   verifySessionToken,
@@ -80,6 +81,13 @@ export async function loginAction(
     maxAge: 60 * 60 * 24 * 7, // 7 days
   });
 
+  // Record authenticated testing session
+  try {
+    testingStore.startSession(user.id, user.role, user.fullName);
+  } catch (logErr) {
+    console.error("[TestingStore] Failed to record login session:", logErr);
+  }
+
   return { success: true, user };
 }
 
@@ -113,6 +121,12 @@ export async function googleWorkspaceAuthAction(
     maxAge: 60 * 60 * 24 * 7,
   });
 
+  try {
+    testingStore.startSession(user.id, user.role, user.fullName, "Google Workspace SSO");
+  } catch (logErr) {
+    console.error("[TestingStore] Failed to record SSO login session:", logErr);
+  }
+
   return { success: true, user };
 }
 
@@ -136,6 +150,15 @@ export async function getGoogleAuthMetadataAction(): Promise<{
 }
 
 export async function logoutAction(): Promise<{ success: boolean }> {
+  try {
+    const activeUser = await getCurrentUserAction();
+    if (activeUser) {
+      testingStore.endSession(activeUser.id);
+    }
+  } catch (logErr) {
+    console.error("[TestingStore] Failed to record logout:", logErr);
+  }
+
   cookies().delete(SESSION_COOKIE);
   cookies().delete(LEGACY_SESSION_COOKIE);
   cookies().delete(LEGACY_COOKIE);
@@ -153,6 +176,12 @@ export async function switchUserAction(userId: string): Promise<Profile> {
     sameSite: "lax",
     maxAge: 60 * 60 * 24 * 7,
   });
+
+  try {
+    testingStore.startSession(user.id, user.role, user.fullName, "Persona Switch");
+  } catch (logErr) {
+    console.error("[TestingStore] Failed to record switch session:", logErr);
+  }
 
   return user;
 }

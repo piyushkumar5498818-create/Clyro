@@ -2,6 +2,8 @@
 
 import { db } from "@/lib/store";
 import { Activity, ActivityFormat, RubricCriteria } from "@/types/database";
+import { getCurrentUserAction } from "@/actions/auth";
+import { testingStore } from "@/lib/testing-store";
 
 export async function getActivitiesAction(orgId?: string): Promise<Activity[]> {
   return db.getActivities(orgId);
@@ -28,7 +30,11 @@ export async function createActivityAction(formData: {
   rubricCriteria?: RubricCriteria[];
 }): Promise<{ success: boolean; data?: Activity; error?: string }> {
   try {
-    const activeUser = db.getActiveUser();
+    const activeUser = await getCurrentUserAction();
+    if (!activeUser) {
+      return { success: false, error: "Authentication required to propose activity plans." };
+    }
+
     const canCreate = [
       "president",
       "vice_president",
@@ -70,6 +76,23 @@ export async function createActivityAction(formData: {
       createdBy: activeUser.id,
     });
 
+    // Verify persisted state in backend store
+    const persisted = db.getActivityById(newAct.id);
+    const verified = Boolean(persisted && persisted.id === newAct.id);
+
+    try {
+      testingStore.recordAction({
+        userId: activeUser.id,
+        role: activeUser.role,
+        userFullName: activeUser.fullName,
+        doneWhatExactly: `Created and submitted activity proposal: "${newAct.title}"`,
+        outcome: verified ? "Successful" : "Failed",
+        targetEntityId: newAct.id,
+      });
+    } catch (logErr) {
+      console.error("[TestingStore] Failed to record create activity action:", logErr);
+    }
+
     return { success: true, data: newAct };
   } catch (err: unknown) {
     return { success: false, error: (err as Error).message };
@@ -82,7 +105,11 @@ export async function reviewActivityAction(
   reason?: string
 ): Promise<{ success: boolean; data?: Activity; error?: string }> {
   try {
-    const activeUser = db.getActiveUser();
+    const activeUser = await getCurrentUserAction();
+    if (!activeUser) {
+      return { success: false, error: "Authentication required to review activities." };
+    }
+
     const canApprove = [
       "president",
       "vice_president",
@@ -96,6 +123,27 @@ export async function reviewActivityAction(
     }
 
     const reviewed = db.reviewActivity(activityId, approved, activeUser.id, reason);
+
+    // Verify status transition in backend store
+    const persisted = db.getActivityById(activityId);
+    const expectedStatus = approved ? "approved" : "rejected";
+    const verified = Boolean(persisted && persisted.status === expectedStatus);
+
+    try {
+      testingStore.recordAction({
+        userId: activeUser.id,
+        role: activeUser.role,
+        userFullName: activeUser.fullName,
+        doneWhatExactly: approved
+          ? `Approved activity plan: "${reviewed.title}"`
+          : `Rejected activity plan: "${reviewed.title}"`,
+        outcome: verified ? "Successful" : "Failed",
+        targetEntityId: activityId,
+      });
+    } catch (logErr) {
+      console.error("[TestingStore] Failed to record review activity action:", logErr);
+    }
+
     return { success: true, data: reviewed };
   } catch (err: unknown) {
     return { success: false, error: (err as Error).message };

@@ -3,6 +3,7 @@
 import { db } from "@/lib/store";
 import { AttendanceToken, AttendanceRecord } from "@/types/database";
 import { getCurrentUserAction } from "@/actions/auth";
+import { testingStore } from "@/lib/testing-store";
 
 export async function generateTokenAction(
   activityId: string,
@@ -10,6 +11,10 @@ export async function generateTokenAction(
 ): Promise<{ success: boolean; data?: AttendanceToken; error?: string }> {
   try {
     const activeUser = await getCurrentUserAction();
+    if (!activeUser) {
+      return { success: false, error: "Authentication required to open attendance." };
+    }
+
     const canManage = [
       "president",
       "vice_president",
@@ -26,6 +31,25 @@ export async function generateTokenAction(
     }
 
     const token = db.generateAttendanceToken(activityId, activeUser.id, minutes);
+    const activity = db.getActivityById(activityId);
+
+    // Verify token active in backend store
+    const activeToken = db.getActiveToken(activityId);
+    const verified = Boolean(activeToken && activeToken.tokenCode === token.tokenCode);
+
+    try {
+      testingStore.recordAction({
+        userId: activeUser.id,
+        role: activeUser.role,
+        userFullName: activeUser.fullName,
+        doneWhatExactly: `Opened attendance check-in session for "${activity?.title || "Activity"}" (Token: ${token.tokenCode})`,
+        outcome: verified ? "Successful" : "Failed",
+        targetEntityId: activityId,
+      });
+    } catch (logErr) {
+      console.error("[TestingStore] Failed to record generate token action:", logErr);
+    }
+
     return { success: true, data: token };
   } catch (err: unknown) {
     return { success: false, error: (err as Error).message };
@@ -43,11 +67,34 @@ export async function checkInStudentAction(
 ): Promise<{ success: boolean; data?: AttendanceRecord; error?: string }> {
   try {
     const activeUser = await getCurrentUserAction();
+    if (!activeUser) {
+      return { success: false, error: "Authentication required to check in." };
+    }
+
     if (activeUser.role !== "student" && activeUser.role !== "member") {
       return { success: false, error: "Only student members can check in to sessions." };
     }
 
     const record = db.checkInStudent(activityId, activeUser.id, code, method);
+    const activity = db.getActivityById(activityId);
+
+    // Verify attendance persisted in backend store
+    const allRecords = db.getAttendanceRecords(activityId);
+    const verified = Boolean(allRecords.some((r) => r.id === record.id && r.userId === activeUser.id));
+
+    try {
+      testingStore.recordAction({
+        userId: activeUser.id,
+        role: activeUser.role,
+        userFullName: activeUser.fullName,
+        doneWhatExactly: `Marked attendance for "${activity?.title || "Activity"}" via ${method === "qr_code" ? "QR Code" : "Passcode"}`,
+        outcome: verified ? "Successful" : "Failed",
+        targetEntityId: record.id,
+      });
+    } catch (logErr) {
+      console.error("[TestingStore] Failed to record check-in action:", logErr);
+    }
+
     return { success: true, data: record };
   } catch (err: unknown) {
     return { success: false, error: (err as Error).message };
@@ -61,6 +108,10 @@ export async function correctAttendanceAction(
 ): Promise<{ success: boolean; data?: AttendanceRecord; error?: string }> {
   try {
     const activeUser = await getCurrentUserAction();
+    if (!activeUser) {
+      return { success: false, error: "Authentication required to correct attendance." };
+    }
+
     const canCorrect = [
       "president",
       "vice_president",
@@ -68,24 +119,36 @@ export async function correctAttendanceAction(
       "admin",
       "student_coordinator",
       "society_admin",
+      "unit_lead",
       "faculty_advisor",
       "college_admin",
     ].includes(activeUser.role);
     if (!canCorrect) {
-      return { success: false, error: "Only presidents, vice presidents, leads, or campus admins can correct attendance." };
+      return { success: false, error: "Unauthorized to correct attendance records." };
     }
 
-    if (!reason || reason.trim().length < 5) {
-      return { success: false, error: "A valid explanation reason (at least 5 characters) is mandatory for audit compliance." };
+    const corrected = db.correctAttendance(recordId, status, activeUser.id, reason);
+
+    try {
+      testingStore.recordAction({
+        userId: activeUser.id,
+        role: activeUser.role,
+        userFullName: activeUser.fullName,
+        doneWhatExactly: `Corrected attendance record status to ${status.toUpperCase()} (Audit Reason: "${reason}")`,
+        outcome: "Successful",
+        targetEntityId: recordId,
+      });
+    } catch (logErr) {
+      console.error("[TestingStore] Failed to record correct attendance action:", logErr);
     }
 
-    const rec = db.correctAttendance(recordId, status, reason.trim(), activeUser.id);
-    return { success: true, data: rec };
+    return { success: true, data: corrected };
   } catch (err: unknown) {
     return { success: false, error: (err as Error).message };
   }
 }
 
-export async function getAttendanceRecordsAction(activityId: string): Promise<AttendanceRecord[]> {
+export async function getAttendanceRecordsAction(activityId?: string): Promise<AttendanceRecord[]> {
+  if (!activityId) return [];
   return db.getAttendanceRecords(activityId);
 }

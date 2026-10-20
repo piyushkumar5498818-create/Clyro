@@ -3,6 +3,7 @@
 import { db } from "@/lib/store";
 import { Submission, SubmissionType } from "@/types/database";
 import { getCurrentUserAction } from "@/actions/auth";
+import { testingStore } from "@/lib/testing-store";
 
 export async function submitWorkAction(
   activityId: string,
@@ -41,6 +42,25 @@ export async function submitWorkAction(
     }
 
     const sub = db.submitWork(activityId, activeUser.id, submissionType, payload);
+    const activity = db.getActivityById(activityId);
+
+    // Verify submission persisted in backend store
+    const allSubs = db.getSubmissions(activityId);
+    const verified = Boolean(allSubs.some((s) => s.id === sub.id && s.userId === activeUser.id));
+
+    try {
+      testingStore.recordAction({
+        userId: activeUser.id,
+        role: activeUser.role,
+        userFullName: activeUser.fullName,
+        doneWhatExactly: `Submitted deliverable link: ${payload.linkUrl || "Uploaded File"} for "${activity?.title || "Activity"}"`,
+        outcome: verified ? "Successful" : "Failed",
+        targetEntityId: sub.id,
+      });
+    } catch (logErr) {
+      console.error("[TestingStore] Failed to record submit deliverable action:", logErr);
+    }
+
     return { success: true, data: sub };
   } catch (err: unknown) {
     return { success: false, error: (err as Error).message };

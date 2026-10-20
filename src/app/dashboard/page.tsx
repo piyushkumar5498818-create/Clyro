@@ -32,6 +32,7 @@ import { ActivityManagementView } from "@/components/ActivityManagementView";
 import { AttendanceView } from "@/components/AttendanceView";
 import { SubmissionsView } from "@/components/SubmissionsView";
 import { CertificatesView } from "@/components/CertificatesView";
+import { TestingLogView } from "@/components/TestingLogView";
 import { GitclubLogo } from "@/components/GitclubLogo";
 import { scrollToSection } from "@/components/SmoothScroll";
 import { ScrollFadeIn } from "@/components/ScrollFadeIn";
@@ -110,6 +111,7 @@ export default function DashboardPage() {
       "activities",
       "submissions",
       "certificates",
+      "testing-log",
     ];
 
     const handleScroll = () => {
@@ -305,6 +307,24 @@ export default function DashboardPage() {
               certificates={certificates}
               onRefresh={loadAllData}
             />
+          </section>
+        </ScrollFadeIn>
+
+        {/* Section 07: [07] / MULTI-USER TESTING LOG */}
+        <ScrollFadeIn direction="up">
+          <section id="testing-log" className="scroll-mt-20 space-y-3.5">
+            <div className="flex items-center gap-2 pb-2.5 border-b border-white/10 font-mono">
+              <span className="text-xs font-black text-cyan-400 tracking-wider px-2 py-0.5 rounded-md bg-cyan-500/15 border border-cyan-400/30">
+                [07]
+              </span>
+              <span className="text-xs font-bold text-white tracking-wider uppercase truncate">
+                Multi-User Testing Log
+              </span>
+              <span className="text-[10px] text-cyan-300 font-semibold ml-auto font-mono">
+                5-FIELD SYNCHRONIZED QA
+              </span>
+            </div>
+            <TestingLogView currentUser={currentUser} />
           </section>
         </ScrollFadeIn>
 

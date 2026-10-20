@@ -3,6 +3,7 @@
 import { db } from "@/lib/store";
 import { Evaluation } from "@/types/database";
 import { getCurrentUserAction } from "@/actions/auth";
+import { testingStore } from "@/lib/testing-store";
 
 export async function evaluateSubmissionAction(
   submissionId: string,
@@ -11,6 +12,10 @@ export async function evaluateSubmissionAction(
 ): Promise<{ success: boolean; data?: Evaluation; error?: string }> {
   try {
     const activeUser = await getCurrentUserAction();
+    if (!activeUser) {
+      return { success: false, error: "Authentication required to evaluate submissions." };
+    }
+
     const canEvaluate = [
       "president",
       "vice_president",
@@ -45,6 +50,23 @@ export async function evaluateSubmissionAction(
     }
 
     const evaluation = db.evaluateSubmission(submissionId, activeUser.id, breakdown, feedback);
+
+    // Verify evaluation persisted in backend store
+    const verified = Boolean(evaluation && evaluation.totalScore !== undefined);
+
+    try {
+      testingStore.recordAction({
+        userId: activeUser.id,
+        role: activeUser.role,
+        userFullName: activeUser.fullName,
+        doneWhatExactly: `Graded deliverable submission with rubric score: ${evaluation.totalScore}/100`,
+        outcome: verified ? "Successful" : "Failed",
+        targetEntityId: submissionId,
+      });
+    } catch (logErr) {
+      console.error("[TestingStore] Failed to record evaluation action:", logErr);
+    }
+
     return { success: true, data: evaluation };
   } catch (err: unknown) {
     return { success: false, error: (err as Error).message };

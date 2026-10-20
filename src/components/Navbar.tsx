@@ -34,6 +34,7 @@ const SECTION_MAP: Record<string, { tag: string; label: string }> = {
   activities: { tag: "04", label: "Proposals & Approvals" },
   submissions: { tag: "05", label: "Deliverables & Rubrics" },
   certificates: { tag: "06", label: "Transcripts & Ledger" },
+  "testing-log": { tag: "07", label: "Multi-User Testing Log" },
 };
 
 export function Navbar({

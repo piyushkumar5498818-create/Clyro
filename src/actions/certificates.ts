@@ -2,6 +2,8 @@
 
 import { db } from "@/lib/store";
 import { Certificate, CertificateType } from "@/types/database";
+import { getCurrentUserAction } from "@/actions/auth";
+import { testingStore } from "@/lib/testing-store";
 
 export async function issueCertificateAction(
   userId: string,
@@ -11,7 +13,11 @@ export async function issueCertificateAction(
   activityId?: string
 ): Promise<{ success: boolean; data?: Certificate; error?: string }> {
   try {
-    const activeUser = db.getActiveUser();
+    const activeUser = await getCurrentUserAction();
+    if (!activeUser) {
+      return { success: false, error: "Authentication required to issue certificates." };
+    }
+
     const canIssue = [
       "president",
       "vice_president",
@@ -25,6 +31,24 @@ export async function issueCertificateAction(
     }
 
     const cert = db.issueCertificate(userId, organizationId, title, type, activityId);
+
+    // Verify certificate in ledger
+    const verifiedCert = db.verifyCertificate(cert.verificationCode);
+    const verified = Boolean(verifiedCert && verifiedCert.verificationCode === cert.verificationCode);
+
+    try {
+      testingStore.recordAction({
+        userId: activeUser.id,
+        role: activeUser.role,
+        userFullName: activeUser.fullName,
+        doneWhatExactly: `Issued verifiable certificate: "${cert.title}" (${cert.verificationCode})`,
+        outcome: verified ? "Successful" : "Failed",
+        targetEntityId: cert.id,
+      });
+    } catch (logErr) {
+      console.error("[TestingStore] Failed to record issue certificate action:", logErr);
+    }
+
     return { success: true, data: cert };
   } catch (err: unknown) {
     return { success: false, error: (err as Error).message };
@@ -51,6 +75,22 @@ export async function verifyCertificateAction(
       verified: false,
       message: "Certificate code not found in Mirai School of Technology ledger. Document may be counterfeit, unapproved, or tampered.",
     };
+  }
+
+  try {
+    const activeUser = await getCurrentUserAction();
+    if (activeUser) {
+      testingStore.recordAction({
+        userId: activeUser.id,
+        role: activeUser.role,
+        userFullName: activeUser.fullName,
+        doneWhatExactly: `Verified authentic certificate in public ledger (${code})`,
+        outcome: "Successful",
+        targetEntityId: cert.id,
+      });
+    }
+  } catch (logErr) {
+    // Non-blocking for public verification
   }
 
   return {

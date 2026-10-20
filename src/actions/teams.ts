@@ -2,6 +2,8 @@
 
 import { db } from "@/lib/store";
 import { Team } from "@/types/database";
+import { getCurrentUserAction } from "@/actions/auth";
+import { testingStore } from "@/lib/testing-store";
 
 export async function createTeamAction(
   activityId: string,
@@ -9,9 +11,13 @@ export async function createTeamAction(
   memberUserIds: string[]
 ): Promise<{ success: boolean; data?: Team; error?: string }> {
   try {
-    const activeUser = db.getActiveUser();
-    if (activeUser.role !== "student") {
-      return { success: false, error: "Only students can form event teams." };
+    const activeUser = await getCurrentUserAction();
+    if (!activeUser) {
+      return { success: false, error: "Authentication required to form event teams." };
+    }
+
+    if (activeUser.role !== "student" && activeUser.role !== "member") {
+      return { success: false, error: "Only student members can form event teams." };
     }
 
     if (!name || name.trim().length < 3) {
@@ -19,6 +25,20 @@ export async function createTeamAction(
     }
 
     const team = db.createTeam(activityId, name.trim(), activeUser.id, memberUserIds);
+
+    try {
+      testingStore.recordAction({
+        userId: activeUser.id,
+        role: activeUser.role,
+        userFullName: activeUser.fullName,
+        doneWhatExactly: `Created event team: "${name.trim()}" (${memberUserIds.length + 1} members)`,
+        outcome: team ? "Successful" : "Failed",
+        targetEntityId: team.id,
+      });
+    } catch (logErr) {
+      console.error("[TestingStore] Failed to record create team action:", logErr);
+    }
+
     return { success: true, data: team };
   } catch (err: unknown) {
     return { success: false, error: (err as Error).message };

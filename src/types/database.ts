@@ -276,3 +276,33 @@ export interface Certificate {
   clubName?: string;
   studentId?: string;
 }
+
+// --- Multi-User Testing Log Types ---
+export type TestingOutcome = "Successful" | "Failed" | "Not verified";
+
+export interface TestingSession {
+  id: string;
+  userId: string;
+  role: string;
+  userFullName: string;
+  loggedInAt: string;
+  loggedOutAt?: string | null;
+  isConfirmedLogout: boolean;
+  lastActiveAt: string;
+  userAgent?: string;
+  createdAt: string;
+}
+
+export interface TestingActionRecord {
+  id: string;
+  sessionId: string;
+  userId: string;
+  role: string; // Field 1: Role
+  loggedInAt: string; // Field 2: Logged in on
+  doneWhatExactly: string; // Field 3: Done what exactly
+  loggedOutAt?: string | null; // Field 4: Logged out on
+  successfulOrNot?: TestingOutcome; // Field 5: Successful or not
+  targetEntityId?: string;
+  timestamp: string;
+}
+
