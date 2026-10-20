@@ -49,7 +49,7 @@ export function CertificatesView({
     setLoading(true);
     setMessage(null);
 
-    // Default to the test student Alex Rivera for simplicity
+    // Default to the test student Piyush Kumar for simplicity
     const targetUserId = "u0000000-0000-0000-0000-000000000008";
     const res = await issueCertificateAction(targetUserId, selectedClubId, title, certType);
     setLoading(false);
@@ -97,7 +97,7 @@ export function CertificatesView({
     doc.setFont("helvetica", "bold");
     doc.setFontSize(24);
     doc.setTextColor(15, 23, 42);
-    doc.text(cert.userFullName || "Alex Rivera", 148.5, 90, { align: "center" });
+    doc.text(cert.userFullName || "Piyush Kumar", 148.5, 90, { align: "center" });
 
     doc.setFont("helvetica", "normal");
     doc.setFontSize(13);

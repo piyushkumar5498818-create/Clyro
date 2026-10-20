@@ -126,12 +126,13 @@ const INITIAL_PROFILES: Profile[] = [
   },
   {
     id: "u0000000-0000-0000-0000-000000000008",
-    email: "alex.student@mirai.edu",
-    fullName: "Alex Rivera",
+    email: "piyush.student@mirai.edu",
+    fullName: "Piyush Kumar",
     role: "member",
     campusId: INITIAL_CAMPUS.id,
     studentId: "STU-2024-042",
-    title: "Student Member",
+    title: "Student Member — Kaizen Tech",
+    organizationId: "o0000000-0000-0000-0000-000000000002",
     createdAt: new Date().toISOString(),
   },
   {
@@ -645,7 +646,7 @@ const INITIAL_INITIATIVES: Initiative[] = [
 const INITIAL_MEMBERSHIPS: OrganizationMembership[] = [
   {
     id: "m0000000-0000-0000-0000-000000000001",
-    organizationId: "o0000000-0000-0000-0000-000000000002", // Alex is approved member of Kaizen Tech
+    organizationId: "o0000000-0000-0000-0000-000000000002", // Piyush is approved member of Kaizen Tech
     userId: "u0000000-0000-0000-0000-000000000008",
     membershipType: "primary",
     status: "approved",
@@ -901,7 +902,7 @@ const INITIAL_MEMBERSHIPS: OrganizationMembership[] = [
 const INITIAL_UNIT_ASSIGNMENTS: UnitAssignment[] = [
   {
     id: "ua000000-0000-0000-0000-000000000001",
-    unitId: "u0000000-0000-0000-0001-000000000003", // Alex assigned to AI & Data Science domain
+    unitId: "u0000000-0000-0000-0001-000000000003", // Piyush assigned to AI & Data Science domain
     userId: "u0000000-0000-0000-0000-000000000008",
     role: "member",
     assignedAt: new Date(Date.now() - 86400000 * 4).toISOString(),
@@ -1417,12 +1418,20 @@ export const db = {
     return this.getActivities().find((a) => a.id === id);
   },
 
-  createActivity(data: Omit<Activity, "id" | "status" | "createdAt">): Activity {
+  createActivity(
+    data: Omit<Activity, "id" | "status" | "createdAt"> & {
+      status?: Activity["status"];
+      approvedBy?: string;
+      approvedAt?: string;
+    }
+  ): Activity {
     const state = getDatabase();
     const newAct: Activity = {
       ...data,
       id: "act_" + Math.random().toString(36).substring(2, 9),
-      status: "submitted_for_approval",
+      status: data.status || "submitted_for_approval",
+      approvedBy: data.approvedBy,
+      approvedAt: data.approvedAt,
       createdAt: new Date().toISOString(),
     };
     state.activities.unshift(newAct);

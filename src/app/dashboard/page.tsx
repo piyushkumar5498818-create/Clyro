@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import {
   Profile,
   Organization,
@@ -177,6 +177,35 @@ export default function DashboardPage() {
     await loadAllData();
   };
 
+  // Role-based Club Activity Visibility:
+  // "only those students who are in club can see their respective club activities"
+  const isStudent = currentUser?.role === "member" || currentUser?.role === "student";
+
+  const userEnrolledClubIds = useMemo(() => {
+    const clubIds = new Set<string>();
+    if (currentUser?.organizationId) {
+      clubIds.add(currentUser.organizationId);
+    }
+    myMemberships
+      .filter((m) => m.status === "approved")
+      .forEach((m) => clubIds.add(m.organizationId));
+    allMemberships
+      .filter(
+        (m) =>
+          m.userId === currentUser?.id &&
+          m.status === "approved"
+      )
+      .forEach((m) => clubIds.add(m.organizationId));
+    return clubIds;
+  }, [currentUser, myMemberships, allMemberships]);
+
+  const visibleActivities = useMemo(() => {
+    if (!isStudent) {
+      return activities;
+    }
+    return activities.filter((act) => userEnrolledClubIds.has(act.organizationId));
+  }, [isStudent, activities, userEnrolledClubIds]);
+
   if (loading || !currentUser) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center p-4 bg-[#070b16]">
@@ -227,7 +256,7 @@ export default function DashboardPage() {
               currentUser={currentUser}
               organizations={organizations}
               institutionalMetrics={institutionalMetrics}
-              activities={activities}
+              activities={visibleActivities}
               attendanceRecords={[]}
               submissions={submissions}
               certificates={certificates}
@@ -276,7 +305,7 @@ export default function DashboardPage() {
             </div>
             <AttendanceView
               currentUser={currentUser}
-              activities={activities}
+              activities={visibleActivities}
               onRefresh={loadAllData}
             />
           </section>
@@ -299,7 +328,7 @@ export default function DashboardPage() {
             <ActivityManagementView
               currentUser={currentUser}
               clubs={organizations as any}
-              activities={activities}
+              activities={visibleActivities}
               onRefresh={loadAllData}
             />
           </section>
@@ -321,7 +350,7 @@ export default function DashboardPage() {
             </div>
             <SubmissionsView
               currentUser={currentUser}
-              activities={activities}
+              activities={visibleActivities}
               submissions={submissions}
               onRefresh={loadAllData}
             />

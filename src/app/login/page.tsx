@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { loginAction, googleWorkspaceAuthAction } from "@/actions/auth";
@@ -17,22 +17,29 @@ import {
   X,
   Building2,
   Check,
+  Search,
+  Users,
+  UserCheck,
 } from "lucide-react";
 import { GitclubLogo } from "@/components/GitclubLogo";
 
-const GOOGLE_WORKSPACE_ACCOUNTS = [
-  {
-    name: "Alex Rivera",
-    email: "alex.student@mirai.edu",
-    role: "Student Member",
-    sub: "Computer Science & Engineering · Year 2",
-    initials: "AR",
-    color: "from-blue-600 to-cyan-500",
-  },
+interface CampusMemberPersona {
+  name: string;
+  email: string;
+  role: string;
+  club: "Kaizen Tech" | "NEX-CELL" | "MALHAR" | "Admin";
+  sub: string;
+  initials: string;
+  color: string;
+}
+
+const ALL_26_CAMPUS_MEMBERS: CampusMemberPersona[] = [
+  // Kaizen Tech — Technical Club (6)
   {
     name: "Rishav Raj",
     email: "rishav.president@mirai.edu",
     role: "President — Kaizen Tech",
+    club: "Kaizen Tech",
     sub: "Technical Club Executive (CP, Web, AI & DS)",
     initials: "RR",
     color: "from-blue-700 to-indigo-600",
@@ -41,22 +48,119 @@ const GOOGLE_WORKSPACE_ACCOUNTS = [
     name: "Aarav Pathak",
     email: "aarav.vp@mirai.edu",
     role: "Vice President — Kaizen Tech",
+    club: "Kaizen Tech",
     sub: "AI & Data Science Domain Lead",
     initials: "AP",
     color: "from-indigo-600 to-blue-500",
   },
   {
+    name: "Sagar Kumar",
+    email: "sagar.lead@mirai.edu",
+    role: "Programming Head — Kaizen Tech",
+    club: "Kaizen Tech",
+    sub: "Competitive Programming Domain",
+    initials: "SK",
+    color: "from-blue-600 to-cyan-500",
+  },
+  {
+    name: "Saurav Kumar",
+    email: "saurav.lead@mirai.edu",
+    role: "Design Head — Kaizen Tech",
+    club: "Kaizen Tech",
+    sub: "Full-Stack & UI/UX Systems",
+    initials: "SK",
+    color: "from-cyan-600 to-teal-500",
+  },
+  {
+    name: "Siya Bhardwaj",
+    email: "siya.treasurer@mirai.edu",
+    role: "Treasurer — Kaizen Tech",
+    club: "Kaizen Tech",
+    sub: "Finance, Budgets & Allocations",
+    initials: "SB",
+    color: "from-indigo-600 to-purple-500",
+  },
+  {
+    name: "Piyush Kumar",
+    email: "piyush.student@mirai.edu",
+    role: "Student Member — Kaizen Tech",
+    club: "Kaizen Tech",
+    sub: "Computer Science & Engineering · AI Domain",
+    initials: "PK",
+    color: "from-blue-600 to-cyan-500",
+  },
+
+  // NEX-CELL — Entrepreneurship Club (7)
+  {
     name: "Arman Mehta",
     email: "arman.president@mirai.edu",
     role: "President — NEX-CELL",
-    sub: "Entrepreneurship Club Executive (6 Tracks)",
+    club: "NEX-CELL",
+    sub: "Entrepreneurship Club Executive (6 Flagship Tracks)",
     initials: "AM",
     color: "from-amber-600 to-orange-500",
   },
   {
+    name: "Rohan Varma",
+    email: "rohan.vp@mirai.edu",
+    role: "Vice President — NEX-CELL",
+    club: "NEX-CELL",
+    sub: "Venture Incubation & Operations",
+    initials: "RV",
+    color: "from-orange-600 to-amber-500",
+  },
+  {
+    name: "Tanya Kapoor",
+    email: "tanya.incubation@mirai.edu",
+    role: "Incubation Lead — NEX-CELL",
+    club: "NEX-CELL",
+    sub: "Venture Incubation & Early Funding",
+    initials: "TK",
+    color: "from-amber-500 to-yellow-500",
+  },
+  {
+    name: "Kabir Joshi",
+    email: "kabir.pitch@mirai.edu",
+    role: "Pitch Lead — NEX-CELL",
+    club: "NEX-CELL",
+    sub: "Founders Fire & Demo Days",
+    initials: "KJ",
+    color: "from-yellow-600 to-amber-600",
+  },
+  {
+    name: "Devansh Soni",
+    email: "devansh.hack@mirai.edu",
+    role: "Hackathon Lead — NEX-CELL",
+    club: "NEX-CELL",
+    sub: "The Mirage & Open Build Sprints",
+    initials: "DS",
+    color: "from-orange-500 to-red-500",
+  },
+  {
+    name: "Meera Nair",
+    email: "meera.founder@mirai.edu",
+    role: "Student Founder — NEX-CELL",
+    club: "NEX-CELL",
+    sub: "Active Cohort Founder & Pitcher",
+    initials: "MN",
+    color: "from-amber-600 to-emerald-500",
+  },
+  {
+    name: "Ishaan Verma",
+    email: "ishaan.founder@mirai.edu",
+    role: "Student Founder — NEX-CELL",
+    club: "NEX-CELL",
+    sub: "Hardware MVP & Prototyping",
+    initials: "IV",
+    color: "from-orange-600 to-amber-400",
+  },
+
+  // MALHAR — Cultural Society (12)
+  {
     name: "Sapna Singh",
     email: "sapna.president@mirai.edu",
     role: "President — MALHAR",
+    club: "MALHAR",
     sub: "Cultural Society Executive (5 Departments)",
     initials: "SS",
     color: "from-rose-600 to-pink-500",
@@ -65,33 +169,157 @@ const GOOGLE_WORKSPACE_ACCOUNTS = [
     name: "Kiran Sinha",
     email: "kiran.vp@mirai.edu",
     role: "Vice President — MALHAR",
-    sub: "Cultural Society Executive (2nd Year)",
+    club: "MALHAR",
+    sub: "Fest Operations & Coordination",
     initials: "KS",
     color: "from-pink-600 to-rose-400",
   },
   {
+    name: "Anshika",
+    email: "anshika.treasurer@mirai.edu",
+    role: "Treasurer — MALHAR",
+    club: "MALHAR",
+    sub: "Society Budgeting & Accounts",
+    initials: "AN",
+    color: "from-rose-500 to-pink-600",
+  },
+  {
+    name: "Dhruv Tomar",
+    email: "dhruv.media@mirai.edu",
+    role: "Media Head — MALHAR",
+    club: "MALHAR",
+    sub: "Media, Film & Photography Department",
+    initials: "DT",
+    color: "from-pink-500 to-purple-500",
+  },
+  {
+    name: "Shivam Kumar",
+    email: "shivam.tech@mirai.edu",
+    role: "Tech Head — MALHAR",
+    club: "MALHAR",
+    sub: "Stage Lighting, Acoustics & Visuals",
+    initials: "SK",
+    color: "from-purple-600 to-indigo-500",
+  },
+  {
+    name: "Priyanka Negi",
+    email: "priyanka.design@mirai.edu",
+    role: "Designing Head — MALHAR",
+    club: "MALHAR",
+    sub: "Brand, Posters & Creative Assets",
+    initials: "PN",
+    color: "from-rose-500 to-red-500",
+  },
+  {
+    name: "Purnima Raj",
+    email: "purnima.mgmt@mirai.edu",
+    role: "Management Head — MALHAR",
+    club: "MALHAR",
+    sub: "Hospitality & Crowd Logistics",
+    initials: "PR",
+    color: "from-pink-600 to-rose-500",
+  },
+  {
+    name: "Anchal kumari",
+    email: "anchal.mgmt@mirai.edu",
+    role: "Management Member — MALHAR",
+    club: "MALHAR",
+    sub: "Event Logistics & Hospitality",
+    initials: "AK",
+    color: "from-rose-500 to-pink-500",
+  },
+  {
+    name: "Aanya Varshney",
+    email: "aanya.design@mirai.edu",
+    role: "Design Member — MALHAR",
+    club: "MALHAR",
+    sub: "Stage Décor & Visual Identity",
+    initials: "AV",
+    color: "from-pink-500 to-purple-400",
+  },
+  {
+    name: "Shambhavi Sharma",
+    email: "shambhavi.mgmt@mirai.edu",
+    role: "Management Member — MALHAR",
+    club: "MALHAR",
+    sub: "Auditorium & Green Room Coordination",
+    initials: "SS",
+    color: "from-rose-600 to-pink-400",
+  },
+  {
+    name: "Anup Gupta",
+    email: "anup.mgmt@mirai.edu",
+    role: "Management Member — MALHAR",
+    club: "MALHAR",
+    sub: "VIP Protocol & Crowd Flow",
+    initials: "AG",
+    color: "from-purple-500 to-pink-500",
+  },
+  {
+    name: "Sanskar Singh",
+    email: "sanskar.mgmt@mirai.edu",
+    role: "Management Member — MALHAR",
+    club: "MALHAR",
+    sub: "Security Liaison & Sound Desk",
+    initials: "SS",
+    color: "from-pink-500 to-rose-500",
+  },
+
+  // Campus Administration (1)
+  {
     name: "Campus Administrator",
     email: "admin@mirai.edu",
-    role: "Dean of Student Affairs",
-    sub: "MSOT Central Administration",
+    role: "Platform Admin / Dean of Student Affairs",
+    club: "Admin",
+    sub: "MSOT Central Administration & Governance Desk",
     initials: "CA",
     color: "from-purple-600 to-indigo-600",
   },
 ];
 
 export default function LoginPage() {
-  const [email, setEmail] = useState("alex.student@mirai.edu");
+  const [email, setEmail] = useState("piyush.student@mirai.edu");
   const [password, setPassword] = useState("••••••••••••");
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
 
+  // Quick Persona Search & Club Filters
+  const [selectedClub, setSelectedClub] = useState<string>("All");
+  const [searchQuery, setSearchQuery] = useState<string>("");
+
   // Google Workspace SSO modal state
   const [showGoogleModal, setShowGoogleModal] = useState(false);
+  const [modalClub, setModalClub] = useState<string>("All");
+  const [modalSearch, setModalSearch] = useState<string>("");
   const [customGoogleEmail, setCustomGoogleEmail] = useState("");
   const [customGoogleName, setCustomGoogleName] = useState("");
   const [showCustomGoogleInput, setShowCustomGoogleInput] = useState(false);
+
+  const filteredMembers = useMemo(() => {
+    return ALL_26_CAMPUS_MEMBERS.filter((m) => {
+      const matchClub = selectedClub === "All" || m.club === selectedClub;
+      const matchQuery =
+        !searchQuery.trim() ||
+        m.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        m.role.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        m.email.toLowerCase().includes(searchQuery.toLowerCase());
+      return matchClub && matchQuery;
+    });
+  }, [selectedClub, searchQuery]);
+
+  const modalFilteredMembers = useMemo(() => {
+    return ALL_26_CAMPUS_MEMBERS.filter((m) => {
+      const matchClub = modalClub === "All" || m.club === modalClub;
+      const matchQuery =
+        !modalSearch.trim() ||
+        m.name.toLowerCase().includes(modalSearch.toLowerCase()) ||
+        m.role.toLowerCase().includes(modalSearch.toLowerCase()) ||
+        m.email.toLowerCase().includes(modalSearch.toLowerCase());
+      return matchClub && matchQuery;
+    });
+  }, [modalClub, modalSearch]);
 
   const handleLogin = async (targetEmail: string) => {
     setLoading(true);
@@ -160,19 +388,20 @@ export default function LoginPage() {
         </Link>
       </header>
 
-      {/* Main Login Card (Matching Dashboard Glass UI) */}
-      <div className="max-w-md w-full mx-auto my-auto z-10 py-6">
+      {/* Main Container */}
+      <div className="max-w-xl w-full mx-auto my-auto z-10 py-4 space-y-6">
+        {/* Main Login Card */}
         <motion.div
           initial={{ opacity: 0, scale: 0.95, y: 18 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           transition={{ type: "spring", stiffness: 90, damping: 18 }}
-          className="glass-panel rounded-3xl p-7 sm:p-9 shadow-2xl shadow-blue-950/60 border border-white/15 backdrop-blur-2xl relative space-y-6"
+          className="glass-panel rounded-3xl p-6 sm:p-8 shadow-2xl shadow-blue-950/60 border border-white/15 backdrop-blur-2xl relative space-y-5"
         >
           {/* Header */}
           <div className="text-center space-y-2">
             <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-blue-500/15 text-cyan-300 text-xs font-mono font-bold border border-blue-400/30">
               <span className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse" />
-              <span>@MIRAI.EDU INSTITUTIONAL ACCESS</span>
+              <span>@MIRAI.EDU CAMPUS DIRECTORY &bull; 26 MEMBERS</span>
             </div>
 
             <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
@@ -180,7 +409,7 @@ export default function LoginPage() {
             </h1>
 
             <p className="text-xs text-slate-300 font-medium max-w-sm mx-auto">
-              Co-curricular operations &bull; NEX-CELL, Kaizen Tech, and MALHAR societies.
+              Select any of the 26 members below for 1-click instant login or sign in with Google Workspace SSO.
             </p>
           </div>
 
@@ -238,7 +467,7 @@ export default function LoginPage() {
                 />
               </svg>
               <span className="text-slate-900 group-hover:text-black">
-                Continue with Google Workspace
+                Continue with Google Workspace (All 26 Members)
               </span>
               <span className="text-[10px] font-mono font-bold text-blue-700 bg-blue-50 px-2 py-0.5 rounded-lg border border-blue-200">
                 SSO
@@ -247,17 +476,17 @@ export default function LoginPage() {
           </div>
 
           {/* Clean Minimalist Divider */}
-          <div className="relative flex items-center justify-center my-4">
+          <div className="relative flex items-center justify-center my-3">
             <div className="border-t border-white/10 w-full" />
             <span className="bg-[#0a1124] px-3 text-[10px] font-mono text-slate-400 uppercase tracking-wider absolute">
-              or campus password
+              or enter credentials
             </span>
           </div>
 
           {/* Credentials Form */}
-          <form onSubmit={onSubmit} className="space-y-4">
+          <form onSubmit={onSubmit} className="space-y-3.5">
             <div>
-              <label className="block text-xs font-semibold text-slate-300 mb-1.5">
+              <label className="block text-xs font-semibold text-slate-300 mb-1">
                 Campus Email Address
               </label>
               <div className="relative">
@@ -268,15 +497,15 @@ export default function LoginPage() {
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="student@mirai.edu"
-                  className="w-full text-xs font-medium rounded-2xl border border-white/15 pl-10 pr-3.5 py-3 bg-white/[0.04] text-white placeholder-slate-500 backdrop-blur-md focus:border-cyan-400 focus:bg-white/[0.08] focus:outline-none transition"
+                  placeholder="piyush.student@mirai.edu"
+                  className="w-full text-xs font-medium rounded-2xl border border-white/15 pl-10 pr-3.5 py-2.5 bg-white/[0.04] text-white placeholder-slate-500 backdrop-blur-md focus:border-cyan-400 focus:bg-white/[0.08] focus:outline-none transition"
                   required
                 />
               </div>
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-slate-300 mb-1.5">
+              <label className="block text-xs font-semibold text-slate-300 mb-1">
                 Account Password
               </label>
               <div className="relative">
@@ -288,7 +517,7 @@ export default function LoginPage() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="Enter password"
-                  className="w-full text-xs font-medium rounded-2xl border border-white/15 pl-10 pr-10 py-3 bg-white/[0.04] text-white placeholder-slate-500 backdrop-blur-md focus:border-cyan-400 focus:bg-white/[0.08] focus:outline-none transition"
+                  className="w-full text-xs font-medium rounded-2xl border border-white/15 pl-10 pr-10 py-2.5 bg-white/[0.04] text-white placeholder-slate-500 backdrop-blur-md focus:border-cyan-400 focus:bg-white/[0.08] focus:outline-none transition"
                   required
                 />
                 <button
@@ -305,7 +534,7 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-3.5 px-4 rounded-2xl bg-gradient-to-r from-blue-700 via-blue-600 to-indigo-600 hover:from-blue-600 hover:to-indigo-500 text-white font-bold text-xs shadow-lg shadow-blue-600/30 flex items-center justify-center gap-2 transition duration-200 mt-2 active:scale-[0.99] border border-white/20"
+              className="w-full py-3 px-4 rounded-2xl bg-gradient-to-r from-blue-700 via-blue-600 to-indigo-600 hover:from-blue-600 hover:to-indigo-500 text-white font-bold text-xs shadow-lg shadow-blue-600/30 flex items-center justify-center gap-2 transition duration-200 active:scale-[0.99] border border-white/20"
             >
               {loading ? (
                 <span>Authenticating with MSOT Directory...</span>
@@ -318,18 +547,131 @@ export default function LoginPage() {
             </button>
           </form>
 
+          {/* Section: 1-Click Instant Persona Login (All 26 Campus Members) */}
+          <div className="pt-4 border-t border-white/10 space-y-3">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2 text-xs font-bold text-white">
+                <Sparkles className="w-3.5 h-3.5 text-cyan-400" />
+                <span>Instant 1-Click Selection (All 26 Members)</span>
+              </div>
+              <span className="text-[10px] font-mono text-cyan-300 font-bold bg-cyan-500/10 px-2 py-0.5 rounded-md border border-cyan-400/20">
+                {filteredMembers.length} Personas
+              </span>
+            </div>
+
+            {/* Club Filter Chips */}
+            <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none text-[11px] font-semibold">
+              {[
+                { id: "All", label: "All (26)" },
+                { id: "Kaizen Tech", label: "Kaizen Tech (6)" },
+                { id: "NEX-CELL", label: "NEX-CELL (7)" },
+                { id: "MALHAR", label: "MALHAR (12)" },
+                { id: "Admin", label: "Admin (1)" },
+              ].map((c) => (
+                <button
+                  key={c.id}
+                  type="button"
+                  onClick={() => setSelectedClub(c.id)}
+                  className={`px-2.5 py-1 rounded-xl whitespace-nowrap transition border ${
+                    selectedClub === c.id
+                      ? "bg-blue-600 text-white border-blue-400 shadow-sm"
+                      : "bg-white/[0.04] text-slate-300 hover:text-white border-white/10 hover:bg-white/[0.08]"
+                  }`}
+                >
+                  {c.label}
+                </button>
+              ))}
+            </div>
+
+            {/* Quick Persona Search Input */}
+            <div className="relative">
+              <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+              <input
+                type="text"
+                placeholder="Search member by name (e.g. Piyush, Rishav, Sapna, Meera)..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full text-xs pl-8 pr-3 py-2 rounded-xl bg-white/[0.03] border border-white/10 text-white placeholder-slate-500 focus:outline-none focus:border-cyan-400 transition"
+              />
+              {searchQuery && (
+                <button
+                  type="button"
+                  onClick={() => setSearchQuery("")}
+                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white text-xs"
+                >
+                  &times;
+                </button>
+              )}
+            </div>
+
+            {/* Scrollable Persona Cards Grid */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-56 overflow-y-auto pr-1">
+              {filteredMembers.map((person) => {
+                const isSelected = email === person.email;
+                return (
+                  <div
+                    key={person.email}
+                    className={`p-2.5 rounded-2xl border transition flex items-center justify-between gap-2 text-left group ${
+                      isSelected
+                        ? "bg-cyan-500/15 border-cyan-400/50 shadow-md"
+                        : "bg-white/[0.03] hover:bg-white/[0.07] border-white/10"
+                    }`}
+                  >
+                    <button
+                      type="button"
+                      onClick={() => handleLogin(person.email)}
+                      disabled={loading}
+                      className="flex items-center gap-2.5 min-w-0 flex-1 text-left"
+                      title={`1-Click Login as ${person.name}`}
+                    >
+                      <div
+                        className={`w-8 h-8 rounded-xl bg-gradient-to-tr ${person.color} text-white font-black text-xs flex items-center justify-center shrink-0 shadow-sm`}
+                      >
+                        {person.initials}
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <div className="text-xs font-bold text-white group-hover:text-cyan-300 transition truncate flex items-center gap-1">
+                          <span>{person.name}</span>
+                          {person.name === "Piyush Kumar" && (
+                            <span className="text-[9px] font-mono px-1 rounded bg-blue-500/20 text-cyan-300 border border-blue-400/30">
+                              STUDENT
+                            </span>
+                          )}
+                        </div>
+                        <div className="text-[10px] text-slate-400 truncate">
+                          {person.role}
+                        </div>
+                      </div>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setEmail(person.email);
+                      }}
+                      className="text-[10px] font-mono px-2 py-1 rounded-lg bg-white/5 hover:bg-white/15 text-slate-300 hover:text-white border border-white/10 transition shrink-0"
+                      title="Fill into form"
+                    >
+                      Select
+                    </button>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
           {/* Security & Organization Ledger Footer */}
-          <div className="pt-4 border-t border-white/10 flex items-center justify-between text-[11px] text-slate-400 font-mono">
+          <div className="pt-3 border-t border-white/10 flex items-center justify-between text-[11px] text-slate-400 font-mono">
             <div className="flex items-center gap-1.5">
               <Shield className="w-3.5 h-3.5 text-cyan-400" />
-              <span>HMAC-SHA256 Sessions</span>
+              <span>HMAC-SHA256 Encrypted</span>
             </div>
             <span className="text-slate-300">Mirai Campus SSO</span>
           </div>
         </motion.div>
       </div>
 
-      {/* Google Workspace Account Chooser Modal (Matching Dark Cobalt Theme) */}
+      {/* Google Workspace Account Chooser Modal (All 26 Members) */}
       <AnimatePresence>
         {showGoogleModal && (
           <motion.div
@@ -342,7 +684,7 @@ export default function LoginPage() {
               initial={{ scale: 0.95, opacity: 0, y: 10 }}
               animate={{ scale: 1, opacity: 1, y: 0 }}
               exit={{ scale: 0.95, opacity: 0, y: 10 }}
-              className="bg-[#0a1124] border border-white/15 rounded-3xl max-w-md w-full p-6 sm:p-7 shadow-2xl relative overflow-hidden"
+              className="bg-[#0a1124] border border-white/15 rounded-3xl max-w-lg w-full p-6 sm:p-7 shadow-2xl relative overflow-hidden space-y-4"
             >
               {/* Close Button */}
               <button
@@ -355,8 +697,8 @@ export default function LoginPage() {
               </button>
 
               {/* Google Header */}
-              <div className="text-center pb-4 border-b border-white/10">
-                <div className="inline-flex items-center justify-center w-11 h-11 rounded-2xl bg-white shadow-lg mb-3">
+              <div className="text-center pb-3 border-b border-white/10">
+                <div className="inline-flex items-center justify-center w-11 h-11 rounded-2xl bg-white shadow-lg mb-2">
                   <svg className="w-5 h-5" viewBox="0 0 24 24">
                     <path
                       fill="#4285F4"
@@ -376,34 +718,74 @@ export default function LoginPage() {
                     />
                   </svg>
                 </div>
-                <h3 className="text-xl font-black text-white">Google Workspace</h3>
-                <p className="text-xs text-slate-300 mt-1">
-                  Select an authorized <strong className="text-cyan-400">@mirai.edu</strong> account to sign in
+                <h3 className="text-xl font-black text-white">Google Workspace SSO</h3>
+                <p className="text-xs text-slate-300 mt-0.5">
+                  Select any authorized <strong className="text-cyan-400">@mirai.edu</strong> member to sign in
                 </p>
-                <div className="mt-2.5 inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/15 text-emerald-300 text-[10px] font-semibold border border-emerald-500/30">
+                <div className="mt-2 inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full bg-emerald-500/15 text-emerald-300 text-[10px] font-semibold border border-emerald-500/30">
                   <Shield className="w-3 h-3 text-emerald-400" />
-                  <span>Institutional Domain Enforced: @mirai.edu</span>
+                  <span>Institutional Domain Enforced: @mirai.edu (26 Accounts)</span>
                 </div>
               </div>
 
-              {/* Verified Institutional Accounts */}
-              <div className="py-4 space-y-2 max-h-72 overflow-y-auto">
-                {GOOGLE_WORKSPACE_ACCOUNTS.map((acc) => (
+              {/* Modal Club Filter Chips & Search */}
+              <div className="space-y-2">
+                <div className="flex items-center gap-1.5 overflow-x-auto pb-1 text-[11px] font-semibold">
+                  {[
+                    { id: "All", label: "All (26)" },
+                    { id: "Kaizen Tech", label: "Kaizen (6)" },
+                    { id: "NEX-CELL", label: "NEX-CELL (7)" },
+                    { id: "MALHAR", label: "MALHAR (12)" },
+                    { id: "Admin", label: "Admin (1)" },
+                  ].map((c) => (
+                    <button
+                      key={c.id}
+                      type="button"
+                      onClick={() => setModalClub(c.id)}
+                      className={`px-2.5 py-1 rounded-xl whitespace-nowrap transition border ${
+                        modalClub === c.id
+                          ? "bg-blue-600 text-white border-blue-400"
+                          : "bg-white/[0.04] text-slate-300 hover:text-white border-white/10"
+                      }`}
+                    >
+                      {c.label}
+                    </button>
+                  ))}
+                </div>
+
+                <div className="relative">
+                  <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+                  <input
+                    type="text"
+                    placeholder="Filter accounts by name or role..."
+                    value={modalSearch}
+                    onChange={(e) => setModalSearch(e.target.value)}
+                    className="w-full text-xs pl-8 pr-3 py-2 rounded-xl bg-white/[0.03] border border-white/10 text-white placeholder-slate-500 focus:outline-none focus:border-cyan-400"
+                  />
+                </div>
+              </div>
+
+              {/* Verified Institutional Accounts (All 26 Members) */}
+              <div className="py-1 space-y-1.5 max-h-64 overflow-y-auto pr-1">
+                {modalFilteredMembers.map((acc) => (
                   <button
                     key={acc.email}
                     type="button"
                     onClick={() => handleGoogleWorkspaceLogin(acc.email, acc.name)}
                     disabled={loading}
-                    className="w-full p-3 rounded-2xl border border-white/10 bg-white/[0.04] hover:bg-white/[0.08] hover:border-cyan-400/40 transition flex items-center gap-3.5 text-left group"
+                    className="w-full p-2.5 rounded-2xl border border-white/10 bg-white/[0.04] hover:bg-white/[0.08] hover:border-cyan-400/40 transition flex items-center gap-3 text-left group"
                   >
                     <div
-                      className={`w-10 h-10 rounded-xl bg-gradient-to-tr ${acc.color} text-white font-black text-xs flex items-center justify-center shadow-md shrink-0`}
+                      className={`w-9 h-9 rounded-xl bg-gradient-to-tr ${acc.color} text-white font-black text-xs flex items-center justify-center shadow-md shrink-0`}
                     >
                       {acc.initials}
                     </div>
                     <div className="min-w-0 flex-1">
-                      <div className="text-xs font-bold text-white group-hover:text-cyan-300 transition truncate">
-                        {acc.name}
+                      <div className="text-xs font-bold text-white group-hover:text-cyan-300 transition truncate flex items-center gap-1.5">
+                        <span>{acc.name}</span>
+                        <span className="text-[9px] font-mono px-1.5 py-0.2 rounded bg-white/10 text-slate-300">
+                          {acc.club}
+                        </span>
                       </div>
                       <div className="text-[11px] font-mono text-slate-300 truncate">
                         {acc.email}
@@ -412,23 +794,24 @@ export default function LoginPage() {
                         {acc.role}
                       </div>
                     </div>
+                    <ArrowRight className="w-4 h-4 text-slate-400 group-hover:text-cyan-400 transition shrink-0" />
                   </button>
                 ))}
               </div>
 
               {/* Custom Google Workspace Email Entry */}
-              <div className="pt-3 border-t border-white/10">
+              <div className="pt-2 border-t border-white/10">
                 {!showCustomGoogleInput ? (
                   <button
                     type="button"
                     onClick={() => setShowCustomGoogleInput(true)}
-                    className="w-full py-2.5 px-3 text-xs font-semibold text-cyan-300 hover:text-white hover:bg-white/5 rounded-xl transition flex items-center justify-center gap-1.5"
+                    className="w-full py-2 px-3 text-xs font-semibold text-cyan-300 hover:text-white hover:bg-white/5 rounded-xl transition flex items-center justify-center gap-1.5"
                   >
-                    <span>Use another @mirai.edu account</span>
+                    <span>Use custom @mirai.edu email</span>
                     <ArrowRight className="w-3.5 h-3.5" />
                   </button>
                 ) : (
-                  <form onSubmit={onCustomGoogleSubmit} className="space-y-3 pt-1">
+                  <form onSubmit={onCustomGoogleSubmit} className="space-y-2 pt-1">
                     <div className="text-xs font-bold text-slate-200">
                       Sign in with custom institutional Google account
                     </div>
@@ -438,7 +821,7 @@ export default function LoginPage() {
                         value={customGoogleName}
                         onChange={(e) => setCustomGoogleName(e.target.value)}
                         placeholder="Full Name (e.g. Diya Sen)"
-                        className="w-full text-xs rounded-xl border border-white/15 p-2.5 bg-slate-800 text-white placeholder-slate-500 focus:border-cyan-400 focus:outline-none mb-2"
+                        className="w-full text-xs rounded-xl border border-white/15 p-2 bg-slate-800 text-white placeholder-slate-500 focus:border-cyan-400 focus:outline-none mb-1.5"
                         required
                       />
                       <input
@@ -446,7 +829,7 @@ export default function LoginPage() {
                         value={customGoogleEmail}
                         onChange={(e) => setCustomGoogleEmail(e.target.value)}
                         placeholder="username@mirai.edu"
-                        className="w-full text-xs font-mono rounded-xl border border-white/15 p-2.5 bg-slate-800 text-white placeholder-slate-500 focus:border-cyan-400 focus:outline-none"
+                        className="w-full text-xs font-mono rounded-xl border border-white/15 p-2 bg-slate-800 text-white placeholder-slate-500 focus:border-cyan-400 focus:outline-none"
                         required
                       />
                     </div>
@@ -461,7 +844,7 @@ export default function LoginPage() {
                       <button
                         type="submit"
                         disabled={loading}
-                        className="glass-btn-primary px-4 py-2 rounded-xl text-xs font-bold shadow"
+                        className="glass-btn-primary px-3 py-1.5 rounded-xl text-xs font-bold shadow"
                       >
                         Continue with Google SSO
                       </button>

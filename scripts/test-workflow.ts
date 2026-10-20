@@ -81,7 +81,7 @@ async function runTests() {
 
   // 4. Membership Rules & Limit Enforcement
   console.log("\n4. Membership Enrolment & Constraints:");
-  const testStudentId = "u0000000-0000-0000-0000-000000000008"; // Alex Rivera (member)
+  const testStudentId = "u0000000-0000-0000-0000-000000000008"; // Piyush Kumar (member)
 
   // Duplicate membership attempt
   let duplicateThrown = false;
@@ -224,7 +224,7 @@ async function runTests() {
 
   const verified = db.verifyCertificate(cert.verificationCode);
   assert(!!verified, "Verification ledger validates authentic certificate");
-  assert(verified?.userFullName === "Alex Rivera", "Verified certificate recipient matches student profile");
+  assert(verified?.userFullName === "Piyush Kumar", "Verified certificate recipient matches student profile");
 
   const tampered = db.verifyCertificate("FAKE-TAMPERED-CERT-9999");
   assert(tampered === undefined, "Tampered/fraudulent code is rejected by verification service");
@@ -232,7 +232,7 @@ async function runTests() {
   // 10. Login Portal & Authentication Verification
   console.log("\n10. Login Portal & Authentication Verification:");
   const profiles = db.getAllProfiles();
-  const student = profiles.find((p) => p.email.toLowerCase() === "alex.student@mirai.edu");
+  const student = profiles.find((p) => p.email.toLowerCase() === "piyush.student@mirai.edu" || p.email.toLowerCase() === "alex.student@mirai.edu");
   assert(!!student, "Student member profile exists for login");
 
   const president = profiles.find((p) => p.email.toLowerCase() === "rishav.president@mirai.edu");

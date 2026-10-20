@@ -34,5 +34,50 @@
     "linkUrl": "https://github.com/mirai-student/genai-venture-sprint",
     "notes": "Multi-agent LangGraph workflow with streaming LLM tool calling and evaluation benchmarks.",
     "submittedAt": "2026-10-20T13:50:31.346Z"
+  },
+  {
+    "id": "sub_wdzvo2p",
+    "activityId": "act_3hb74pn",
+    "userId": "u0000000-0000-0000-0000-000000000008",
+    "submissionType": "link",
+    "linkUrl": "https://pitch.com/founders-fire-demo",
+    "notes": "AI Copilot for supply chain validation with 3 beta pilots.",
+    "submittedAt": "2026-10-20T14:04:53.709Z"
+  },
+  {
+    "id": "sub_57m0zad",
+    "activityId": "act_2fht55r",
+    "userId": "u0000000-0000-0000-0000-000000000008",
+    "submissionType": "link",
+    "linkUrl": "https://pitch.com/founders-fire-demo",
+    "notes": "AI Copilot for supply chain validation with 3 beta pilots.",
+    "submittedAt": "2026-10-20T14:10:49.101Z"
+  },
+  {
+    "id": "sub_nb7ix34",
+    "activityId": "act_mdnyl01",
+    "userId": "u0000000-0000-0000-0000-000000000025",
+    "submissionType": "link",
+    "linkUrl": "https://github.com/mirai-student/genai-venture-sprint",
+    "notes": "Multi-agent LangGraph workflow with streaming LLM tool calling and evaluation benchmarks.",
+    "submittedAt": "2026-10-20T14:10:53.122Z"
+  },
+  {
+    "id": "sub_0knzmkp",
+    "activityId": "act_bni8uvy",
+    "userId": "u0000000-0000-0000-0000-000000000008",
+    "submissionType": "link",
+    "linkUrl": "https://pitch.com/founders-fire-demo",
+    "notes": "AI Copilot for supply chain validation with 3 beta pilots.",
+    "submittedAt": "2026-10-20T14:11:57.567Z"
+  },
+  {
+    "id": "sub_v0ajb5v",
+    "activityId": "act_mxnv6dc",
+    "userId": "u0000000-0000-0000-0000-000000000025",
+    "submissionType": "link",
+    "linkUrl": "https://github.com/mirai-student/genai-venture-sprint",
+    "notes": "Multi-agent LangGraph workflow with streaming LLM tool calling and evaluation benchmarks.",
+    "submittedAt": "2026-10-20T14:11:58.097Z"
   }
 ]

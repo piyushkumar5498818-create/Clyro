@@ -28,6 +28,7 @@ export async function createActivityAction(formData: {
   venue: string;
   submissionDeadline: string;
   rubricCriteria?: RubricCriteria[];
+  publishImmediately?: boolean;
 }): Promise<{ success: boolean; data?: Activity; error?: string }> {
   try {
     const activeUser = await getCurrentUserAction();
@@ -55,6 +56,15 @@ export async function createActivityAction(formData: {
       return { success: false, error: "Organization must be selected." };
     }
 
+    const isLeadership = [
+      "president",
+      "vice_president",
+      "admin",
+      "college_admin",
+      "faculty_advisor",
+    ].includes(activeUser.role);
+    const shouldApprove = Boolean(formData.publishImmediately && isLeadership);
+
     const newAct = db.createActivity({
       organizationId: orgId,
       unitId: formData.unitId,
@@ -68,6 +78,9 @@ export async function createActivityAction(formData: {
       endTime: formData.endTime,
       venue: formData.venue,
       submissionDeadline: formData.submissionDeadline,
+      status: shouldApprove ? "approved" : "submitted_for_approval",
+      approvedBy: shouldApprove ? activeUser.id : undefined,
+      approvedAt: shouldApprove ? new Date().toISOString() : undefined,
       rubricCriteria: formData.rubricCriteria || [
         { name: "Technical/Creative Depth", maxScore: 40, description: "Depth of execution and deliverable quality." },
         { name: "Presentation & Communication", maxScore: 30, description: "Clarity of demonstration and documentation." },
@@ -85,7 +98,9 @@ export async function createActivityAction(formData: {
         userId: activeUser.id,
         role: activeUser.role,
         userFullName: activeUser.fullName,
-        doneWhatExactly: `Created and submitted activity proposal: "${newAct.title}"`,
+        doneWhatExactly: shouldApprove
+          ? `Created and published live activity: "${newAct.title}"`
+          : `Created and submitted activity proposal: "${newAct.title}"`,
         outcome: verified ? "Successful" : "Failed",
         targetEntityId: newAct.id,
       });
