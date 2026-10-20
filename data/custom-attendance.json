@@ -1,0 +1,46 @@
+[
+  {
+    "id": "rec_wtz0ci2",
+    "activityId": "act_spfs1as",
+    "userId": "u0000000-0000-0000-0000-000000000008",
+    "status": "excused",
+    "checkInTime": "2026-10-20T13:49:17.830Z",
+    "checkInMethod": "qr_code",
+    "userFullName": "Alex Rivera",
+    "studentId": "STU-2024-042",
+    "correctionReason": "Student representing college at hackathon conference",
+    "correctedBy": "u0000000-0000-0000-0000-000000000003"
+  },
+  {
+    "id": "rec_qbllh0j",
+    "activityId": "act_vmrnu4n",
+    "userId": "u0000000-0000-0000-0000-000000000025",
+    "status": "present",
+    "checkInTime": "2026-10-20T13:49:18.381Z",
+    "checkInMethod": "qr_code",
+    "userFullName": "Meera Nair",
+    "studentId": "STU-2024-NEX-06"
+  },
+  {
+    "id": "rec_tinqlv1",
+    "activityId": "act_78ujcp8",
+    "userId": "u0000000-0000-0000-0000-000000000008",
+    "status": "excused",
+    "checkInTime": "2026-10-20T13:50:27.874Z",
+    "checkInMethod": "qr_code",
+    "userFullName": "Alex Rivera",
+    "studentId": "STU-2024-042",
+    "correctionReason": "Student representing college at hackathon conference",
+    "correctedBy": "u0000000-0000-0000-0000-000000000003"
+  },
+  {
+    "id": "rec_9pzmvop",
+    "activityId": "act_65dsrz1",
+    "userId": "u0000000-0000-0000-0000-000000000025",
+    "status": "present",
+    "checkInTime": "2026-10-20T13:50:31.345Z",
+    "checkInMethod": "qr_code",
+    "userFullName": "Meera Nair",
+    "studentId": "STU-2024-NEX-06"
+  }
+]

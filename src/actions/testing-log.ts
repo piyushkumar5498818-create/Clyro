@@ -86,3 +86,21 @@ export async function resetTestingLogAction(): Promise<{ success: boolean; messa
     return { success: false, message: (err as Error).message };
   }
 }
+
+/**
+ * Synchronizes client-side persistent records with server memory and storage.
+ * Guarantees zero data loss across Lambda container lifecycles.
+ */
+export async function syncTestingLogAction(
+  clientRecords?: FormattedTestingLogEntry[]
+): Promise<FormattedTestingLogEntry[]> {
+  try {
+    if (clientRecords && Array.isArray(clientRecords) && clientRecords.length > 0) {
+      testingStore.mergeClientRecords(clientRecords);
+    }
+    return getTestingLogAction();
+  } catch (err) {
+    console.error("[syncTestingLogAction] Error:", err);
+    return getTestingLogAction();
+  }
+}

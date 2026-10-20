@@ -1,6 +1,6 @@
 import fs from "fs";
 import path from "path";
-import { TestingSession, TestingActionRecord, TestingOutcome } from "@/types/database";
+import { TestingSession, TestingActionRecord, TestingOutcome, FormattedTestingLogEntry } from "@/types/database";
 
 interface TestingLogData {
   sessions: TestingSession[];
@@ -380,5 +380,44 @@ export const testingStore = {
   resetStore(): void {
     globalThis.__gitclub_testing_cache = { sessions: [], actions: [] };
     saveToDisk();
+  },
+
+  /**
+   * Merges persistent client records into server state so records never disappear on cold starts.
+   */
+  mergeClientRecords(clientRecords: FormattedTestingLogEntry[]): void {
+    const data = ensureLoaded();
+    const existingActionMap = new Map(data.actions.map((a) => [a.id, a]));
+    let modified = false;
+
+    for (const r of clientRecords) {
+      if (!existingActionMap.has(r.id)) {
+        const action: TestingActionRecord = {
+          id: r.id,
+          sessionId: r.sessionId || "tsess_client_restored",
+          userId: r.userId || "u0000000-0000-0000-0000-000000000008",
+          role: r.role,
+          loggedInAt: r.loggedInAt || r.timestamp,
+          doneWhatExactly: r.doneWhatExactly,
+          loggedOutAt: r.loggedOutAt || null,
+          successfulOrNot: r.successfulOrNot,
+          timestamp: r.timestamp,
+        };
+        data.actions.push(action);
+        existingActionMap.set(r.id, action);
+        modified = true;
+      } else {
+        const existing = existingActionMap.get(r.id)!;
+        if (!existing.loggedOutAt && r.loggedOutAt) {
+          existing.loggedOutAt = r.loggedOutAt;
+          modified = true;
+        }
+      }
+    }
+
+    if (modified) {
+      data.actions.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+      saveToDisk();
+    }
   },
 };

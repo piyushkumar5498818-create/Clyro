@@ -18,7 +18,7 @@ import {
   getAllOrganizationsAction,
   getInstitutionalMetricsAction,
 } from "@/actions/organizations";
-import { getActivitiesAction } from "@/actions/activities";
+import { getActivitiesAction, syncCustomActivitiesAction } from "@/actions/activities";
 import { getSubmissionsAction } from "@/actions/submissions";
 import { getCertificatesAction } from "@/actions/certificates";
 import { checkInStudentAction } from "@/actions/attendance";
@@ -58,6 +58,12 @@ export default function DashboardPage() {
 
   const loadAllData = async () => {
     try {
+      let localActs: Activity[] = [];
+      try {
+        const raw = localStorage.getItem("gitclub_custom_activities_v3");
+        if (raw) localActs = JSON.parse(raw);
+      } catch {}
+
       const [
         user,
         profs,
@@ -72,7 +78,7 @@ export default function DashboardPage() {
         getAllProfilesAction(),
         getAllOrganizationsAction(),
         getInstitutionalMetricsAction(),
-        getActivitiesAction(),
+        syncCustomActivitiesAction(localActs),
         getMyMembershipsAction(),
         getSubmissionsAction(),
         getCertificatesAction(),
@@ -86,6 +92,14 @@ export default function DashboardPage() {
       setMyMemberships(myMems);
       setSubmissions(subs);
       setCertificates(certs);
+
+      // Persist custom activities to client storage
+      try {
+        const customOnly = acts.filter((a) => !a.id.startsWith("a0000000"));
+        if (customOnly.length > 0) {
+          localStorage.setItem("gitclub_custom_activities_v3", JSON.stringify(customOnly));
+        }
+      } catch {}
 
       if (orgs.length > 0) {
         const memPromises = orgs.map((o) => getClubMembershipsAction(o.id));

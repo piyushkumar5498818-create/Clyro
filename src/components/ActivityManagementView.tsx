@@ -72,8 +72,14 @@ export function ActivityManagementView({
     });
     setLoading(false);
     if (res.success) {
-      setMessage({ text: "Activity scheduled successfully!", type: "success" });
+      setMessage({ text: "Activity scheduled successfully! Pending leadership review.", type: "success" });
       setShowForm(false);
+      setFormData((prev) => ({
+        ...prev,
+        title: "",
+        topic: "",
+        deliverableDescription: "",
+      }));
       onRefresh();
     } else {
       setMessage({ text: res.error || "Failed to create activity", type: "error" });

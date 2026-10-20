@@ -75,6 +75,15 @@ export function AttendanceView({
   };
 
   useEffect(() => {
+    if (approvedActivities.length > 0) {
+      const exists = approvedActivities.some((a) => a.id === selectedActId);
+      if (!selectedActId || !exists) {
+        setSelectedActId(approvedActivities[0].id);
+      }
+    }
+  }, [approvedActivities, selectedActId]);
+
+  useEffect(() => {
     if (selectedActId) {
       loadAttendanceData(selectedActId);
     }
@@ -178,6 +187,33 @@ export function AttendanceView({
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* Interactive Activity Session Switcher Tabs: Clearly shows each activity */}
+      {approvedActivities.length > 0 && (
+        <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none">
+          <span className="text-xs font-semibold text-slate-400 shrink-0 mr-1">Select Activity:</span>
+          {approvedActivities.map((act) => {
+            const isSelected = act.id === selectedActId;
+            return (
+              <button
+                key={act.id}
+                type="button"
+                onClick={() => setSelectedActId(act.id)}
+                className={`px-3 py-1.5 rounded-xl text-xs font-bold transition whitespace-nowrap flex items-center gap-2 border ${
+                  isSelected
+                    ? "bg-indigo-600 text-white border-indigo-400 shadow-md shadow-indigo-600/30"
+                    : "bg-white/[0.04] text-slate-300 hover:text-white border-white/10"
+                }`}
+              >
+                <span>{act.title}</span>
+                <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-black/30 text-indigo-200">
+                  {act.clubName || "Club"}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+      )}
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Left Column: QR Code / Token Display */}

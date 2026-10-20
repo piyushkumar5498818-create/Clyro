@@ -1,3 +1,5 @@
+import fs from "fs";
+import path from "path";
 import {
   Campus,
   Profile,
@@ -1130,6 +1132,34 @@ declare global {
 
 function getDatabase(): MiraiDatabaseState {
   if (!globalThis.__mirai_db) {
+    let customActivities: Activity[] = [];
+    let customAttendance: AttendanceRecord[] = [];
+    let customSubmissions: Submission[] = [];
+
+    try {
+      const dataDir = process.env.VERCEL ? "/tmp/gitclub-data" : path.join(process.cwd(), "data");
+      const actsFile = path.join(dataDir, "custom-activities.json");
+      if (fs.existsSync(actsFile)) {
+        const raw = fs.readFileSync(actsFile, "utf-8");
+        const parsed = JSON.parse(raw);
+        if (Array.isArray(parsed)) customActivities = parsed;
+      }
+      const attFile = path.join(dataDir, "custom-attendance.json");
+      if (fs.existsSync(attFile)) {
+        const raw = fs.readFileSync(attFile, "utf-8");
+        const parsed = JSON.parse(raw);
+        if (Array.isArray(parsed)) customAttendance = parsed;
+      }
+      const subsFile = path.join(dataDir, "custom-submissions.json");
+      if (fs.existsSync(subsFile)) {
+        const raw = fs.readFileSync(subsFile, "utf-8");
+        const parsed = JSON.parse(raw);
+        if (Array.isArray(parsed)) customSubmissions = parsed;
+      }
+    } catch {
+      // Ignored
+    }
+
     globalThis.__mirai_db = {
       campuses: [INITIAL_CAMPUS],
       profiles: [...INITIAL_PROFILES],
@@ -1138,10 +1168,10 @@ function getDatabase(): MiraiDatabaseState {
       initiatives: [...INITIAL_INITIATIVES],
       memberships: [...INITIAL_MEMBERSHIPS],
       unitAssignments: [...INITIAL_UNIT_ASSIGNMENTS],
-      activities: [...INITIAL_ACTIVITIES],
+      activities: [...customActivities, ...INITIAL_ACTIVITIES],
       attendanceTokens: [...INITIAL_TOKENS],
-      attendanceRecords: [...INITIAL_ATTENDANCE],
-      submissions: [...INITIAL_SUBMISSIONS],
+      attendanceRecords: [...INITIAL_ATTENDANCE, ...customAttendance],
+      submissions: [...INITIAL_SUBMISSIONS, ...customSubmissions],
       evaluations: [...INITIAL_EVALUATIONS],
       teams: [...INITIAL_TEAMS],
       certificates: [...INITIAL_CERTIFICATES],
@@ -1396,6 +1426,7 @@ export const db = {
       createdAt: new Date().toISOString(),
     };
     state.activities.unshift(newAct);
+    this.saveAppDataToDisk();
     return newAct;
   },
 
@@ -1413,7 +1444,60 @@ export const db = {
     act.approvedBy = reviewerId;
     act.approvedAt = new Date().toISOString();
     if (reason) act.rejectionReason = reason;
+    this.saveAppDataToDisk();
     return act;
+  },
+
+  saveAppDataToDisk(): void {
+    try {
+      const state = getDatabase();
+      const dataDir = process.env.VERCEL ? "/tmp/gitclub-data" : path.join(process.cwd(), "data");
+      if (!fs.existsSync(dataDir)) fs.mkdirSync(dataDir, { recursive: true });
+
+      const customActs = state.activities.filter(
+        (a) => !INITIAL_ACTIVITIES.some((init) => init.id === a.id)
+      );
+      fs.writeFileSync(path.join(dataDir, "custom-activities.json"), JSON.stringify(customActs, null, 2));
+
+      const customAtt = state.attendanceRecords.filter(
+        (r) => !INITIAL_ATTENDANCE.some((init) => init.id === r.id)
+      );
+      fs.writeFileSync(path.join(dataDir, "custom-attendance.json"), JSON.stringify(customAtt, null, 2));
+
+      const customSubs = state.submissions.filter(
+        (s) => !INITIAL_SUBMISSIONS.some((init) => init.id === s.id)
+      );
+      fs.writeFileSync(path.join(dataDir, "custom-submissions.json"), JSON.stringify(customSubs, null, 2));
+    } catch {
+      // Ignored
+    }
+  },
+
+  mergeCustomActivities(incoming: Activity[]): Activity[] {
+    const state = getDatabase();
+    const existingMap = new Map(state.activities.map((a) => [a.id, a]));
+    let modified = false;
+
+    for (const act of incoming) {
+      if (!existingMap.has(act.id)) {
+        state.activities.unshift(act);
+        existingMap.set(act.id, act);
+        modified = true;
+      } else {
+        const existing = existingMap.get(act.id)!;
+        if (existing.status !== act.status) {
+          existing.status = act.status;
+          existing.approvedBy = act.approvedBy;
+          existing.approvedAt = act.approvedAt;
+          modified = true;
+        }
+      }
+    }
+
+    if (modified) {
+      this.saveAppDataToDisk();
+    }
+    return this.getActivities();
   },
 
   // --- Attendance Tokens & Check-In ---
@@ -1519,6 +1603,7 @@ export const db = {
     };
 
     state.attendanceRecords.push(record);
+    this.saveAppDataToDisk();
     return record;
   },
 
@@ -1579,6 +1664,7 @@ export const db = {
     };
 
     state.submissions.push(newSub);
+    this.saveAppDataToDisk();
     return newSub;
   },
 

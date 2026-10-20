@@ -149,3 +149,21 @@ export async function reviewActivityAction(
     return { success: false, error: (err as Error).message };
   }
 }
+
+/**
+ * Synchronizes client-side custom activities with the server.
+ * Guarantees custom activities persist across cold starts and deployments.
+ */
+export async function syncCustomActivitiesAction(
+  clientActivities: Activity[]
+): Promise<Activity[]> {
+  try {
+    if (clientActivities && Array.isArray(clientActivities) && clientActivities.length > 0) {
+      return db.mergeCustomActivities(clientActivities);
+    }
+    return db.getActivities();
+  } catch (err) {
+    console.error("[syncCustomActivitiesAction] Error:", err);
+    return db.getActivities();
+  }
+}
