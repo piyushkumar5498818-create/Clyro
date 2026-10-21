@@ -104,3 +104,18 @@ export async function syncTestingLogAction(
     return getTestingLogAction();
   }
 }
+
+/**
+ * High-precision server ping action for live latency telemetry in the QA Test Panel.
+ */
+export async function pingServerAction(): Promise<{
+  serverTime: string;
+  timestamp: number;
+  environment: string;
+}> {
+  return {
+    serverTime: new Date().toISOString(),
+    timestamp: Date.now(),
+    environment: process.env.NODE_ENV || "production",
+  };
+}
