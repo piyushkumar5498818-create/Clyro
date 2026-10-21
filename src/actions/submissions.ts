@@ -41,8 +41,28 @@ export async function submitWorkAction(
       return { success: false, error: "Please provide a valid submission URL/link." };
     }
 
-    const sub = db.submitWork(activityId, activeUser.id, submissionType, payload);
     const activity = db.getActivityById(activityId);
+    if (!activity) {
+      return { success: false, error: "Activity not found." };
+    }
+
+    const isAdmin = activeUser.role === "admin" || activeUser.role === "college_admin";
+    if (!isAdmin) {
+      const userClubIds = new Set<string>();
+      if (activeUser.organizationId) userClubIds.add(activeUser.organizationId);
+      db.getMembershipsByUser(activeUser.id)
+        .filter((m) => m.status === "approved")
+        .forEach((m) => userClubIds.add(m.organizationId));
+
+      if (!userClubIds.has(activity.organizationId)) {
+        return {
+          success: false,
+          error: "Permission denied: You can only submit deliverables for your enrolled club.",
+        };
+      }
+    }
+
+    const sub = db.submitWork(activityId, activeUser.id, submissionType, payload);
 
     // Verify submission persisted in backend store
     const allSubs = db.getSubmissions(activityId);
@@ -69,4 +89,18 @@ export async function submitWorkAction(
 
 export async function getSubmissionsAction(activityId?: string): Promise<Submission[]> {
   return db.getSubmissions(activityId);
+}
+
+export async function syncCustomSubmissionsAction(
+  clientSubmissions: Submission[]
+): Promise<Submission[]> {
+  try {
+    if (clientSubmissions && Array.isArray(clientSubmissions) && clientSubmissions.length > 0) {
+      return db.mergeCustomSubmissions(clientSubmissions);
+    }
+    return db.getSubmissions();
+  } catch (err) {
+    console.error("[syncCustomSubmissionsAction] Error:", err);
+    return db.getSubmissions();
+  }
 }

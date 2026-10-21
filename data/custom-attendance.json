@@ -98,5 +98,49 @@
     "checkInMethod": "qr_code",
     "userFullName": "Meera Nair",
     "studentId": "STU-2024-NEX-06"
+  },
+  {
+    "id": "rec_ln3j3ce",
+    "activityId": "act_l5gc5ed",
+    "userId": "u0000000-0000-0000-0000-000000000008",
+    "status": "excused",
+    "checkInTime": "2026-10-21T04:15:47.113Z",
+    "checkInMethod": "qr_code",
+    "userFullName": "Piyush Kumar",
+    "studentId": "STU-2024-042",
+    "correctionReason": "Student representing college at hackathon conference",
+    "correctedBy": "u0000000-0000-0000-0000-000000000003"
+  },
+  {
+    "id": "rec_vi1xgfk",
+    "activityId": "act_0dwm8ae",
+    "userId": "u0000000-0000-0000-0000-000000000025",
+    "status": "present",
+    "checkInTime": "2026-10-21T04:15:52.864Z",
+    "checkInMethod": "qr_code",
+    "userFullName": "Meera Nair",
+    "studentId": "STU-2024-NEX-06"
+  },
+  {
+    "id": "rec_loifbcj",
+    "activityId": "act_6s8i5zo",
+    "userId": "u0000000-0000-0000-0000-000000000008",
+    "status": "excused",
+    "checkInTime": "2026-10-21T04:16:46.868Z",
+    "checkInMethod": "qr_code",
+    "userFullName": "Piyush Kumar",
+    "studentId": "STU-2024-042",
+    "correctionReason": "Student representing college at hackathon conference",
+    "correctedBy": "u0000000-0000-0000-0000-000000000003"
+  },
+  {
+    "id": "rec_isbqx6g",
+    "activityId": "act_2qs73iq",
+    "userId": "u0000000-0000-0000-0000-000000000025",
+    "status": "present",
+    "checkInTime": "2026-10-21T04:16:47.140Z",
+    "checkInMethod": "qr_code",
+    "userFullName": "Meera Nair",
+    "studentId": "STU-2024-NEX-06"
   }
 ]

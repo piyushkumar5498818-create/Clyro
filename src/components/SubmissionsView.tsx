@@ -16,6 +16,7 @@ import {
   Star,
   Clock,
   Sparkles,
+  Shield,
 } from "lucide-react";
 
 interface SubmissionsViewProps {
@@ -58,14 +59,15 @@ export function SubmissionsView({
     (s) => s.activityId === selectedActId && s.userId === currentUser.id
   );
 
-  // Evaluation modal state
+  // Dynamic evaluation state
   const [evaluatingSub, setEvaluatingSub] = useState<Submission | null>(null);
-  const [rubric, setRubric] = useState({
-    scoreContent: 35, // max 40
-    scorePresentation: 25, // max 30
-    scoreParticipation: 25, // max 30
-    feedback: "",
-  });
+  const [evalItems, setEvalItems] = useState<{
+    name: string;
+    maxScore: number;
+    score: number;
+    description?: string;
+  }[]>([]);
+  const [evalFeedback, setEvalFeedback] = useState<string>("");
 
   const canSubmit = [
     "member",
@@ -88,6 +90,39 @@ export function SubmissionsView({
     "college_admin",
   ].includes(currentUser.role);
 
+  const openEvaluationModal = (sub: Submission) => {
+    setEvaluatingSub(sub);
+    const targetAct = activities.find((a) => a.id === sub.activityId);
+
+    if (sub.evaluation?.scoreBreakdown && sub.evaluation.scoreBreakdown.length > 0) {
+      setEvalItems(
+        sub.evaluation.scoreBreakdown.map((b) => ({
+          name: b.criteriaName,
+          maxScore: b.maxScore || 40,
+          score: b.score,
+        }))
+      );
+      setEvalFeedback(sub.evaluation.feedback || "");
+    } else if (targetAct?.rubricCriteria && targetAct.rubricCriteria.length > 0) {
+      setEvalItems(
+        targetAct.rubricCriteria.map((c) => ({
+          name: c.name,
+          maxScore: c.maxScore,
+          score: Math.round(c.maxScore * 0.85),
+          description: c.description,
+        }))
+      );
+      setEvalFeedback("");
+    } else {
+      setEvalItems([
+        { name: "Content & Technical Depth", maxScore: 40, score: 35, description: "Depth of execution and deliverable quality." },
+        { name: "Presentation & Clarity", maxScore: 30, score: 25, description: "Clarity of demonstration and documentation." },
+        { name: "Participation & Timeliness", maxScore: 30, score: 25, description: "Attendance adherence and discussion engagement." },
+      ]);
+      setEvalFeedback("");
+    }
+  };
+
   const handleSubmitWork = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedActId) {
@@ -101,7 +136,14 @@ export function SubmissionsView({
       notes,
     });
     setLoading(false);
-    if (res.success) {
+    if (res.success && res.data) {
+      try {
+        const raw = localStorage.getItem("gitclub_custom_submissions_v2");
+        const current: Submission[] = raw ? JSON.parse(raw) : [];
+        const updated = [res.data, ...current.filter((s) => s.id !== res.data!.id)];
+        localStorage.setItem("gitclub_custom_submissions_v2", JSON.stringify(updated));
+      } catch {}
+
       setMessage({ text: "Deliverable successfully submitted and recorded on the campus ledger!", type: "success" });
       setLinkUrl("");
       setNotes("");
@@ -115,10 +157,38 @@ export function SubmissionsView({
     e.preventDefault();
     if (!evaluatingSub) return;
     setLoading(true);
-    const res = await evaluateSubmissionAction(evaluatingSub.id, rubric);
+    setMessage(null);
+
+    const breakdown = evalItems.map((item) => ({
+      criteriaName: item.name,
+      score: Number(item.score) || 0,
+      maxScore: item.maxScore,
+    }));
+
+    const res = await evaluateSubmissionAction(evaluatingSub.id, {
+      breakdown,
+      feedback: evalFeedback,
+      scoreContent: evalItems[0]?.score,
+      scorePresentation: evalItems[1]?.score,
+      scoreParticipation: evalItems[2]?.score,
+    });
+
     setLoading(false);
-    if (res.success) {
-      setMessage({ text: "Rubric evaluation saved and published to student!", type: "success" });
+    if (res.success && res.data) {
+      try {
+        const raw = localStorage.getItem("gitclub_custom_evaluations_v2");
+        const current: Evaluation[] = raw ? JSON.parse(raw) : [];
+        const updated = [
+          res.data,
+          ...current.filter((e) => e.submissionId !== res.data!.submissionId && e.id !== res.data!.id),
+        ];
+        localStorage.setItem("gitclub_custom_evaluations_v2", JSON.stringify(updated));
+      } catch {}
+
+      setMessage({
+        text: `Rubric evaluation saved (${res.data.totalScore}/100) and recorded on ledger!`,
+        type: "success",
+      });
       setEvaluatingSub(null);
       onRefresh();
     } else {
@@ -126,19 +196,27 @@ export function SubmissionsView({
     }
   };
 
-  const currentTotalScore =
-    Number(rubric.scoreContent || 0) +
-    Number(rubric.scorePresentation || 0) +
-    Number(rubric.scoreParticipation || 0);
+  const currentTotalScore = evalItems.reduce(
+    (acc, curr) => acc + (Number(curr.score) || 0),
+    0
+  );
 
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-white/10 pb-5">
         <div>
-          <h2 className="text-xl sm:text-2xl font-black tracking-tight text-white flex items-center gap-2">
-            <Upload className="w-6 h-6 text-indigo-400" />
-            Deliverables & Evaluation
-          </h2>
+          <div className="flex items-center gap-2 flex-wrap">
+            <h2 className="text-xl sm:text-2xl font-black tracking-tight text-white flex items-center gap-2">
+              <Upload className="w-6 h-6 text-indigo-400" />
+              Deliverables &amp; Evaluation
+            </h2>
+            {currentUser.role !== "admin" && (
+              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-cyan-500/15 text-cyan-300 border border-cyan-400/30 text-[10px] font-mono font-bold">
+                <Shield className="w-3 h-3 text-cyan-400" />
+                <span>MY CLUB SESSIONS ONLY</span>
+              </span>
+            )}
+          </div>
           <p className="text-xs sm:text-sm text-slate-300 mt-1">
             Submit verified project deliverables, review evaluation rubrics, and track scores.
           </p>
@@ -469,17 +547,7 @@ export function SubmissionsView({
                   {canEvaluate && (
                     <div className="pt-2">
                       <button
-                        onClick={() => {
-                          setEvaluatingSub(s);
-                          if (s.evaluation) {
-                            setRubric({
-                              scoreContent: s.evaluation.scoreContent ?? 35,
-                              scorePresentation: s.evaluation.scorePresentation ?? 25,
-                              scoreParticipation: s.evaluation.scoreParticipation ?? 25,
-                              feedback: s.evaluation.feedback || "",
-                            });
-                          }
-                        }}
+                        onClick={() => openEvaluationModal(s)}
                         className="w-full glass-btn-secondary py-2 rounded-xl font-semibold text-xs text-center"
                       >
                         {s.evaluation ? "Update Rubric" : "Grade Rubric"}
@@ -543,17 +611,7 @@ export function SubmissionsView({
                       <td className="py-2.5 px-3 text-right">
                         {canEvaluate && (
                           <button
-                            onClick={() => {
-                              setEvaluatingSub(s);
-                              if (s.evaluation) {
-                                setRubric({
-                                  scoreContent: s.evaluation.scoreContent ?? 35,
-                                  scorePresentation: s.evaluation.scorePresentation ?? 25,
-                                  scoreParticipation: s.evaluation.scoreParticipation ?? 25,
-                                  feedback: s.evaluation.feedback || "",
-                                });
-                              }
-                            }}
+                            onClick={() => openEvaluationModal(s)}
                             className="glass-btn-secondary px-3 py-1.5 rounded-xl font-semibold text-xs transition"
                           >
                             {s.evaluation ? "Update Rubric" : "Grade Rubric"}
@@ -600,51 +658,56 @@ export function SubmissionsView({
                 </div>
               </div>
 
-              <div className="space-y-4">
-                <div>
-                  <div className="flex justify-between text-xs font-semibold mb-1.5 text-slate-300">
-                    <span>1. Content &amp; Technical Depth (Max 40)</span>
-                    <span className="font-bold text-indigo-300">{rubric.scoreContent} pts</span>
-                  </div>
-                  <input
-                    type="range"
-                    min="0"
-                    max="40"
-                    value={rubric.scoreContent}
-                    onChange={(e) => setRubric({ ...rubric, scoreContent: Number(e.target.value) })}
-                    className="w-full accent-indigo-500 cursor-pointer"
-                  />
-                </div>
+              <div className="space-y-3.5 max-h-[60vh] overflow-y-auto pr-1">
+                {evalItems.map((item, idx) => (
+                  <div
+                    key={item.name + idx}
+                    className="p-3.5 rounded-2xl bg-white/[0.04] border border-white/10 space-y-2"
+                  >
+                    <div className="flex items-start justify-between gap-3 text-xs">
+                      <div>
+                        <div className="font-bold text-white">
+                          {idx + 1}. {item.name}
+                        </div>
+                        {item.description && (
+                          <div className="text-[11px] text-slate-400 mt-0.5 leading-snug">
+                            {item.description}
+                          </div>
+                        )}
+                      </div>
+                      <div className="flex items-center gap-1.5 shrink-0 bg-slate-900/80 px-2 py-1 rounded-xl border border-white/10">
+                        <input
+                          type="number"
+                          min="0"
+                          max={item.maxScore}
+                          value={item.score}
+                          onChange={(e) => {
+                            const val = Math.min(item.maxScore, Math.max(0, Number(e.target.value) || 0));
+                            setEvalItems((prev) =>
+                              prev.map((it, i) => (i === idx ? { ...it, score: val } : it))
+                            );
+                          }}
+                          className="w-12 text-center text-xs font-mono font-bold bg-transparent text-cyan-300 focus:outline-none"
+                        />
+                        <span className="text-[10px] text-slate-400 font-mono">/ {item.maxScore}</span>
+                      </div>
+                    </div>
 
-                <div>
-                  <div className="flex justify-between text-xs font-semibold mb-1.5 text-slate-300">
-                    <span>2. Presentation &amp; Clarity (Max 30)</span>
-                    <span className="font-bold text-indigo-300">{rubric.scorePresentation} pts</span>
+                    <input
+                      type="range"
+                      min="0"
+                      max={item.maxScore}
+                      value={item.score}
+                      onChange={(e) => {
+                        const val = Number(e.target.value);
+                        setEvalItems((prev) =>
+                          prev.map((it, i) => (i === idx ? { ...it, score: val } : it))
+                        );
+                      }}
+                      className="w-full accent-indigo-500 cursor-pointer h-2 bg-slate-800 rounded-lg"
+                    />
                   </div>
-                  <input
-                    type="range"
-                    min="0"
-                    max="30"
-                    value={rubric.scorePresentation}
-                    onChange={(e) => setRubric({ ...rubric, scorePresentation: Number(e.target.value) })}
-                    className="w-full accent-indigo-500 cursor-pointer"
-                  />
-                </div>
-
-                <div>
-                  <div className="flex justify-between text-xs font-semibold mb-1.5 text-slate-300">
-                    <span>3. Participation &amp; Timeliness (Max 30)</span>
-                    <span className="font-bold text-indigo-300">{rubric.scoreParticipation} pts</span>
-                  </div>
-                  <input
-                    type="range"
-                    min="0"
-                    max="30"
-                    value={rubric.scoreParticipation}
-                    onChange={(e) => setRubric({ ...rubric, scoreParticipation: Number(e.target.value) })}
-                    className="w-full accent-indigo-500 cursor-pointer"
-                  />
-                </div>
+                ))}
 
                 <div>
                   <label className="block text-xs font-semibold text-slate-300 mb-1">
@@ -653,8 +716,8 @@ export function SubmissionsView({
                   <textarea
                     rows={2}
                     placeholder="Constructive feedback, highlights, and growth advice..."
-                    value={rubric.feedback}
-                    onChange={(e) => setRubric({ ...rubric, feedback: e.target.value })}
+                    value={evalFeedback}
+                    onChange={(e) => setEvalFeedback(e.target.value)}
                     className="w-full text-xs rounded-xl border border-white/15 p-2.5 bg-slate-800 text-white placeholder-slate-500 focus:border-indigo-400 focus:outline-none"
                   />
                 </div>

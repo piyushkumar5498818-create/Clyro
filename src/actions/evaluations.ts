@@ -31,11 +31,40 @@ export async function evaluateSubmissionAction(
       return { success: false, error: "Only presidents, vice presidents, leads, or campus admins can evaluate submissions." };
     }
 
+    const submission = db.getSubmissions().find((s) => s.id === submissionId);
+    if (!submission) {
+      return { success: false, error: "Submission not found." };
+    }
+
+    const activity = db.getActivityById(submission.activityId);
+    if (!activity) {
+      return { success: false, error: "Associated activity not found." };
+    }
+
+    const isAdmin = activeUser.role === "admin" || activeUser.role === "college_admin";
+    if (!isAdmin) {
+      const reviewerClubIds = new Set<string>();
+      if (activeUser.organizationId) reviewerClubIds.add(activeUser.organizationId);
+      db.getMembershipsByUser(activeUser.id)
+        .filter((m) => m.status === "approved")
+        .forEach((m) => reviewerClubIds.add(m.organizationId));
+
+      if (!reviewerClubIds.has(activity.organizationId)) {
+        return {
+          success: false,
+          error: "Permission denied: You can only evaluate deliverables for your own club.",
+        };
+      }
+    }
+
     let breakdown: { criteriaName: string; score: number; maxScore: number }[] = [];
     let feedback = legacyFeedback || "";
 
     if (Array.isArray(scoreBreakdownOrRubric)) {
       breakdown = scoreBreakdownOrRubric;
+    } else if (scoreBreakdownOrRubric.breakdown && Array.isArray(scoreBreakdownOrRubric.breakdown)) {
+      breakdown = scoreBreakdownOrRubric.breakdown;
+      feedback = scoreBreakdownOrRubric.feedback || feedback;
     } else if (scoreBreakdownOrRubric.scoreContent !== undefined) {
       // Legacy 40/30/30 rubric compatibility
       breakdown = [
@@ -43,9 +72,6 @@ export async function evaluateSubmissionAction(
         { criteriaName: "Presentation & Clarity", score: scoreBreakdownOrRubric.scorePresentation, maxScore: 30 },
         { criteriaName: "Participation & Timeliness", score: scoreBreakdownOrRubric.scoreParticipation, maxScore: 30 },
       ];
-      feedback = scoreBreakdownOrRubric.feedback || feedback;
-    } else if (scoreBreakdownOrRubric.breakdown) {
-      breakdown = scoreBreakdownOrRubric.breakdown;
       feedback = scoreBreakdownOrRubric.feedback || feedback;
     }
 
@@ -70,5 +96,19 @@ export async function evaluateSubmissionAction(
     return { success: true, data: evaluation };
   } catch (err: unknown) {
     return { success: false, error: (err as Error).message };
+  }
+}
+
+export async function syncCustomEvaluationsAction(
+  clientEvaluations: Evaluation[]
+): Promise<Evaluation[]> {
+  try {
+    if (clientEvaluations && Array.isArray(clientEvaluations) && clientEvaluations.length > 0) {
+      return db.mergeCustomEvaluations(clientEvaluations);
+    }
+    return db.getAllEvaluations();
+  } catch (err) {
+    console.error("[syncCustomEvaluationsAction] Error:", err);
+    return db.getAllEvaluations();
   }
 }

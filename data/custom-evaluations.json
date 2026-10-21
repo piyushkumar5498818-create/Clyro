@@ -1,0 +1,124 @@
+[
+  {
+    "id": "eval_zl6pora",
+    "submissionId": "sub_rca4v9x",
+    "evaluatorId": "u0000000-0000-0000-0000-000000000003",
+    "scoreBreakdown": [
+      {
+        "criteriaName": "Problem Validation & TAM",
+        "score": 28,
+        "maxScore": 30
+      },
+      {
+        "criteriaName": "Technical Feasibility & MVP",
+        "score": 28,
+        "maxScore": 30
+      },
+      {
+        "criteriaName": "Traction & Unit Economics",
+        "score": 18,
+        "maxScore": 20
+      },
+      {
+        "criteriaName": "Pitch Delivery & Defense",
+        "score": 19,
+        "maxScore": 20
+      }
+    ],
+    "scoreContent": 28,
+    "scorePresentation": 28,
+    "scoreParticipation": 18,
+    "totalScore": 93,
+    "feedback": "Strong founder validation, impressive prototype traction.",
+    "evaluatedAt": "2026-10-21T04:15:47.114Z"
+  },
+  {
+    "id": "eval_5o0r499",
+    "submissionId": "sub_qascqd4",
+    "evaluatorId": "u0000000-0000-0000-0000-000000000001",
+    "scoreBreakdown": [
+      {
+        "criteriaName": "Technical Depth & Agent Architecture",
+        "score": 38,
+        "maxScore": 40
+      },
+      {
+        "criteriaName": "Live Execution & Presentation",
+        "score": 29,
+        "maxScore": 30
+      },
+      {
+        "criteriaName": "Code Quality & Documentation",
+        "score": 29,
+        "maxScore": 30
+      }
+    ],
+    "scoreContent": 38,
+    "scorePresentation": 29,
+    "scoreParticipation": 29,
+    "totalScore": 96,
+    "feedback": "Outstanding implementation of autonomous agent routing and memory persistence.",
+    "evaluatedAt": "2026-10-21T04:15:52.865Z"
+  },
+  {
+    "id": "eval_iu1qcen",
+    "submissionId": "sub_9gw6ws6",
+    "evaluatorId": "u0000000-0000-0000-0000-000000000003",
+    "scoreBreakdown": [
+      {
+        "criteriaName": "Problem Validation & TAM",
+        "score": 28,
+        "maxScore": 30
+      },
+      {
+        "criteriaName": "Technical Feasibility & MVP",
+        "score": 28,
+        "maxScore": 30
+      },
+      {
+        "criteriaName": "Traction & Unit Economics",
+        "score": 18,
+        "maxScore": 20
+      },
+      {
+        "criteriaName": "Pitch Delivery & Defense",
+        "score": 19,
+        "maxScore": 20
+      }
+    ],
+    "scoreContent": 28,
+    "scorePresentation": 28,
+    "scoreParticipation": 18,
+    "totalScore": 93,
+    "feedback": "Strong founder validation, impressive prototype traction.",
+    "evaluatedAt": "2026-10-21T04:16:46.869Z"
+  },
+  {
+    "id": "eval_7hunu1v",
+    "submissionId": "sub_be2jsl7",
+    "evaluatorId": "u0000000-0000-0000-0000-000000000001",
+    "scoreBreakdown": [
+      {
+        "criteriaName": "Technical Depth & Agent Architecture",
+        "score": 38,
+        "maxScore": 40
+      },
+      {
+        "criteriaName": "Live Execution & Presentation",
+        "score": 29,
+        "maxScore": 30
+      },
+      {
+        "criteriaName": "Code Quality & Documentation",
+        "score": 29,
+        "maxScore": 30
+      }
+    ],
+    "scoreContent": 38,
+    "scorePresentation": 29,
+    "scoreParticipation": 29,
+    "totalScore": 96,
+    "feedback": "Outstanding implementation of autonomous agent routing and memory persistence.",
+    "evaluatedAt": "2026-10-21T04:16:47.141Z"
+  }
+]

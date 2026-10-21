@@ -1136,6 +1136,7 @@ function getDatabase(): MiraiDatabaseState {
     let customActivities: Activity[] = [];
     let customAttendance: AttendanceRecord[] = [];
     let customSubmissions: Submission[] = [];
+    let customEvaluations: Evaluation[] = [];
 
     try {
       const dataDir = process.env.VERCEL ? "/tmp/gitclub-data" : path.join(process.cwd(), "data");
@@ -1157,6 +1158,12 @@ function getDatabase(): MiraiDatabaseState {
         const parsed = JSON.parse(raw);
         if (Array.isArray(parsed)) customSubmissions = parsed;
       }
+      const evalsFile = path.join(dataDir, "custom-evaluations.json");
+      if (fs.existsSync(evalsFile)) {
+        const raw = fs.readFileSync(evalsFile, "utf-8");
+        const parsed = JSON.parse(raw);
+        if (Array.isArray(parsed)) customEvaluations = parsed;
+      }
     } catch {
       // Ignored
     }
@@ -1173,7 +1180,7 @@ function getDatabase(): MiraiDatabaseState {
       attendanceTokens: [...INITIAL_TOKENS],
       attendanceRecords: [...INITIAL_ATTENDANCE, ...customAttendance],
       submissions: [...INITIAL_SUBMISSIONS, ...customSubmissions],
-      evaluations: [...INITIAL_EVALUATIONS],
+      evaluations: [...customEvaluations, ...INITIAL_EVALUATIONS],
       teams: [...INITIAL_TEAMS],
       certificates: [...INITIAL_CERTIFICATES],
       activeUserId: "u0000000-0000-0000-0000-000000000001", // Rishav Raj (President — Kaizen Tech)
@@ -1477,9 +1484,69 @@ export const db = {
         (s) => !INITIAL_SUBMISSIONS.some((init) => init.id === s.id)
       );
       fs.writeFileSync(path.join(dataDir, "custom-submissions.json"), JSON.stringify(customSubs, null, 2));
+
+      const customEvals = state.evaluations.filter(
+        (e) => !INITIAL_EVALUATIONS.some((init) => init.id === e.id)
+      );
+      fs.writeFileSync(path.join(dataDir, "custom-evaluations.json"), JSON.stringify(customEvals, null, 2));
     } catch {
       // Ignored
     }
+  },
+
+  mergeCustomSubmissions(incoming: Submission[]): Submission[] {
+    const state = getDatabase();
+    const existingMap = new Map(state.submissions.map((s) => [s.id, s]));
+    let modified = false;
+
+    for (const sub of incoming) {
+      if (!existingMap.has(sub.id)) {
+        state.submissions.unshift(sub);
+        existingMap.set(sub.id, sub);
+        modified = true;
+      }
+    }
+
+    if (modified) {
+      this.saveAppDataToDisk();
+    }
+    return this.getSubmissions();
+  },
+
+  mergeCustomEvaluations(incoming: Evaluation[]): Evaluation[] {
+    const state = getDatabase();
+    const existingMap = new Map(state.evaluations.map((e) => [e.submissionId, e]));
+    let modified = false;
+
+    for (const ev of incoming) {
+      if (!existingMap.has(ev.submissionId)) {
+        state.evaluations.push(ev);
+        existingMap.set(ev.submissionId, ev);
+        modified = true;
+      } else {
+        const existing = existingMap.get(ev.submissionId)!;
+        if (existing.totalScore !== ev.totalScore || existing.feedback !== ev.feedback) {
+          existing.scoreBreakdown = ev.scoreBreakdown;
+          existing.scoreContent = ev.scoreContent;
+          existing.scorePresentation = ev.scorePresentation;
+          existing.scoreParticipation = ev.scoreParticipation;
+          existing.totalScore = ev.totalScore;
+          existing.feedback = ev.feedback;
+          existing.evaluatedAt = ev.evaluatedAt;
+          existing.evaluatorId = ev.evaluatorId;
+          modified = true;
+        }
+      }
+    }
+
+    if (modified) {
+      this.saveAppDataToDisk();
+    }
+    return state.evaluations;
+  },
+
+  getAllEvaluations(): Evaluation[] {
+    return getDatabase().evaluations;
   },
 
   mergeCustomActivities(incoming: Activity[]): Activity[] {
@@ -1747,6 +1814,7 @@ export const db = {
       };
       state.evaluations.push(evaluation);
     }
+    this.saveAppDataToDisk();
     return evaluation;
   },
 

@@ -19,7 +19,9 @@ import {
   getInstitutionalMetricsAction,
 } from "@/actions/organizations";
 import { getActivitiesAction, syncCustomActivitiesAction } from "@/actions/activities";
-import { getSubmissionsAction } from "@/actions/submissions";
+import { getSubmissionsAction, syncCustomSubmissionsAction } from "@/actions/submissions";
+import { syncCustomEvaluationsAction } from "@/actions/evaluations";
+import { Evaluation } from "@/types/database";
 import { getCertificatesAction } from "@/actions/certificates";
 import { checkInStudentAction } from "@/actions/attendance";
 import {
@@ -64,6 +66,18 @@ export default function DashboardPage() {
         if (raw) localActs = JSON.parse(raw);
       } catch {}
 
+      let localSubs: Submission[] = [];
+      try {
+        const raw = localStorage.getItem("gitclub_custom_submissions_v2");
+        if (raw) localSubs = JSON.parse(raw);
+      } catch {}
+
+      let localEvals: Evaluation[] = [];
+      try {
+        const raw = localStorage.getItem("gitclub_custom_evaluations_v2");
+        if (raw) localEvals = JSON.parse(raw);
+      } catch {}
+
       const [
         user,
         profs,
@@ -80,9 +94,11 @@ export default function DashboardPage() {
         getInstitutionalMetricsAction(),
         syncCustomActivitiesAction(localActs),
         getMyMembershipsAction(),
-        getSubmissionsAction(),
+        syncCustomSubmissionsAction(localSubs),
         getCertificatesAction(),
       ]);
+
+      await syncCustomEvaluationsAction(localEvals);
 
       setCurrentUser(user);
       setProfiles(profs);
@@ -98,6 +114,14 @@ export default function DashboardPage() {
         const customOnly = acts.filter((a) => !a.id.startsWith("a0000000"));
         if (customOnly.length > 0) {
           localStorage.setItem("gitclub_custom_activities_v3", JSON.stringify(customOnly));
+        }
+      } catch {}
+
+      // Persist custom submissions to client storage
+      try {
+        const customSubsOnly = subs.filter((s) => !s.id.startsWith("s0000000"));
+        if (customSubsOnly.length > 0) {
+          localStorage.setItem("gitclub_custom_submissions_v2", JSON.stringify(customSubsOnly));
         }
       } catch {}
 
@@ -177,9 +201,9 @@ export default function DashboardPage() {
     await loadAllData();
   };
 
-  // Role-based Club Activity Visibility:
-  // "only those students who are in club can see their respective club activities"
-  const isStudent = currentUser?.role === "member" || currentUser?.role === "student";
+  // Role-based Club Activity & Assignment Visibility:
+  // "visibilyt of assignemnt and activity should remain to same club memebers only"
+  const isAdmin = currentUser?.role === "admin" || currentUser?.role === "college_admin";
 
   const userEnrolledClubIds = useMemo(() => {
     const clubIds = new Set<string>();
@@ -199,12 +223,30 @@ export default function DashboardPage() {
     return clubIds;
   }, [currentUser, myMemberships, allMemberships]);
 
+  // If not Campus Administrator, strictly restrict activities to the user's club(s)
   const visibleActivities = useMemo(() => {
-    if (!isStudent) {
+    if (isAdmin) {
       return activities;
     }
     return activities.filter((act) => userEnrolledClubIds.has(act.organizationId));
-  }, [isStudent, activities, userEnrolledClubIds]);
+  }, [isAdmin, activities, userEnrolledClubIds]);
+
+  // If not Campus Administrator, strictly restrict submissions/assignments to the user's club(s)
+  const visibleSubmissions = useMemo(() => {
+    if (isAdmin) {
+      return submissions;
+    }
+    const allowedActivityIds = new Set(visibleActivities.map((a) => a.id));
+    return submissions.filter((s) => allowedActivityIds.has(s.activityId));
+  }, [isAdmin, submissions, visibleActivities]);
+
+  // If not Campus Administrator, strictly restrict clubs for hosting activities to the user's club(s)
+  const visibleClubs = useMemo(() => {
+    if (isAdmin) {
+      return organizations;
+    }
+    return organizations.filter((org) => userEnrolledClubIds.has(org.id));
+  }, [isAdmin, organizations, userEnrolledClubIds]);
 
   if (loading || !currentUser) {
     return (
@@ -258,7 +300,7 @@ export default function DashboardPage() {
               institutionalMetrics={institutionalMetrics}
               activities={visibleActivities}
               attendanceRecords={[]}
-              submissions={submissions}
+              submissions={visibleSubmissions}
               certificates={certificates}
             />
           </section>
@@ -327,7 +369,7 @@ export default function DashboardPage() {
             </div>
             <ActivityManagementView
               currentUser={currentUser}
-              clubs={organizations as any}
+              clubs={visibleClubs as any}
               activities={visibleActivities}
               onRefresh={loadAllData}
             />
@@ -351,7 +393,7 @@ export default function DashboardPage() {
             <SubmissionsView
               currentUser={currentUser}
               activities={visibleActivities}
-              submissions={submissions}
+              submissions={visibleSubmissions}
               onRefresh={loadAllData}
             />
           </section>
