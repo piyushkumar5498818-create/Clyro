@@ -23,6 +23,7 @@ import {
   ChevronDown,
   MapPin,
   School,
+  ExternalLink,
 } from "lucide-react";
 import { GitclubLogo } from "@/components/GitclubLogo";
 
@@ -284,35 +285,49 @@ interface CampusOption {
   id: string;
   name: string;
   code: string;
+  city: string;
+  state: string;
   location: string;
+  affiliation: string;
+  programs: string;
+  url: string;
   isMain?: boolean;
 }
 
 const AVAILABLE_CAMPUSES: CampusOption[] = [
   {
     id: "c0000000-0000-0000-0000-000000000001",
-    name: "Mirai School of Technology",
-    code: "MSOT-MAIN",
-    location: "Main Tech Campus · Innovation Block A",
+    name: "Rathinam Institute of Technology",
+    code: "MSOT-BLR",
+    city: "Bengaluru",
+    state: "Karnataka",
+    location: "Bengaluru South, Karnataka – 560076",
+    affiliation: "AICTE Approved · VTU Affiliated",
+    programs: "BE CSE · BE CSE-AI/ML",
+    url: "https://miraisot.com/campuses/rathinam",
     isMain: true,
   },
   {
     id: "c0000000-0000-0000-0000-000000000002",
-    name: "Mirai North Engineering Hub",
-    code: "MSOT-NORTH",
-    location: "North Campus · Computing & Robotics Wing",
+    name: "Hi-Tech Institute of Technology",
+    code: "MSOT-GZB",
+    city: "Ghaziabad",
+    state: "Uttar Pradesh",
+    location: "Ghaziabad, Uttar Pradesh (Delhi NCR) – 201015",
+    affiliation: "AICTE Approved · AKTU Affiliated",
+    programs: "B.Tech CSE · B.Tech CSE AI/ML",
+    url: "https://miraisot.com/campuses/hi-tech",
   },
   {
     id: "c0000000-0000-0000-0000-000000000003",
-    name: "Mirai Research & Incubation City",
-    code: "MSOT-RIC",
-    location: "Electronic City · DeepTech & AI Labs",
-  },
-  {
-    id: "c0000000-0000-0000-0000-000000000004",
-    name: "Mirai Global & Virtual Campus",
-    code: "MSOT-GLOBAL",
-    location: "Cloud Network · Virtual Exchange",
+    name: "Jagannath University",
+    code: "MSOT-JPR",
+    city: "Jaipur",
+    state: "Rajasthan",
+    location: "Jaipur, Rajasthan – 302022",
+    affiliation: "AICTE Approved · NAAC A+ Accreditation",
+    programs: "B.Tech AI/ML",
+    url: "https://miraisot.com/campuses/jagannath-university",
   },
 ];
 
@@ -475,15 +490,20 @@ export default function LoginPage() {
           </div>
 
           {/* Institutional Campus Selection Selector */}
-          <div className="p-3.5 sm:p-4 rounded-2xl bg-white/[0.04] border border-white/10 space-y-2.5">
+          <div className="p-3.5 sm:p-4 rounded-2xl bg-white/[0.04] border border-white/10 space-y-3">
             <div className="flex items-center justify-between">
               <label className="text-xs font-bold text-white flex items-center gap-1.5">
                 <Building2 className="w-4 h-4 text-cyan-400" />
                 <span>Institutional Campus</span>
               </label>
-              <span className="text-[10px] font-mono font-bold text-cyan-300 bg-cyan-500/10 px-2 py-0.5 rounded-md border border-cyan-400/20">
-                {selectedCampus.code}
-              </span>
+              <div className="flex items-center gap-1.5">
+                <span className="text-[10px] font-mono font-bold text-cyan-300 bg-cyan-500/10 px-2 py-0.5 rounded-md border border-cyan-400/20">
+                  {selectedCampus.code}
+                </span>
+                <span className="text-[10px] font-mono font-semibold text-slate-400 bg-white/5 px-2 py-0.5 rounded-md border border-white/10">
+                  3 Campuses
+                </span>
+              </div>
             </div>
 
             {/* Dropdown Selector with Custom Icons */}
@@ -496,7 +516,7 @@ export default function LoginPage() {
               >
                 {AVAILABLE_CAMPUSES.map((c) => (
                   <option key={c.id} value={c.id} className="bg-slate-900 text-white py-1 font-sans">
-                    {c.name} ({c.code})
+                    {c.name} ({c.code}) — {c.city}, {c.state}
                   </option>
                 ))}
               </select>
@@ -508,8 +528,8 @@ export default function LoginPage() {
               </div>
             </div>
 
-            {/* Fast Campus Branch Chips */}
-            <div className="flex items-center gap-1.5 overflow-x-auto pb-0.5 scrollbar-none text-[11px] font-semibold">
+            {/* Fast 3-Campus Branch Chips */}
+            <div className="grid grid-cols-3 gap-1.5 text-[11px] font-semibold">
               {AVAILABLE_CAMPUSES.map((c) => {
                 const isSelected = c.id === selectedCampusId;
                 return (
@@ -517,28 +537,51 @@ export default function LoginPage() {
                     key={c.id}
                     type="button"
                     onClick={() => handleCampusChange(c.id)}
-                    className={`px-2.5 py-1 rounded-xl whitespace-nowrap transition border ${
+                    className={`px-2 py-1.5 rounded-xl transition border text-center flex flex-col items-center justify-center ${
                       isSelected
-                        ? "bg-cyan-500/20 text-cyan-200 border-cyan-400/50 shadow-sm"
+                        ? "bg-gradient-to-r from-blue-600/30 via-indigo-600/30 to-cyan-500/30 text-cyan-200 border-cyan-400/50 shadow-sm ring-1 ring-cyan-400/30"
                         : "bg-white/[0.03] text-slate-400 hover:text-white border-white/10 hover:bg-white/[0.06]"
                     }`}
                   >
-                    <span>{c.code}</span>
+                    <span className="font-bold text-[11px] text-white truncate w-full">{c.city}</span>
+                    <span className="text-[9px] font-mono text-cyan-300/80">{c.code}</span>
                   </button>
                 );
               })}
             </div>
 
-            {/* Selected Campus Location Metadata */}
-            <div className="flex items-center justify-between text-[11px] text-slate-400 pt-0.5">
-              <span className="truncate flex items-center gap-1.5">
-                <MapPin className="w-3 h-3 text-cyan-400 shrink-0" />
-                <span className="truncate">{selectedCampus.location}</span>
-              </span>
-              <span className="font-mono text-[10px] text-emerald-400 shrink-0 font-semibold flex items-center gap-1">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                <span>Active</span>
-              </span>
+            {/* Selected Campus Location & Affiliation Metadata */}
+            <div className="pt-2 border-t border-white/5 space-y-1.5">
+              <div className="flex items-center justify-between text-[11px] text-slate-300">
+                <span className="truncate flex items-center gap-1.5">
+                  <MapPin className="w-3 h-3 text-cyan-400 shrink-0" />
+                  <span className="truncate">{selectedCampus.location}</span>
+                </span>
+                <span className="font-mono text-[10px] text-emerald-400 shrink-0 font-semibold flex items-center gap-1">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                  <span>Active</span>
+                </span>
+              </div>
+
+              <div className="flex items-center justify-between gap-2 flex-wrap text-[10px] text-slate-400">
+                <div className="flex items-center gap-1.5 flex-wrap">
+                  <span className="px-1.5 py-0.5 rounded bg-blue-500/10 text-blue-300 border border-blue-500/20 font-mono">
+                    {selectedCampus.affiliation}
+                  </span>
+                  <span className="px-1.5 py-0.5 rounded bg-indigo-500/10 text-indigo-300 border border-indigo-500/20 font-mono">
+                    {selectedCampus.programs}
+                  </span>
+                </div>
+                <a
+                  href={selectedCampus.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1 text-[10px] text-cyan-400 hover:text-cyan-300 font-semibold transition hover:underline shrink-0"
+                >
+                  <span>miraisot.com</span>
+                  <ExternalLink className="w-2.5 h-2.5" />
+                </a>
+              </div>
             </div>
           </div>
 

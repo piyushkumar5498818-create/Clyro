@@ -291,7 +291,7 @@ export default function DashboardPage() {
                 Overview &amp; Metrics
               </span>
               <span className="text-[10px] text-cyan-300 font-semibold ml-auto font-mono">
-                MIRAI CAMPUS
+                3 CAMPUSES (BLR &bull; GZB &bull; JPR)
               </span>
             </div>
             <OverviewView

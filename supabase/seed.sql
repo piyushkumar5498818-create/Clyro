@@ -1,10 +1,15 @@
 -- Clyro: Seed Data for Mirai School of Technology
 -- 3 Primary Clubs · 3 Kaizen Tech Domains · Student Leadership (President, VP, Lead, Member, Admin)
 
--- 1. Campus
+-- 1. Official 3 Campuses of Mirai School of Technology (https://miraisot.com/)
 INSERT INTO campuses (id, name, code, location) VALUES
-('c0000000-0000-0000-0000-000000000001', 'Mirai School of Technology', 'MSOT-MAIN', 'Innovation Campus Block A')
-ON CONFLICT (id) DO NOTHING;
+('c0000000-0000-0000-0000-000000000001', 'Rathinam Institute of Technology', 'MSOT-BLR', 'Bengaluru, Karnataka (AICTE Approved · VTU Affiliated)'),
+('c0000000-0000-0000-0000-000000000002', 'Hi-Tech Institute of Technology', 'MSOT-GZB', 'Ghaziabad, Uttar Pradesh (AICTE Approved · AKTU Affiliated)'),
+('c0000000-0000-0000-0000-000000000003', 'Jagannath University', 'MSOT-JPR', 'Jaipur, Rajasthan (AICTE Approved · NAAC A+ Accreditation)')
+ON CONFLICT (id) DO UPDATE SET
+  name = EXCLUDED.name,
+  code = EXCLUDED.code,
+  location = EXCLUDED.location;
 
 -- 2. Profiles (Student Leadership Hierarchy)
 INSERT INTO profiles (id, email, full_name, role, campus_id, student_id, title) VALUES

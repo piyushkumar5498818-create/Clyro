@@ -37,13 +37,31 @@ interface MiraiDatabaseState {
   activeUserId: string;
 }
 
-const INITIAL_CAMPUS: Campus = {
-  id: "c0000000-0000-0000-0000-000000000001",
-  name: "Mirai School of Technology",
-  code: "MSOT-MAIN",
-  location: "Innovation Campus Block A",
-  createdAt: new Date().toISOString(),
-};
+const INITIAL_CAMPUSES: Campus[] = [
+  {
+    id: "c0000000-0000-0000-0000-000000000001",
+    name: "Rathinam Institute of Technology",
+    code: "MSOT-BLR",
+    location: "Bengaluru, Karnataka (AICTE Approved · VTU Affiliated)",
+    createdAt: new Date().toISOString(),
+  },
+  {
+    id: "c0000000-0000-0000-0000-000000000002",
+    name: "Hi-Tech Institute of Technology",
+    code: "MSOT-GZB",
+    location: "Ghaziabad, Uttar Pradesh (AICTE Approved · AKTU Affiliated)",
+    createdAt: new Date().toISOString(),
+  },
+  {
+    id: "c0000000-0000-0000-0000-000000000003",
+    name: "Jagannath University",
+    code: "MSOT-JPR",
+    location: "Jaipur, Rajasthan (AICTE Approved · NAAC A+ Accreditation)",
+    createdAt: new Date().toISOString(),
+  },
+];
+
+const INITIAL_CAMPUS: Campus = INITIAL_CAMPUSES[0];
 
 const INITIAL_PROFILES: Profile[] = [
   {
@@ -1177,7 +1195,7 @@ function getDatabase(): MiraiDatabaseState {
     }
 
     globalThis.__mirai_db = {
-      campuses: [INITIAL_CAMPUS],
+      campuses: [...INITIAL_CAMPUSES],
       profiles: [...INITIAL_PROFILES],
       organizations: [...INITIAL_ORGANIZATIONS, ...customOrganizations],
       units: [...INITIAL_UNITS],
