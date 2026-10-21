@@ -2,8 +2,9 @@
 
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Activity, Club, Profile, ActivityFormat } from "@/types/database";
+import { Activity, Club, Profile, ActivityFormat, Team } from "@/types/database";
 import { createActivityAction, reviewActivityAction } from "@/actions/activities";
+import { createTeamAction, getTeamsAction } from "@/actions/teams";
 import {
   Calendar,
   Clock,
@@ -16,6 +17,11 @@ import {
   FileText,
   Sparkles,
   Shield,
+  Users,
+  Download,
+  Printer,
+  X,
+  Award,
 } from "lucide-react";
 
 interface ActivityManagementViewProps {
@@ -47,6 +53,41 @@ export function ActivityManagementView({
   });
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<{ text: string; type: "success" | "error" } | null>(null);
+
+  // Event Teams & Registration state
+  const [selectedTeamAct, setSelectedTeamAct] = useState<Activity | null>(null);
+  const [activityTeams, setActivityTeams] = useState<Team[]>([]);
+  const [newTeamName, setNewTeamName] = useState("");
+  const [loadingTeams, setLoadingTeams] = useState(false);
+  const [teamMessage, setTeamMessage] = useState<{ text: string; type: "success" | "error" } | null>(null);
+
+  // Duty Leave state
+  const [dutyLeaveAct, setDutyLeaveAct] = useState<Activity | null>(null);
+
+  const openTeamsModal = async (act: Activity) => {
+    setSelectedTeamAct(act);
+    setTeamMessage(null);
+    setLoadingTeams(true);
+    const teams = await getTeamsAction(act.id);
+    setActivityTeams(teams);
+    setLoadingTeams(false);
+  };
+
+  const handleCreateTeam = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!selectedTeamAct || !newTeamName.trim()) return;
+    setLoadingTeams(true);
+    setTeamMessage(null);
+    const res = await createTeamAction(selectedTeamAct.id, newTeamName.trim(), []);
+    setLoadingTeams(false);
+    if (res.success && res.data) {
+      setActivityTeams((prev) => [res.data!, ...prev]);
+      setNewTeamName("");
+      setTeamMessage({ text: `Team "${res.data.name}" successfully registered!`, type: "success" });
+    } else {
+      setTeamMessage({ text: res.error || "Failed to register team", type: "error" });
+    }
+  };
 
   // Sync default club selection whenever clubs or currentUser changes
   useEffect(() => {
@@ -437,6 +478,28 @@ export function ActivityManagementView({
                   <strong className="text-white">Deliverable:</strong> {act.deliverableDescription}
                 </div>
               </div>
+
+              {/* Event Registration & Duty Leave Quick Actions */}
+              <div className="mt-3 pt-2.5 border-t border-white/10 flex flex-wrap items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => openTeamsModal(act)}
+                  className="px-3 py-1.5 rounded-xl text-xs font-semibold bg-white/5 hover:bg-white/10 text-cyan-300 border border-white/10 transition flex items-center gap-1.5"
+                >
+                  <Users className="w-3.5 h-3.5" />
+                  <span>Teams &amp; Registration</span>
+                </button>
+                {act.status === "approved" && (
+                  <button
+                    type="button"
+                    onClick={() => setDutyLeaveAct(act)}
+                    className="px-3 py-1.5 rounded-xl text-xs font-semibold bg-white/5 hover:bg-white/10 text-amber-300 border border-white/10 transition flex items-center gap-1.5"
+                  >
+                    <FileText className="w-3.5 h-3.5" />
+                    <span>Duty Leave</span>
+                  </button>
+                )}
+              </div>
             </div>
 
             {/* Leadership Approval Actions */}
@@ -462,6 +525,208 @@ export function ActivityManagementView({
           </div>
         ))}
       </div>
+
+      {/* Event Teams & Registration Modal */}
+      {selectedTeamAct && (
+        <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-md flex items-center justify-center p-4">
+          <motion.div
+            initial={{ scale: 0.95, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            className="glass-panel bg-slate-900/95 rounded-3xl max-w-md w-full p-6 shadow-2xl space-y-4 border border-white/15 max-h-[90vh] overflow-y-auto"
+          >
+            <div className="flex items-center justify-between border-b border-white/10 pb-3">
+              <div>
+                <h4 className="font-bold text-base text-white flex items-center gap-2">
+                  <Users className="w-4 h-4 text-cyan-400" />
+                  Event Teams &amp; Registration
+                </h4>
+                <p className="text-[11px] text-slate-400 mt-0.5 truncate max-w-xs">
+                  {selectedTeamAct.title}
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setSelectedTeamAct(null)}
+                className="p-1 rounded-lg hover:bg-white/10 text-slate-400 hover:text-white"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            {teamMessage && (
+              <div
+                className={`p-3 rounded-xl text-xs font-semibold flex items-center gap-2 border ${
+                  teamMessage.type === "success"
+                    ? "bg-emerald-500/15 text-emerald-200 border-emerald-500/30"
+                    : "bg-rose-500/15 text-rose-200 border-rose-500/30"
+                }`}
+              >
+                {teamMessage.type === "success" ? (
+                  <CheckCircle className="w-4 h-4 text-emerald-400 shrink-0" />
+                ) : (
+                  <AlertCircle className="w-4 h-4 text-rose-400 shrink-0" />
+                )}
+                <span>{teamMessage.text}</span>
+              </div>
+            )}
+
+            {/* Team Registration Form */}
+            <form onSubmit={handleCreateTeam} className="p-3.5 rounded-2xl bg-white/[0.03] border border-white/10 space-y-3">
+              <div className="text-xs font-bold text-white flex items-center gap-1.5">
+                <Plus className="w-3.5 h-3.5 text-cyan-400" />
+                <span>Form &amp; Register a Team</span>
+              </div>
+              <div>
+                <input
+                  type="text"
+                  required
+                  placeholder="e.g. Neural Ninjas, Team Alpha..."
+                  value={newTeamName}
+                  onChange={(e) => setNewTeamName(e.target.value)}
+                  className="w-full px-3 py-2 rounded-xl bg-black/40 border border-white/10 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-cyan-400"
+                />
+              </div>
+              <div className="flex justify-end">
+                <button
+                  type="submit"
+                  disabled={loadingTeams}
+                  className="glass-btn-primary px-4 py-1.5 rounded-xl text-xs font-bold shadow"
+                >
+                  {loadingTeams ? "Registering..." : "Register Team"}
+                </button>
+              </div>
+            </form>
+
+            {/* Registered Teams List */}
+            <div className="space-y-2 pt-1">
+              <div className="text-xs font-bold text-slate-300">
+                Registered Teams ({activityTeams.length})
+              </div>
+              {activityTeams.length === 0 ? (
+                <div className="py-6 text-center text-xs text-slate-400 border border-white/5 rounded-2xl bg-white/[0.02]">
+                  No teams registered for this event yet. Be the first to form a team!
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  {activityTeams.map((team) => (
+                    <div
+                      key={team.id}
+                      className="p-3 rounded-2xl bg-white/[0.03] border border-white/10 flex items-center justify-between gap-2"
+                    >
+                      <div>
+                        <div className="text-xs font-bold text-white flex items-center gap-1.5">
+                          <span>{team.name}</span>
+                          <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-cyan-500/20 text-cyan-300 border border-cyan-500/30">
+                            Registered
+                          </span>
+                        </div>
+                        <div className="text-[11px] text-slate-400 mt-0.5">
+                          {team.projectTitle || "Project in development"} &bull; Team Lead: Active Member
+                        </div>
+                      </div>
+                      <span className="text-[10px] font-mono text-slate-400">
+                        {team.memberUserIds?.length ? `${team.memberUserIds.length + 1} Members` : "Team Active"}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </motion.div>
+        </div>
+      )}
+
+      {/* Duty Leave Letter Modal */}
+      {dutyLeaveAct && (
+        <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-md flex items-center justify-center p-4">
+          <motion.div
+            initial={{ scale: 0.95, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            className="glass-panel bg-slate-900/95 rounded-3xl max-w-lg w-full p-6 shadow-2xl space-y-4 border border-white/15 max-h-[90vh] overflow-y-auto"
+          >
+            <div className="flex items-center justify-between border-b border-white/10 pb-3">
+              <div>
+                <h4 className="font-bold text-base text-white flex items-center gap-2">
+                  <FileText className="w-4 h-4 text-amber-400" />
+                  Official Duty Leave Endorsement
+                </h4>
+                <p className="text-[11px] text-slate-400 mt-0.5">
+                  Mirai School of Technology &bull; Academic Affairs &amp; Co-Curricular Cell
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setDutyLeaveAct(null)}
+                className="p-1 rounded-lg hover:bg-white/10 text-slate-400 hover:text-white"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <div className="p-5 rounded-2xl bg-white/[0.02] border border-white/10 text-xs text-slate-300 space-y-3 font-sans leading-relaxed">
+              <div className="text-center pb-2 border-b border-white/10">
+                <div className="font-bold text-sm text-white">MIRAI SCHOOL OF TECHNOLOGY</div>
+                <div className="text-[10px] text-slate-400">OFFICE OF STUDENT AFFAIRS &amp; CLUB GOVERNANCE</div>
+              </div>
+
+              <p>
+                <strong>Date:</strong> {new Date().toLocaleDateString("en-IN", { dateStyle: "long" })}
+              </p>
+              <p>
+                <strong>To:</strong> The Campus Manager &amp; Head of Department
+              </p>
+              <p>
+                <strong>Subject:</strong> Sanction of Duty Leave for Approved Campus Activity
+              </p>
+              <p>
+                This is to certify that <strong>{currentUser.fullName}</strong> ({currentUser.studentId || "Verified Student"}), registered in <strong>{dutyLeaveAct.clubName || "Mirai Campus Club"}</strong>, is officially deputed to participate in:
+              </p>
+
+              <div className="p-3 rounded-xl bg-white/5 border border-white/10 space-y-1">
+                <div><strong>Event / Session:</strong> {dutyLeaveAct.title}</div>
+                <div><strong>Scheduled Date &amp; Time:</strong> {dutyLeaveAct.scheduledDate} ({dutyLeaveAct.startTime} – {dutyLeaveAct.endTime})</div>
+                <div><strong>Venue:</strong> {dutyLeaveAct.venue}</div>
+                <div><strong>Deliverable:</strong> {dutyLeaveAct.deliverableDescription}</div>
+              </div>
+
+              <p>
+                Kindly grant duty leave for the aforementioned duration as per institutional co-curricular guidelines.
+              </p>
+
+              <div className="pt-4 border-t border-white/10 flex justify-between text-[11px] text-slate-400">
+                <div>
+                  <div className="font-semibold text-white">Faculty Advisor Endorsement</div>
+                  <div>MSOT Co-Curricular Governance</div>
+                </div>
+                <div className="text-right">
+                  <div className="font-semibold text-emerald-400">Status: Approved</div>
+                  <div>Digital Token Verified</div>
+                </div>
+              </div>
+            </div>
+
+            <div className="flex justify-end gap-2 pt-2 border-t border-white/10">
+              <button
+                type="button"
+                onClick={() => setDutyLeaveAct(null)}
+                className="px-3.5 py-2 rounded-xl text-xs font-semibold text-slate-400 hover:text-white"
+              >
+                Close
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  window.print();
+                }}
+                className="glass-btn-primary px-4 py-2 rounded-xl text-xs font-bold shadow flex items-center gap-1.5"
+              >
+                <Printer className="w-3.5 h-3.5" />
+                <span>Print / Save Letter</span>
+              </button>
+            </div>
+          </motion.div>
+        </div>
+      )}
     </div>
   );
 }

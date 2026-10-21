@@ -1,181 +1,181 @@
 {
   "sessions": [
     {
-      "id": "tsess_jzuzy0g_mvhlolk4",
+      "id": "tsess_wr1g6sc_mvhmzlpf",
       "userId": "u0000000-0000-0000-0000-000000000025",
       "role": "member",
       "userFullName": "Meera Nair",
-      "loggedInAt": "2026-10-21T04:16:47.140Z",
-      "loggedOutAt": "2026-10-21T04:16:47.142Z",
+      "loggedInAt": "2026-10-21T04:53:20.163Z",
+      "loggedOutAt": "2026-10-21T04:53:20.167Z",
       "isConfirmedLogout": true,
-      "lastActiveAt": "2026-10-21T04:16:47.142Z",
+      "lastActiveAt": "2026-10-21T04:53:20.167Z",
       "userAgent": "Browser Session 3 (Student)",
-      "createdAt": "2026-10-21T04:16:47.140Z"
+      "createdAt": "2026-10-21T04:53:20.163Z"
     },
     {
-      "id": "tsess_bv3583s_mvhlolk3",
+      "id": "tsess_uvekok3_mvhmzlpd",
       "userId": "u0000000-0000-0000-0000-000000000001",
       "role": "president",
       "userFullName": "Rishav Raj",
-      "loggedInAt": "2026-10-21T04:16:47.139Z",
+      "loggedInAt": "2026-10-21T04:53:20.161Z",
       "loggedOutAt": null,
       "isConfirmedLogout": false,
-      "lastActiveAt": "2026-10-21T04:16:47.142Z",
+      "lastActiveAt": "2026-10-21T04:53:20.167Z",
       "userAgent": "Browser Session 2 (President)",
-      "createdAt": "2026-10-21T04:16:47.139Z"
+      "createdAt": "2026-10-21T04:53:20.161Z"
     },
     {
-      "id": "tsess_y3hl30v_mvhlolk3",
+      "id": "tsess_4s8c490_mvhmzlpc",
       "userId": "u0000000-0000-0000-0000-000000000024",
       "role": "lead",
       "userFullName": "Devansh Soni",
-      "loggedInAt": "2026-10-21T04:16:47.139Z",
-      "loggedOutAt": "2026-10-21T04:16:47.142Z",
+      "loggedInAt": "2026-10-21T04:53:20.160Z",
+      "loggedOutAt": "2026-10-21T04:53:20.167Z",
       "isConfirmedLogout": true,
-      "lastActiveAt": "2026-10-21T04:16:47.142Z",
+      "lastActiveAt": "2026-10-21T04:53:20.167Z",
       "userAgent": "Browser Session 1 (Lead)",
-      "createdAt": "2026-10-21T04:16:47.139Z"
+      "createdAt": "2026-10-21T04:53:20.160Z"
     }
   ],
   "actions": [
     {
-      "id": "tact_gs2v92k",
-      "sessionId": "tsess_jzuzy0g_mvhlolk4",
+      "id": "tact_kwj7twn",
+      "sessionId": "tsess_wr1g6sc_mvhmzlpf",
       "userId": "u0000000-0000-0000-0000-000000000025",
       "role": "Student",
-      "loggedInAt": "2026-10-21T04:16:47.140Z",
+      "loggedInAt": "2026-10-21T04:53:20.163Z",
       "doneWhatExactly": "Logged out of the application",
-      "loggedOutAt": "2026-10-21T04:16:47.142Z",
+      "loggedOutAt": "2026-10-21T04:53:20.167Z",
       "successfulOrNot": "Successful",
-      "timestamp": "2026-10-21T04:16:47.142Z"
+      "timestamp": "2026-10-21T04:53:20.167Z"
     },
     {
-      "id": "tact_3lo4cf2",
-      "sessionId": "tsess_y3hl30v_mvhlolk3",
+      "id": "tact_tupg03y",
+      "sessionId": "tsess_4s8c490_mvhmzlpc",
       "userId": "u0000000-0000-0000-0000-000000000024",
       "role": "Lead Member",
-      "loggedInAt": "2026-10-21T04:16:47.139Z",
+      "loggedInAt": "2026-10-21T04:53:20.160Z",
       "doneWhatExactly": "Logged out of the application",
-      "loggedOutAt": "2026-10-21T04:16:47.142Z",
+      "loggedOutAt": "2026-10-21T04:53:20.167Z",
       "successfulOrNot": "Successful",
-      "timestamp": "2026-10-21T04:16:47.142Z"
+      "timestamp": "2026-10-21T04:53:20.167Z"
     },
     {
-      "id": "tact_htyame4",
-      "sessionId": "tsess_bv3583s_mvhlolk3",
+      "id": "tact_7lfotu7",
+      "sessionId": "tsess_uvekok3_mvhmzlpd",
       "userId": "u0000000-0000-0000-0000-000000000001",
       "role": "President",
-      "loggedInAt": "2026-10-21T04:16:47.139Z",
-      "doneWhatExactly": "Issued verifiable certificate: \"GenAI Venture Sprint Winner — Outstanding Deliverable\" (GITCLUB-NEX-5671)",
+      "loggedInAt": "2026-10-21T04:53:20.161Z",
+      "doneWhatExactly": "Issued verifiable certificate: \"GenAI Venture Sprint Winner — Outstanding Deliverable\" (GITCLUB-NEX-9044)",
       "loggedOutAt": null,
       "successfulOrNot": "Successful",
-      "targetEntityId": "cert_pfexb2q",
-      "timestamp": "2026-10-21T04:16:47.142Z"
+      "targetEntityId": "cert_afglfwf",
+      "timestamp": "2026-10-21T04:53:20.167Z"
     },
     {
-      "id": "tact_4kxrle5",
-      "sessionId": "tsess_bv3583s_mvhlolk3",
+      "id": "tact_mxtshg2",
+      "sessionId": "tsess_uvekok3_mvhmzlpd",
       "userId": "u0000000-0000-0000-0000-000000000001",
       "role": "President",
-      "loggedInAt": "2026-10-21T04:16:47.139Z",
+      "loggedInAt": "2026-10-21T04:53:20.161Z",
       "doneWhatExactly": "Graded deliverable submission with rubric score: 96/100",
       "loggedOutAt": null,
       "successfulOrNot": "Successful",
-      "targetEntityId": "sub_be2jsl7",
-      "timestamp": "2026-10-21T04:16:47.142Z"
+      "targetEntityId": "sub_yvyko9i",
+      "timestamp": "2026-10-21T04:53:20.166Z"
     },
     {
-      "id": "tact_g8otbwt",
-      "sessionId": "tsess_jzuzy0g_mvhlolk4",
+      "id": "tact_9a4albh",
+      "sessionId": "tsess_wr1g6sc_mvhmzlpf",
       "userId": "u0000000-0000-0000-0000-000000000025",
       "role": "Student",
-      "loggedInAt": "2026-10-21T04:16:47.140Z",
+      "loggedInAt": "2026-10-21T04:53:20.163Z",
       "doneWhatExactly": "Submitted deliverable link: https://github.com/mirai-student/genai-venture-sprint for \"Mirai GenAI Venture Sprint 2026\"",
-      "loggedOutAt": "2026-10-21T04:16:47.142Z",
+      "loggedOutAt": "2026-10-21T04:53:20.167Z",
       "successfulOrNot": "Successful",
-      "targetEntityId": "sub_be2jsl7",
-      "timestamp": "2026-10-21T04:16:47.141Z"
+      "targetEntityId": "sub_yvyko9i",
+      "timestamp": "2026-10-21T04:53:20.165Z"
     },
     {
-      "id": "tact_rz0ie95",
-      "sessionId": "tsess_jzuzy0g_mvhlolk4",
+      "id": "tact_qctzvxl",
+      "sessionId": "tsess_wr1g6sc_mvhmzlpf",
       "userId": "u0000000-0000-0000-0000-000000000025",
       "role": "Student",
-      "loggedInAt": "2026-10-21T04:16:47.140Z",
+      "loggedInAt": "2026-10-21T04:53:20.163Z",
       "doneWhatExactly": "Marked attendance for \"Mirai GenAI Venture Sprint 2026\" via QR Code",
-      "loggedOutAt": "2026-10-21T04:16:47.142Z",
+      "loggedOutAt": "2026-10-21T04:53:20.167Z",
       "successfulOrNot": "Successful",
-      "targetEntityId": "rec_isbqx6g",
-      "timestamp": "2026-10-21T04:16:47.141Z"
+      "targetEntityId": "rec_g9vv2gq",
+      "timestamp": "2026-10-21T04:53:20.164Z"
     },
     {
-      "id": "tact_1tii89l",
-      "sessionId": "tsess_jzuzy0g_mvhlolk4",
+      "id": "tact_75j6tl9",
+      "sessionId": "tsess_wr1g6sc_mvhmzlpf",
       "userId": "u0000000-0000-0000-0000-000000000025",
       "role": "Student",
-      "loggedInAt": "2026-10-21T04:16:47.140Z",
+      "loggedInAt": "2026-10-21T04:53:20.163Z",
       "doneWhatExactly": "Logged into the application",
-      "loggedOutAt": "2026-10-21T04:16:47.142Z",
+      "loggedOutAt": "2026-10-21T04:53:20.167Z",
       "successfulOrNot": "Successful",
-      "timestamp": "2026-10-21T04:16:47.140Z"
+      "timestamp": "2026-10-21T04:53:20.163Z"
     },
     {
-      "id": "tact_8aqfcho",
-      "sessionId": "tsess_bv3583s_mvhlolk3",
+      "id": "tact_buppdo4",
+      "sessionId": "tsess_uvekok3_mvhmzlpd",
       "userId": "u0000000-0000-0000-0000-000000000001",
       "role": "President",
-      "loggedInAt": "2026-10-21T04:16:47.139Z",
-      "doneWhatExactly": "Opened attendance check-in session for \"Mirai GenAI Venture Sprint 2026\" (Token: GITCLUB-2676)",
+      "loggedInAt": "2026-10-21T04:53:20.161Z",
+      "doneWhatExactly": "Opened attendance check-in session for \"Mirai GenAI Venture Sprint 2026\" (Token: GITCLUB-6230)",
       "loggedOutAt": null,
       "successfulOrNot": "Successful",
-      "targetEntityId": "act_2qs73iq",
-      "timestamp": "2026-10-21T04:16:47.140Z"
+      "targetEntityId": "act_xfqb4xw",
+      "timestamp": "2026-10-21T04:53:20.163Z"
     },
     {
-      "id": "tact_h6hjz9p",
-      "sessionId": "tsess_bv3583s_mvhlolk3",
+      "id": "tact_8lt9w2e",
+      "sessionId": "tsess_uvekok3_mvhmzlpd",
       "userId": "u0000000-0000-0000-0000-000000000001",
       "role": "President",
-      "loggedInAt": "2026-10-21T04:16:47.139Z",
+      "loggedInAt": "2026-10-21T04:53:20.161Z",
       "doneWhatExactly": "Approved activity plan: \"Mirai GenAI Venture Sprint 2026\"",
       "loggedOutAt": null,
       "successfulOrNot": "Successful",
-      "targetEntityId": "act_2qs73iq",
-      "timestamp": "2026-10-21T04:16:47.140Z"
+      "targetEntityId": "act_xfqb4xw",
+      "timestamp": "2026-10-21T04:53:20.163Z"
     },
     {
-      "id": "tact_fnr1qco",
-      "sessionId": "tsess_bv3583s_mvhlolk3",
+      "id": "tact_tqmd6nl",
+      "sessionId": "tsess_uvekok3_mvhmzlpd",
       "userId": "u0000000-0000-0000-0000-000000000001",
       "role": "President",
-      "loggedInAt": "2026-10-21T04:16:47.139Z",
+      "loggedInAt": "2026-10-21T04:53:20.161Z",
       "doneWhatExactly": "Logged into the application",
       "loggedOutAt": null,
       "successfulOrNot": "Successful",
-      "timestamp": "2026-10-21T04:16:47.139Z"
+      "timestamp": "2026-10-21T04:53:20.161Z"
     },
     {
-      "id": "tact_m2fbx4q",
-      "sessionId": "tsess_y3hl30v_mvhlolk3",
+      "id": "tact_lql8fr3",
+      "sessionId": "tsess_4s8c490_mvhmzlpc",
       "userId": "u0000000-0000-0000-0000-000000000024",
       "role": "Lead Member",
-      "loggedInAt": "2026-10-21T04:16:47.139Z",
+      "loggedInAt": "2026-10-21T04:53:20.160Z",
       "doneWhatExactly": "Created and submitted activity proposal: \"Mirai GenAI Venture Sprint 2026\"",
-      "loggedOutAt": "2026-10-21T04:16:47.142Z",
+      "loggedOutAt": "2026-10-21T04:53:20.167Z",
       "successfulOrNot": "Successful",
-      "targetEntityId": "act_2qs73iq",
-      "timestamp": "2026-10-21T04:16:47.139Z"
+      "targetEntityId": "act_xfqb4xw",
+      "timestamp": "2026-10-21T04:53:20.161Z"
     },
     {
-      "id": "tact_p2rgyj4",
-      "sessionId": "tsess_y3hl30v_mvhlolk3",
+      "id": "tact_jhquotd",
+      "sessionId": "tsess_4s8c490_mvhmzlpc",
       "userId": "u0000000-0000-0000-0000-000000000024",
       "role": "Lead Member",
-      "loggedInAt": "2026-10-21T04:16:47.139Z",
+      "loggedInAt": "2026-10-21T04:53:20.160Z",
       "doneWhatExactly": "Logged into the application",
-      "loggedOutAt": "2026-10-21T04:16:47.142Z",
+      "loggedOutAt": "2026-10-21T04:53:20.167Z",
       "successfulOrNot": "Successful",
-      "timestamp": "2026-10-21T04:16:47.139Z"
+      "timestamp": "2026-10-21T04:53:20.160Z"
     }
   ]
 }

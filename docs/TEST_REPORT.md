@@ -1,23 +1,25 @@
-# Clyro Verification & Test Report: Mirai School of Technology
+# Gitclub Verification & Comprehensive Test Report: Mirai School of Technology
 
 ## Test Execution Details
-- **Date of Execution:** 2026-10-16
-- **Test Command:** `npm test` & `npm run test:load`
-- **Environment:** Node v26.8.1, Next.js 14.2.35, TypeScript 5.6
-- **Target Institutions:** NEX-CELL, Kaizen Tech, MALHAR
+- **Date of Execution:** 2026-10-21
+- **Test Commands:** `npm test`, `npm run test:multi`, & `npm run test:load`
+- **Environment:** Node v20+, Next.js 14.2.35, TypeScript 5.6
+- **Target Institutions:** NEX-CELL, Kaizen Tech, MALHAR, Cypher (Club Registry)
 
 ---
 
-## 1. Core Workflow & Organizational Integrity Matrix
+## 1. Core Workflow, Scalability & Institutional Integrity Matrix
 
 | Category | Test Case | Target Behavior | Actual Result | Status |
 | :--- | :--- | :--- | :--- | :--- |
-| **Organizations** | 3 Primary Organizations | NEX-CELL, Kaizen Tech, MALHAR | Exactly 3 organizations deployed | PASS |
+| **Organizations** | 3 Primary Organizations | NEX-CELL, Kaizen Tech, MALHAR | Exactly 3 primary organizations deployed | PASS |
 | **Organizations** | Organization Typing | Correct enum typing for each | All 3 typed accurately | PASS |
-| **Kaizen Domains** | 6 Technical Domains | Web, AI/ML, CP, Mobile, OSS, UI/UX | Exactly 6 domains configured | PASS |
+| **Kaizen Domains** | 3 Technical Domains | CP, Web, AI & Data Science | Exactly 3 domains configured | PASS |
 | **MALHAR Depts** | 5 Operating Departments | Management, Media, Tech, Designing, PR | Exactly 5 departments configured | PASS |
 | **NEX-CELL Initiatives** | 6 Flagship Programmes | Founders Fire, Scrap to Scale, Masterminds, Founder Talks, The Mirage, Open Build | Exactly 6 initiatives configured | PASS |
-| **Campus Metrics** | Non-Double-Counting | Distinct student counting across units | Reports distinct user IDs | PASS |
+| **Campus Metrics** | Non-Double-Counting | Distinct student counting across units | Reports distinct verified user IDs | PASS |
+| **Club Registry** | Admin Club Creation | Admin registers new club per campus | Created Cypher club with advisor, coordinator, rules | PASS |
+| **Club Registry** | Capacity & Rules | Enforces capacity limit & meeting schedule | Persisted capacity 120 and Friday lab rules | PASS |
 | **Membership** | Duplicate Request Guard | Student cannot request same organization twice | Throws duplicate error | PASS |
 | **Membership** | Secondary Club Join | Student can join second organization | Secondary membership granted | PASS |
 | **Membership** | Institutional Cap | Enforces maximum 2 clubs per student | Exceeding cap throws error | PASS |
@@ -31,15 +33,18 @@
 | **Submissions** | Deliverable Upload | Student submits repo link & notes | Submission logged with timestamp | PASS |
 | **Submissions** | Duplicate Submission Guard | Prevents multiple submissions for same activity | Throws duplicate error | PASS |
 | **Rubric** | Dynamic Rubrics | Multi-criteria scoring up to 100 pts | Computed 93/100 accurately | PASS |
-| **Teams** | Event Team Formation | Collaborative team for hackathon/pitch | Team created with lead & members | PASS |
-| **Certificates** | Issuance & Verification | Verification code lookup against ledger | Authentic certificate validated | PASS |
-| **Certificates** | Fraud & Tamper Guard | Unrecognized or altered codes rejected | Invalid code safely rejected | PASS |
+| **Events (200 pax)** | 200 Registrations & Teams | Event with 200 registrations and team formation | Formed 50 teams of 4 members with zero lost entries | PASS |
+| **Certificates** | 20-Certificate Scale Audit | 20 certificates generated with unique ledger codes | Generated 20 certificates successfully | PASS |
+| **Certificates** | 20 Verification Links | Each verification link opens the correct record | All 20 codes validated against ledger | PASS |
+| **Certificates** | Fraud & Tamper Guard | Unrecognized or altered codes rejected | Invalid/tampered code safely rejected | PASS |
+| **Authentication** | Cryptographic Sessions | HMAC-SHA256 session token generation | Validated authentic token signature | PASS |
+| **Authentication** | Domain Restriction | Restrict to @mirai.edu Google Workspace | Non-mirai domain (@gmail.com) safely blocked | PASS |
+| **Reports** | Report Reconciliation | Reconcile monthly report totals with raw data | Report totals exactly match raw attendance & submissions | PASS |
 
 ### Test Summary
-- **Total Tests Run:** 35
-- **Passed:** 35
-- **Failed:** 0
-- **Success Rate:** 100%
+- **Unit & Integration Tests (`npm test`):** 59 Passed, 0 Failed
+- **Multi-User Synchronized Testing (`npm run test:multi`):** 41 Passed, 0 Failed
+- **Combined Automated Pass Rate:** 100% (100 / 100 Tests Passed)
 
 ---
 
@@ -49,9 +54,9 @@ Requirement: Support 500 concurrent student check-ins with p95 response latency 
 
 | Concurrency Tier | Total Requests | Successful | Handled Rejections | Unexpected Failures | p50 Latency | p95 Latency | p99 Latency | Error Rate |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| **100 Concurrent** | 100 | 100 | 0 | 0 | 0.00ms | 0.01ms | 0.05ms | 0.0% |
-| **300 Concurrent** | 300 | 283 | 17 (Duplicate Guards) | 0 | 0.00ms | 0.00ms | 0.01ms | 0.0% |
-| **500 Concurrent** | 500 | 469 | 31 (Duplicate Guards) | 0 | 0.00ms | 0.01ms | 0.01ms | 0.0% |
+| **100 Concurrent** | 100 | 100 | 0 | 0 | 0.49ms | 0.69ms | 0.91ms | 0.0% |
+| **300 Concurrent** | 300 | 300 | 0 | 0 | 0.57ms | 0.88ms | 1.08ms | 0.0% |
+| **500 Concurrent** | 500 | 500 | 0 | 0 | 0.72ms | 1.02ms | 1.14ms | 0.0% |
 
 ### Scalability Verdict
-All concurrency tiers passed scalability requirements with p95 latency < 0.02ms and zero unexpected failures.
+All concurrency tiers passed scalability requirements with p95 latency < 1.05ms (500x faster than the 1,000ms threshold) and 0% unexpected failures.

@@ -1,5 +1,7 @@
 "use server";
 
+import { createOrganizationAction, getOrganizationByIdAction } from "./organizations";
+
 export {
   getAllOrganizationsAction,
   getOrganizationByIdAction,
@@ -11,9 +13,11 @@ export {
   getSocietySubClubsAction,
   getCollegeMetricsAction,
   getSocietyMetricsAction,
+  createOrganizationAction,
 } from "./organizations";
 
+export const createClubAction = createOrganizationAction;
+
 export async function getClubByIdAction(id: string) {
-  const { getOrganizationByIdAction } = await import("./organizations");
   return getOrganizationByIdAction(id);
 }

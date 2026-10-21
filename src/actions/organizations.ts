@@ -23,6 +23,55 @@ export async function getInstitutionalMetricsAction() {
   return db.getInstitutionalMetrics();
 }
 
+export async function createOrganizationAction(data: {
+  campusId?: string;
+  name: string;
+  shortName: string;
+  description: string;
+  type: Organization["type"];
+  facultyAdvisorName?: string;
+  presidentName?: string;
+  capacity?: number;
+  meetingRules?: string;
+}): Promise<{ success: boolean; data?: Organization; error?: string }> {
+  try {
+    const { getCurrentUserAction } = await import("./auth");
+    const activeUser = await getCurrentUserAction();
+    const isAdmin =
+      activeUser?.role === "admin" ||
+      activeUser?.role === "college_admin" ||
+      activeUser?.role === "campus_manager";
+    if (!isAdmin) {
+      return {
+        success: false,
+        error: "Only Campus Administrators and Campus Managers can register new clubs.",
+      };
+    }
+
+    if (!data.name || data.name.trim().length < 3) {
+      return { success: false, error: "Club name must be at least 3 characters." };
+    }
+
+    const org = db.createOrganization(data);
+
+    try {
+      const { testingStore } = await import("@/lib/testing-store");
+      testingStore.recordAction({
+        userId: activeUser?.id || "admin",
+        role: activeUser?.role || "admin",
+        userFullName: activeUser?.fullName || "Campus Administrator",
+        doneWhatExactly: `Created new club registry entry: "${org.name}" (Capacity: ${org.capacity})`,
+        outcome: "Successful",
+        targetEntityId: org.id,
+      });
+    } catch {}
+
+    return { success: true, data: org };
+  } catch (err: unknown) {
+    return { success: false, error: (err as Error).message };
+  }
+}
+
 // Backward compatibility aliases for existing views
 export async function getAllClubsAction(): Promise<any[]> {
   return db.getAllOrganizations().map((o) => ({

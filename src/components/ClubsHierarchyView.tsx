@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Organization, Profile, OrganizationMembership } from "@/types/database";
 import { requestMembershipAction, reviewMembershipAction } from "@/actions/memberships";
+import { createOrganizationAction } from "@/actions/organizations";
 import {
   Users,
   Check,
@@ -21,6 +22,7 @@ import {
   Sparkles,
   ShieldCheck,
   Award,
+  Plus,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -205,6 +207,58 @@ export function ClubsHierarchyView({
   };
 
   const isStudent = currentUser.role === "member" || currentUser.role === "student";
+  const isAdmin =
+    currentUser.role === "admin" ||
+    currentUser.role === "college_admin" ||
+    currentUser.role === "campus_manager";
+
+  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [createFormData, setCreateFormData] = useState({
+    name: "",
+    shortName: "",
+    description: "",
+    type: "technical_club" as Organization["type"],
+    facultyAdvisorName: "",
+    presidentName: "",
+    capacity: 100,
+    meetingRules: "Every Saturday 10:00 AM",
+  });
+
+  const handleCreateClub = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!createFormData.name.trim()) return;
+    setLoading(true);
+    setMessage(null);
+    const res = await createOrganizationAction({
+      name: createFormData.name.trim(),
+      shortName: createFormData.shortName.trim() || createFormData.name.trim(),
+      description: createFormData.description.trim(),
+      type: createFormData.type,
+      facultyAdvisorName: createFormData.facultyAdvisorName.trim(),
+      presidentName: createFormData.presidentName.trim(),
+      capacity: Number(createFormData.capacity) || 100,
+      meetingRules: createFormData.meetingRules.trim() || "Every Saturday 10:00 AM",
+    });
+    setLoading(false);
+    if (res.success) {
+      setMessage({ text: `Club "${createFormData.name}" successfully registered!`, type: "success" });
+      setShowCreateModal(false);
+      setCreateFormData({
+        name: "",
+        shortName: "",
+        description: "",
+        type: "technical_club",
+        facultyAdvisorName: "",
+        presidentName: "",
+        capacity: 100,
+        meetingRules: "Every Saturday 10:00 AM",
+      });
+      onRefresh();
+    } else {
+      setMessage({ text: res.error || "Failed to register club", type: "error" });
+    }
+  };
+
   const canReview =
     currentUser.role === "president" ||
     currentUser.role === "vice_president" ||
@@ -265,11 +319,23 @@ export function ClubsHierarchyView({
           </p>
         </div>
 
-        {isStudent && (
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-indigo-500/15 border border-indigo-500/30 text-[11px] text-indigo-300">
-            <span>Policy: Max 2 Primary Memberships</span>
-          </div>
-        )}
+        <div className="flex items-center gap-2">
+          {isAdmin && (
+            <button
+              onClick={() => setShowCreateModal(true)}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-cyan-500/20 hover:bg-cyan-500/30 border border-cyan-400/40 text-cyan-200 text-xs font-bold transition shadow-sm"
+            >
+              <Plus className="w-3.5 h-3.5" />
+              <span>Register Club</span>
+            </button>
+          )}
+
+          {isStudent && (
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-indigo-500/15 border border-indigo-500/30 text-[11px] text-indigo-300">
+              <span>Policy: Max 2 Primary Memberships</span>
+            </div>
+          )}
+        </div>
       </div>
 
       {message && (
@@ -870,6 +936,261 @@ export function ClubsHierarchyView({
             </div>
           );
         })()
+      )}
+
+      {/* ========================================================
+          4. ADDITIONAL REGISTERED CAMPUS CLUBS
+         ======================================================== */}
+      {topClubs
+        .filter(
+          (o) =>
+            o.shortName !== "NEX-CELL" &&
+            o.shortName !== "Kaizen Tech" &&
+            o.shortName !== "MALHAR"
+        )
+        .map((club) => {
+          const isExpanded = expandedClubId === club.id;
+          const clubMembers = allMemberships.filter((m) => m.organizationId === club.id);
+          return (
+            <div
+              key={club.id}
+              className={`glass-panel rounded-3xl transition-all duration-300 border ${
+                isExpanded
+                  ? "p-5 sm:p-6 border-cyan-500/40 shadow-2xl shadow-cyan-500/5 ring-1 ring-cyan-500/20"
+                  : "p-4 sm:p-5 border-white/10 hover:border-cyan-400/40 hover:bg-white/[0.04]"
+              }`}
+            >
+              <div
+                onClick={() => toggleClub(club.id)}
+                className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 cursor-pointer select-none group"
+              >
+                <div className="flex items-center gap-3.5 min-w-0">
+                  <div className="w-12 h-12 rounded-2xl bg-cyan-500/20 border border-cyan-400/30 text-cyan-400 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform duration-300">
+                    <Rocket className="w-6 h-6" />
+                  </div>
+                  <div className="min-w-0">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <h3 className="text-lg sm:text-xl font-black text-white group-hover:text-cyan-200 transition-colors">
+                        {club.name}
+                      </h3>
+                      <span className="text-[10px] font-bold uppercase px-2 py-0.5 rounded-full bg-cyan-500/20 text-cyan-300 border border-cyan-500/30">
+                        {club.type.replace("_", " ")}
+                      </span>
+                      <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-cyan-500/15 text-cyan-300 border border-cyan-400/25">
+                        {clubMembers.length} Members &bull; Cap: {club.capacity}
+                      </span>
+                    </div>
+                    <p className="text-xs text-slate-400 mt-0.5 line-clamp-1 group-hover:text-slate-300 transition-colors">
+                      {club.description}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2.5 shrink-0 self-end sm:self-auto">
+                  {isStudent && (
+                    (() => {
+                      const mem = myMemberships.find((m) => m.organizationId === club.id);
+                      return mem ? (
+                        <span
+                          onClick={(e) => e.stopPropagation()}
+                          className="px-3 py-1 rounded-xl text-xs font-bold uppercase bg-emerald-500/20 text-emerald-300 border border-emerald-500/30"
+                        >
+                          {mem.membershipType} &bull; {mem.status}
+                        </span>
+                      ) : (
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setSelectedOrg(club);
+                          }}
+                          className="glass-btn-primary px-3.5 py-1.5 rounded-xl text-xs font-bold shadow"
+                        >
+                          Join Club
+                        </button>
+                      );
+                    })()
+                  )}
+                  <ChevronDown
+                    className={`w-5 h-5 text-slate-400 transition-transform duration-300 ${
+                      isExpanded ? "rotate-180 text-cyan-400" : ""
+                    }`}
+                  />
+                </div>
+              </div>
+
+              <AnimatePresence>
+                {isExpanded && (
+                  <motion.div
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: "auto" }}
+                    exit={{ opacity: 0, height: 0 }}
+                    className="overflow-hidden mt-6 pt-6 border-t border-white/10 space-y-4"
+                  >
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+                      <div className="p-3 rounded-xl bg-white/[0.03] border border-white/10">
+                        <span className="text-slate-400">Faculty Advisor:</span>{" "}
+                        <span className="text-white font-bold">{club.advisorName || "Faculty Assigned"}</span>
+                      </div>
+                      <div className="p-3 rounded-xl bg-white/[0.03] border border-white/10">
+                        <span className="text-slate-400">Meeting Rules:</span>{" "}
+                        <span className="text-white font-bold">{club.meetingRules}</span>
+                      </div>
+                    </div>
+
+                    <div className="pt-2">
+                      <div className="text-xs font-bold text-white mb-2">Registered Members ({clubMembers.length})</div>
+                      <ClubMembersGrid
+                        members={clubMembers}
+                        clubTheme="indigo"
+                        canReview={canReview}
+                        onReview={handleReviewMembership}
+                        loading={loading}
+                      />
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+          );
+        })}
+
+      {/* Admin Club Registration Modal */}
+      {showCreateModal && (
+        <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-md flex items-center justify-center p-4">
+          <motion.div
+            initial={{ scale: 0.95, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            className="glass-panel bg-slate-900/95 rounded-3xl max-w-md w-full p-6 shadow-2xl space-y-4 border border-white/15 max-h-[90vh] overflow-y-auto"
+          >
+            <div className="flex items-center justify-between border-b border-white/10 pb-3">
+              <h4 className="font-bold text-base text-white flex items-center gap-2">
+                <Rocket className="w-4 h-4 text-cyan-400" />
+                Register New Campus Club
+              </h4>
+              <button
+                onClick={() => setShowCreateModal(false)}
+                className="p-1 rounded-lg hover:bg-white/10 text-slate-400 hover:text-white"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <form onSubmit={handleCreateClub} className="space-y-3.5">
+              <div>
+                <label className="text-xs font-semibold text-slate-300">Club Full Name</label>
+                <input
+                  type="text"
+                  required
+                  placeholder="e.g. Cypher — Cybersecurity Club"
+                  value={createFormData.name}
+                  onChange={(e) => setCreateFormData({ ...createFormData, name: e.target.value })}
+                  className="w-full mt-1 px-3 py-2 rounded-xl bg-black/40 border border-white/10 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-cyan-400"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="text-xs font-semibold text-slate-300">Short Name</label>
+                  <input
+                    type="text"
+                    required
+                    placeholder="e.g. Cypher"
+                    value={createFormData.shortName}
+                    onChange={(e) => setCreateFormData({ ...createFormData, shortName: e.target.value })}
+                    className="w-full mt-1 px-3 py-2 rounded-xl bg-black/40 border border-white/10 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-cyan-400"
+                  />
+                </div>
+                <div>
+                  <label className="text-xs font-semibold text-slate-300">Category</label>
+                  <select
+                    value={createFormData.type}
+                    onChange={(e) => setCreateFormData({ ...createFormData, type: e.target.value as any })}
+                    className="w-full mt-1 px-3 py-2 rounded-xl bg-slate-900 border border-white/10 text-xs text-white focus:outline-none focus:border-cyan-400"
+                  >
+                    <option value="technical_club">Technical Club</option>
+                    <option value="cultural_society">Cultural Society</option>
+                    <option value="entrepreneurship_club">Entrepreneurship Club</option>
+                  </select>
+                </div>
+              </div>
+
+              <div>
+                <label className="text-xs font-semibold text-slate-300">Description</label>
+                <textarea
+                  rows={2}
+                  placeholder="Mission, focus area, and campus activities..."
+                  value={createFormData.description}
+                  onChange={(e) => setCreateFormData({ ...createFormData, description: e.target.value })}
+                  className="w-full mt-1 px-3 py-2 rounded-xl bg-black/40 border border-white/10 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-cyan-400"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="text-xs font-semibold text-slate-300">Faculty Advisor</label>
+                  <input
+                    type="text"
+                    placeholder="Dr. Sharma"
+                    value={createFormData.facultyAdvisorName}
+                    onChange={(e) => setCreateFormData({ ...createFormData, facultyAdvisorName: e.target.value })}
+                    className="w-full mt-1 px-3 py-2 rounded-xl bg-black/40 border border-white/10 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-cyan-400"
+                  />
+                </div>
+                <div>
+                  <label className="text-xs font-semibold text-slate-300">Student Coordinator</label>
+                  <input
+                    type="text"
+                    placeholder="Student Lead"
+                    value={createFormData.presidentName}
+                    onChange={(e) => setCreateFormData({ ...createFormData, presidentName: e.target.value })}
+                    className="w-full mt-1 px-3 py-2 rounded-xl bg-black/40 border border-white/10 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-cyan-400"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="text-xs font-semibold text-slate-300">Capacity</label>
+                  <input
+                    type="number"
+                    min={10}
+                    max={1000}
+                    value={createFormData.capacity}
+                    onChange={(e) => setCreateFormData({ ...createFormData, capacity: Number(e.target.value) })}
+                    className="w-full mt-1 px-3 py-2 rounded-xl bg-black/40 border border-white/10 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-cyan-400"
+                  />
+                </div>
+                <div>
+                  <label className="text-xs font-semibold text-slate-300">Meeting Rules</label>
+                  <input
+                    type="text"
+                    placeholder="Saturdays 2:00 PM"
+                    value={createFormData.meetingRules}
+                    onChange={(e) => setCreateFormData({ ...createFormData, meetingRules: e.target.value })}
+                    className="w-full mt-1 px-3 py-2 rounded-xl bg-black/40 border border-white/10 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-cyan-400"
+                  />
+                </div>
+              </div>
+
+              <div className="flex justify-end gap-2 pt-3 border-t border-white/10">
+                <button
+                  type="button"
+                  onClick={() => setShowCreateModal(false)}
+                  className="px-3.5 py-2 rounded-xl text-xs font-semibold text-slate-400 hover:text-white hover:bg-white/5"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="glass-btn-primary px-4 py-2 rounded-xl text-xs font-bold shadow"
+                >
+                  {loading ? "Registering..." : "Register Club"}
+                </button>
+              </div>
+            </form>
+          </motion.div>
+        </div>
       )}
 
       {/* Minimal Membership Modal */}

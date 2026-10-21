@@ -16,6 +16,7 @@ import {
   Team,
   Certificate,
   UserRole,
+  OrganizationType,
 } from "@/types/database";
 
 interface MiraiDatabaseState {
@@ -1137,9 +1138,16 @@ function getDatabase(): MiraiDatabaseState {
     let customAttendance: AttendanceRecord[] = [];
     let customSubmissions: Submission[] = [];
     let customEvaluations: Evaluation[] = [];
+    let customOrganizations: Organization[] = [];
 
     try {
       const dataDir = process.env.VERCEL ? "/tmp/gitclub-data" : path.join(process.cwd(), "data");
+      const orgsFile = path.join(dataDir, "custom-organizations.json");
+      if (fs.existsSync(orgsFile)) {
+        const raw = fs.readFileSync(orgsFile, "utf-8");
+        const parsed = JSON.parse(raw);
+        if (Array.isArray(parsed)) customOrganizations = parsed;
+      }
       const actsFile = path.join(dataDir, "custom-activities.json");
       if (fs.existsSync(actsFile)) {
         const raw = fs.readFileSync(actsFile, "utf-8");
@@ -1171,7 +1179,7 @@ function getDatabase(): MiraiDatabaseState {
     globalThis.__mirai_db = {
       campuses: [INITIAL_CAMPUS],
       profiles: [...INITIAL_PROFILES],
-      organizations: [...INITIAL_ORGANIZATIONS],
+      organizations: [...INITIAL_ORGANIZATIONS, ...customOrganizations],
       units: [...INITIAL_UNITS],
       initiatives: [...INITIAL_INITIATIVES],
       memberships: [...INITIAL_MEMBERSHIPS],
@@ -1271,6 +1279,39 @@ export const db = {
 
   getOrganizationById(orgId: string): Organization | undefined {
     return this.getAllOrganizations().find((o) => o.id === orgId);
+  },
+
+  createOrganization(data: {
+    campusId?: string;
+    name: string;
+    shortName: string;
+    description: string;
+    type: OrganizationType;
+    facultyAdvisorName?: string;
+    presidentName?: string;
+    capacity?: number;
+    meetingRules?: string;
+  }): Organization {
+    const state = getDatabase();
+    const newOrg: Organization = {
+      id: "o_custom_" + Math.random().toString(36).substring(2, 9),
+      campusId: data.campusId || INITIAL_CAMPUS.id,
+      name: data.name,
+      shortName: data.shortName,
+      description: data.description,
+      type: data.type,
+      presidentName: data.presidentName || "Student Coordinator",
+      advisorName: data.facultyAdvisorName || "Faculty Advisor",
+      capacity: data.capacity || 100,
+      meetingRules: data.meetingRules || "Every Saturday 10:00 AM",
+      createdAt: new Date().toISOString(),
+      memberCount: 0,
+      units: [],
+      initiatives: [],
+    };
+    state.organizations.push(newOrg);
+    this.saveAppDataToDisk();
+    return newOrg;
   },
 
   getUnits(orgId?: string): OrganizationUnit[] {
@@ -1489,6 +1530,11 @@ export const db = {
         (e) => !INITIAL_EVALUATIONS.some((init) => init.id === e.id)
       );
       fs.writeFileSync(path.join(dataDir, "custom-evaluations.json"), JSON.stringify(customEvals, null, 2));
+
+      const customOrgs = state.organizations.filter(
+        (o) => !INITIAL_ORGANIZATIONS.some((init) => init.id === o.id)
+      );
+      fs.writeFileSync(path.join(dataDir, "custom-organizations.json"), JSON.stringify(customOrgs, null, 2));
     } catch {
       // Ignored
     }
