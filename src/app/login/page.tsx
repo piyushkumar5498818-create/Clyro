@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { loginAction, googleSignInAction, mailLoginAction } from "@/actions/auth";
@@ -20,6 +20,9 @@ import {
   Search,
   Users,
   UserCheck,
+  ChevronDown,
+  MapPin,
+  School,
 } from "lucide-react";
 import { GitclubLogo } from "@/components/GitclubLogo";
 
@@ -277,6 +280,42 @@ const ALL_26_CAMPUS_MEMBERS: CampusMemberPersona[] = [
   },
 ];
 
+interface CampusOption {
+  id: string;
+  name: string;
+  code: string;
+  location: string;
+  isMain?: boolean;
+}
+
+const AVAILABLE_CAMPUSES: CampusOption[] = [
+  {
+    id: "c0000000-0000-0000-0000-000000000001",
+    name: "Mirai School of Technology",
+    code: "MSOT-MAIN",
+    location: "Main Tech Campus · Innovation Block A",
+    isMain: true,
+  },
+  {
+    id: "c0000000-0000-0000-0000-000000000002",
+    name: "Mirai North Engineering Hub",
+    code: "MSOT-NORTH",
+    location: "North Campus · Computing & Robotics Wing",
+  },
+  {
+    id: "c0000000-0000-0000-0000-000000000003",
+    name: "Mirai Research & Incubation City",
+    code: "MSOT-RIC",
+    location: "Electronic City · DeepTech & AI Labs",
+  },
+  {
+    id: "c0000000-0000-0000-0000-000000000004",
+    name: "Mirai Global & Virtual Campus",
+    code: "MSOT-GLOBAL",
+    location: "Cloud Network · Virtual Exchange",
+  },
+];
+
 export default function LoginPage() {
   const [email, setEmail] = useState("piyush.student@mirai.edu");
   const [password, setPassword] = useState("••••••••••••");
@@ -284,6 +323,28 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+
+  // Campus selection state
+  const [selectedCampusId, setSelectedCampusId] = useState<string>("c0000000-0000-0000-0000-000000000001");
+
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem("gitclub_selected_campus_id");
+      if (saved && AVAILABLE_CAMPUSES.some((c) => c.id === saved)) {
+        setSelectedCampusId(saved);
+      }
+    } catch {}
+  }, []);
+
+  const handleCampusChange = (id: string) => {
+    setSelectedCampusId(id);
+    try {
+      localStorage.setItem("gitclub_selected_campus_id", id);
+    } catch {}
+  };
+
+  const selectedCampus =
+    AVAILABLE_CAMPUSES.find((c) => c.id === selectedCampusId) || AVAILABLE_CAMPUSES[0];
 
   // Quick Persona Search & Club Filters
   const [selectedClub, setSelectedClub] = useState<string>("All");
@@ -328,7 +389,7 @@ export default function LoginPage() {
 
     const res = await mailLoginAction(targetEmail, password);
     if (res.success && res.user) {
-      setSuccess(`Authenticated as ${res.user.fullName} (${res.user.title || res.user.role}). Redirecting...`);
+      setSuccess(`Authenticated for ${selectedCampus.name} as ${res.user.fullName} (${res.user.title || res.user.role}). Redirecting...`);
       setTimeout(() => {
         window.location.href = "/dashboard";
       }, 400);
@@ -347,7 +408,7 @@ export default function LoginPage() {
     if (res.success && res.user) {
       setShowGoogleModal(false);
       setSuccess(
-        `Signed in with Google: ${res.user.fullName} (${res.user.email}). Redirecting...`
+        `Signed in with Google for ${selectedCampus.name}: ${res.user.fullName} (${res.user.email}). Redirecting...`
       );
       setTimeout(() => {
         window.location.href = "/dashboard";
@@ -411,6 +472,74 @@ export default function LoginPage() {
             <p className="text-xs text-slate-300 font-medium max-w-sm mx-auto">
               Sign in with Google, use the Mail Login System with any email address, or select an instant campus persona below.
             </p>
+          </div>
+
+          {/* Institutional Campus Selection Selector */}
+          <div className="p-3.5 sm:p-4 rounded-2xl bg-white/[0.04] border border-white/10 space-y-2.5">
+            <div className="flex items-center justify-between">
+              <label className="text-xs font-bold text-white flex items-center gap-1.5">
+                <Building2 className="w-4 h-4 text-cyan-400" />
+                <span>Institutional Campus</span>
+              </label>
+              <span className="text-[10px] font-mono font-bold text-cyan-300 bg-cyan-500/10 px-2 py-0.5 rounded-md border border-cyan-400/20">
+                {selectedCampus.code}
+              </span>
+            </div>
+
+            {/* Dropdown Selector with Custom Icons */}
+            <div className="relative">
+              <select
+                value={selectedCampusId}
+                onChange={(e) => handleCampusChange(e.target.value)}
+                className="w-full text-xs font-bold rounded-xl border border-white/15 pl-9 pr-9 py-2.5 bg-slate-900/95 text-white backdrop-blur-md focus:border-cyan-400 focus:outline-none appearance-none cursor-pointer"
+                aria-label="Select Institutional Campus"
+              >
+                {AVAILABLE_CAMPUSES.map((c) => (
+                  <option key={c.id} value={c.id} className="bg-slate-900 text-white py-1 font-sans">
+                    {c.name} ({c.code})
+                  </option>
+                ))}
+              </select>
+              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+                <School className="w-3.5 h-3.5 text-cyan-400" />
+              </div>
+              <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none text-slate-400">
+                <ChevronDown className="w-4 h-4 text-cyan-400" />
+              </div>
+            </div>
+
+            {/* Fast Campus Branch Chips */}
+            <div className="flex items-center gap-1.5 overflow-x-auto pb-0.5 scrollbar-none text-[11px] font-semibold">
+              {AVAILABLE_CAMPUSES.map((c) => {
+                const isSelected = c.id === selectedCampusId;
+                return (
+                  <button
+                    key={c.id}
+                    type="button"
+                    onClick={() => handleCampusChange(c.id)}
+                    className={`px-2.5 py-1 rounded-xl whitespace-nowrap transition border ${
+                      isSelected
+                        ? "bg-cyan-500/20 text-cyan-200 border-cyan-400/50 shadow-sm"
+                        : "bg-white/[0.03] text-slate-400 hover:text-white border-white/10 hover:bg-white/[0.06]"
+                    }`}
+                  >
+                    <span>{c.code}</span>
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* Selected Campus Location Metadata */}
+            <div className="flex items-center justify-between text-[11px] text-slate-400 pt-0.5">
+              <span className="truncate flex items-center gap-1.5">
+                <MapPin className="w-3 h-3 text-cyan-400 shrink-0" />
+                <span className="truncate">{selectedCampus.location}</span>
+              </span>
+              <span className="font-mono text-[10px] text-emerald-400 shrink-0 font-semibold flex items-center gap-1">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                <span>Active</span>
+              </span>
+            </div>
           </div>
 
           {/* Feedback Banners */}
@@ -500,6 +629,20 @@ export default function LoginPage() {
             <p className="text-[11px] text-slate-400">
               Sign in with any email address. Existing profiles log in instantly; new emails are automatically registered.
             </p>
+
+            {/* Target Campus Badge in Mail Login */}
+            <div className="p-2.5 rounded-xl bg-white/[0.02] border border-white/5 flex items-center justify-between text-[11px]">
+              <span className="flex items-center gap-1.5 text-slate-400">
+                <Building2 className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
+                <span>Target Campus:</span>
+              </span>
+              <span className="font-bold text-white flex items-center gap-1.5 truncate">
+                <span className="truncate">{selectedCampus.name}</span>
+                <span className="text-[10px] font-mono text-cyan-300 font-bold px-1.5 py-0.5 rounded bg-cyan-500/10 border border-cyan-400/20 shrink-0">
+                  {selectedCampus.code}
+                </span>
+              </span>
+            </div>
 
             <form onSubmit={onSubmit} className="space-y-3">
               <div>
@@ -740,9 +883,15 @@ export default function LoginPage() {
                 <p className="text-xs text-slate-300 mt-0.5">
                   Select an account or enter any Google email address to continue to GitClub
                 </p>
-                <div className="mt-2 inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full bg-emerald-500/15 text-emerald-300 text-[10px] font-semibold border border-emerald-500/30">
-                  <Shield className="w-3 h-3 text-emerald-400" />
-                  <span>Google Accounts (@gmail.com &amp; campus emails supported)</span>
+                <div className="mt-2 flex flex-wrap items-center justify-center gap-1.5">
+                  <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-cyan-500/15 text-cyan-300 text-[10px] font-semibold border border-cyan-500/30">
+                    <Building2 className="w-3 h-3 text-cyan-400" />
+                    <span>Campus: {selectedCampus.name} ({selectedCampus.code})</span>
+                  </span>
+                  <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-emerald-500/15 text-emerald-300 text-[10px] font-semibold border border-emerald-500/30">
+                    <Shield className="w-3 h-3 text-emerald-400" />
+                    <span>Google Accounts (@gmail.com &amp; campus emails)</span>
+                  </span>
                 </div>
               </div>
 
