@@ -3,7 +3,7 @@
 import { useState, useMemo } from "react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
-import { loginAction, googleWorkspaceAuthAction } from "@/actions/auth";
+import { loginAction, googleSignInAction, mailLoginAction } from "@/actions/auth";
 import {
   Mail,
   Lock,
@@ -326,7 +326,7 @@ export default function LoginPage() {
     setError(null);
     setSuccess(null);
 
-    const res = await loginAction(targetEmail, password);
+    const res = await mailLoginAction(targetEmail, password);
     if (res.success && res.user) {
       setSuccess(`Authenticated as ${res.user.fullName} (${res.user.title || res.user.role}). Redirecting...`);
       setTimeout(() => {
@@ -334,27 +334,27 @@ export default function LoginPage() {
       }, 400);
     } else {
       setLoading(false);
-      setError(res.error || "Authentication failed. Please verify your email.");
+      setError(res.error || "Mail authentication failed. Please enter a valid email.");
     }
   };
 
-  const handleGoogleWorkspaceLogin = async (targetEmail: string, fullName?: string) => {
+  const handleGoogleLogin = async (targetEmail: string, fullName?: string) => {
     setLoading(true);
     setError(null);
     setSuccess(null);
 
-    const res = await googleWorkspaceAuthAction(targetEmail, fullName);
+    const res = await googleSignInAction(targetEmail, fullName);
     if (res.success && res.user) {
       setShowGoogleModal(false);
       setSuccess(
-        `Google Workspace Verified: ${res.user.fullName} (${res.user.email}). Redirecting...`
+        `Signed in with Google: ${res.user.fullName} (${res.user.email}). Redirecting...`
       );
       setTimeout(() => {
         window.location.href = "/dashboard";
       }, 400);
     } else {
       setLoading(false);
-      setError(res.error || "Google Workspace authentication was rejected.");
+      setError(res.error || "Google authentication was rejected.");
     }
   };
 
@@ -365,7 +365,7 @@ export default function LoginPage() {
 
   const onCustomGoogleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    await handleGoogleWorkspaceLogin(customGoogleEmail, customGoogleName);
+    await handleGoogleLogin(customGoogleEmail, customGoogleName);
   };
 
   return (
@@ -401,7 +401,7 @@ export default function LoginPage() {
           <div className="text-center space-y-2">
             <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-blue-500/15 text-cyan-300 text-xs font-mono font-bold border border-blue-400/30">
               <span className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse" />
-              <span>@MIRAI.EDU CAMPUS DIRECTORY &bull; 26 MEMBERS</span>
+              <span>GOOGLE SIGN IN &bull; MAIL LOGIN SYSTEM</span>
             </div>
 
             <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
@@ -409,7 +409,7 @@ export default function LoginPage() {
             </h1>
 
             <p className="text-xs text-slate-300 font-medium max-w-sm mx-auto">
-              Select any of the 26 members below for 1-click instant login or sign in with Google Workspace SSO.
+              Sign in with Google, use the Mail Login System with any email address, or select an instant campus persona below.
             </p>
           </div>
 
@@ -440,7 +440,7 @@ export default function LoginPage() {
             )}
           </AnimatePresence>
 
-          {/* Primary Action: Google Workspace SSO Button */}
+          {/* Primary Action: Google Sign In Button */}
           <div className="space-y-3">
             <button
               type="button"
@@ -466,11 +466,11 @@ export default function LoginPage() {
                   d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"
                 />
               </svg>
-              <span className="text-slate-900 group-hover:text-black">
-                Continue with Google Workspace (All 26 Members)
+              <span className="text-slate-900 group-hover:text-black font-extrabold">
+                Sign in with Google
               </span>
               <span className="text-[10px] font-mono font-bold text-blue-700 bg-blue-50 px-2 py-0.5 rounded-lg border border-blue-200">
-                SSO
+                1-Tap
               </span>
             </button>
           </div>
@@ -479,73 +479,91 @@ export default function LoginPage() {
           <div className="relative flex items-center justify-center my-3">
             <div className="border-t border-white/10 w-full" />
             <span className="bg-[#0a1124] px-3 text-[10px] font-mono text-slate-400 uppercase tracking-wider absolute">
-              or enter credentials
+              or continue with mail login
             </span>
           </div>
 
-          {/* Credentials Form */}
-          <form onSubmit={onSubmit} className="space-y-3.5">
-            <div>
-              <label className="block text-xs font-semibold text-slate-300 mb-1">
-                Campus Email Address
-              </label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
-                  <Mail className="w-4 h-4" />
-                </div>
-                <input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="piyush.student@mirai.edu"
-                  className="w-full text-xs font-medium rounded-2xl border border-white/15 pl-10 pr-3.5 py-2.5 bg-white/[0.04] text-white placeholder-slate-500 backdrop-blur-md focus:border-cyan-400 focus:bg-white/[0.08] focus:outline-none transition"
-                  required
-                />
+          {/* Mail Login System */}
+          <div className="p-4 sm:p-5 rounded-2xl bg-white/[0.03] border border-white/10 space-y-3.5">
+            <div className="flex items-center justify-between pb-2 border-b border-white/10">
+              <div className="flex items-center gap-2">
+                <Mail className="w-4 h-4 text-cyan-400" />
+                <h2 className="text-xs font-bold text-white uppercase tracking-wider">
+                  Mail Login System
+                </h2>
               </div>
+              <span className="text-[10px] font-mono text-cyan-300 font-bold px-2 py-0.5 rounded-full bg-cyan-500/15 border border-cyan-400/30">
+                Email + Password
+              </span>
             </div>
 
-            <div>
-              <label className="block text-xs font-semibold text-slate-300 mb-1">
-                Account Password
-              </label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
-                  <Lock className="w-4 h-4" />
-                </div>
-                <input
-                  type={showPassword ? "text" : "password"}
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="Enter password"
-                  className="w-full text-xs font-medium rounded-2xl border border-white/15 pl-10 pr-10 py-2.5 bg-white/[0.04] text-white placeholder-slate-500 backdrop-blur-md focus:border-cyan-400 focus:bg-white/[0.08] focus:outline-none transition"
-                  required
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-400 hover:text-white transition"
-                  aria-label="Toggle password visibility"
-                >
-                  {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                </button>
-              </div>
-            </div>
+            <p className="text-[11px] text-slate-400">
+              Sign in with any email address. Existing profiles log in instantly; new emails are automatically registered.
+            </p>
 
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full py-3 px-4 rounded-2xl bg-gradient-to-r from-blue-700 via-blue-600 to-indigo-600 hover:from-blue-600 hover:to-indigo-500 text-white font-bold text-xs shadow-lg shadow-blue-600/30 flex items-center justify-center gap-2 transition duration-200 active:scale-[0.99] border border-white/20"
-            >
-              {loading ? (
-                <span>Authenticating with MSOT Directory...</span>
-              ) : (
-                <>
-                  <span>Sign In with Credentials</span>
-                  <ArrowRight className="w-4 h-4" />
-                </>
-              )}
-            </button>
-          </form>
+            <form onSubmit={onSubmit} className="space-y-3">
+              <div>
+                <label className="block text-xs font-semibold text-slate-300 mb-1">
+                  Email Address
+                </label>
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                    <Mail className="w-4 h-4" />
+                  </div>
+                  <input
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="name@mirai.edu or user@gmail.com"
+                    className="w-full text-xs font-medium rounded-2xl border border-white/15 pl-10 pr-3.5 py-2.5 bg-white/[0.04] text-white placeholder-slate-500 backdrop-blur-md focus:border-cyan-400 focus:bg-white/[0.08] focus:outline-none transition"
+                    required
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-slate-300 mb-1">
+                  Account Password
+                </label>
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                    <Lock className="w-4 h-4" />
+                  </div>
+                  <input
+                    type={showPassword ? "text" : "password"}
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="Enter password"
+                    className="w-full text-xs font-medium rounded-2xl border border-white/15 pl-10 pr-10 py-2.5 bg-white/[0.04] text-white placeholder-slate-500 backdrop-blur-md focus:border-cyan-400 focus:bg-white/[0.08] focus:outline-none transition"
+                    required
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-400 hover:text-white transition"
+                    aria-label="Toggle password visibility"
+                  >
+                    {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </button>
+                </div>
+              </div>
+
+              <button
+                type="submit"
+                disabled={loading}
+                className="w-full py-3 px-4 rounded-2xl bg-gradient-to-r from-blue-700 via-blue-600 to-indigo-600 hover:from-blue-600 hover:to-indigo-500 text-white font-bold text-xs shadow-lg shadow-blue-600/30 flex items-center justify-center gap-2 transition duration-200 active:scale-[0.99] border border-white/20"
+              >
+                {loading ? (
+                  <span>Authenticating with Mail System...</span>
+                ) : (
+                  <>
+                    <span>Sign In with Mail</span>
+                    <ArrowRight className="w-4 h-4" />
+                  </>
+                )}
+              </button>
+            </form>
+          </div>
 
           {/* Section: 1-Click Instant Persona Login (All 26 Campus Members) */}
           <div className="pt-4 border-t border-white/10 space-y-3">
@@ -718,13 +736,13 @@ export default function LoginPage() {
                     />
                   </svg>
                 </div>
-                <h3 className="text-xl font-black text-white">Google Workspace SSO</h3>
+                <h3 className="text-xl font-black text-white">Sign in with Google</h3>
                 <p className="text-xs text-slate-300 mt-0.5">
-                  Select any authorized <strong className="text-cyan-400">@mirai.edu</strong> member to sign in
+                  Select an account or enter any Google email address to continue to GitClub
                 </p>
                 <div className="mt-2 inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full bg-emerald-500/15 text-emerald-300 text-[10px] font-semibold border border-emerald-500/30">
                   <Shield className="w-3 h-3 text-emerald-400" />
-                  <span>Institutional Domain Enforced: @mirai.edu (26 Accounts)</span>
+                  <span>Google Accounts (@gmail.com &amp; campus emails supported)</span>
                 </div>
               </div>
 
@@ -765,13 +783,13 @@ export default function LoginPage() {
                 </div>
               </div>
 
-              {/* Verified Institutional Accounts (All 26 Members) */}
+              {/* Verified Accounts */}
               <div className="py-1 space-y-1.5 max-h-64 overflow-y-auto pr-1">
                 {modalFilteredMembers.map((acc) => (
                   <button
                     key={acc.email}
                     type="button"
-                    onClick={() => handleGoogleWorkspaceLogin(acc.email, acc.name)}
+                    onClick={() => handleGoogleLogin(acc.email, acc.name)}
                     disabled={loading}
                     className="w-full p-2.5 rounded-2xl border border-white/10 bg-white/[0.04] hover:bg-white/[0.08] hover:border-cyan-400/40 transition flex items-center gap-3 text-left group"
                   >
@@ -799,7 +817,7 @@ export default function LoginPage() {
                 ))}
               </div>
 
-              {/* Custom Google Workspace Email Entry */}
+              {/* Custom Google Email Entry */}
               <div className="pt-2 border-t border-white/10">
                 {!showCustomGoogleInput ? (
                   <button
@@ -807,13 +825,13 @@ export default function LoginPage() {
                     onClick={() => setShowCustomGoogleInput(true)}
                     className="w-full py-2 px-3 text-xs font-semibold text-cyan-300 hover:text-white hover:bg-white/5 rounded-xl transition flex items-center justify-center gap-1.5"
                   >
-                    <span>Use custom @mirai.edu email</span>
+                    <span>Use another Google account (@gmail.com or campus)</span>
                     <ArrowRight className="w-3.5 h-3.5" />
                   </button>
                 ) : (
                   <form onSubmit={onCustomGoogleSubmit} className="space-y-2 pt-1">
                     <div className="text-xs font-bold text-slate-200">
-                      Sign in with custom institutional Google account
+                      Sign in with any Google account
                     </div>
                     <div>
                       <input
@@ -828,7 +846,7 @@ export default function LoginPage() {
                         type="email"
                         value={customGoogleEmail}
                         onChange={(e) => setCustomGoogleEmail(e.target.value)}
-                        placeholder="username@mirai.edu"
+                        placeholder="yourname@gmail.com or username@mirai.edu"
                         className="w-full text-xs font-mono rounded-xl border border-white/15 p-2 bg-slate-800 text-white placeholder-slate-500 focus:border-cyan-400 focus:outline-none"
                         required
                       />
@@ -846,7 +864,7 @@ export default function LoginPage() {
                         disabled={loading}
                         className="glass-btn-primary px-3 py-1.5 rounded-xl text-xs font-bold shadow"
                       >
-                        Continue with Google SSO
+                        Sign in with Google
                       </button>
                     </div>
                   </form>
@@ -859,7 +877,7 @@ export default function LoginPage() {
 
       {/* Footer */}
       <footer className="text-center text-xs text-slate-400 z-10 py-3 font-mono">
-        Mirai School of Technology &bull; Google Workspace SSO Integration &bull; Gitclub Matrix
+        Mirai School of Technology &bull; Google Sign In &bull; Mail Login System &bull; Gitclub Matrix
       </footer>
     </main>
   );

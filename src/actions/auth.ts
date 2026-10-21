@@ -54,21 +54,23 @@ export async function loginAction(
 ): Promise<{ success: boolean; user?: Profile; error?: string }> {
   const trimmedEmail = email.trim().toLowerCase();
   if (!trimmedEmail) {
-    return { success: false, error: "Please enter your campus email address." };
+    return { success: false, error: "Please enter your email address." };
+  }
+
+  if (!trimmedEmail.includes("@") || !trimmedEmail.includes(".")) {
+    return { success: false, error: "Please enter a valid email address (e.g. name@domain.com)." };
   }
 
   const profiles = db.getAllProfiles();
-  const user =
+  let user =
     profiles.find((p) => p.email.toLowerCase() === trimmedEmail) ||
     (trimmedEmail === "alex.student@mirai.edu"
       ? profiles.find((p) => p.id === "u0000000-0000-0000-0000-000000000008")
       : undefined);
 
+  // If new email in the mail login system, auto-provision student profile
   if (!user) {
-    return {
-      success: false,
-      error: `No account registered with "${trimmedEmail}". Please use your Mirai credentials or choose a quick persona.`,
-    };
+    user = db.findOrCreateGoogleProfile(trimmedEmail);
   }
 
   // Generate cryptographically signed HMAC-SHA256 session token
@@ -87,7 +89,7 @@ export async function loginAction(
 
   // Record authenticated testing session
   try {
-    testingStore.startSession(user.id, user.role, user.fullName);
+    testingStore.startSession(user.id, user.role, user.fullName, "Mail Login");
   } catch (logErr) {
     console.error("[TestingStore] Failed to record login session:", logErr);
   }
@@ -96,23 +98,33 @@ export async function loginAction(
 }
 
 /**
- * Authenticates a user via Mirai Google Workspace Single Sign-On (SSO).
- * Strictly restricts access to the authorized Google Workspace institutional domain.
+ * Dedicated Mail Login System action.
  */
-export async function googleWorkspaceAuthAction(
+export async function mailLoginAction(
+  email: string,
+  password?: string
+): Promise<{ success: boolean; user?: Profile; error?: string }> {
+  return loginAction(email, password);
+}
+
+/**
+ * Authenticates a user via Google Sign-In.
+ * Supports universal Google accounts (including @gmail.com and campus domains).
+ */
+export async function googleSignInAction(
   email: string,
   fullName?: string,
   avatarUrl?: string
 ): Promise<{ success: boolean; user?: Profile; error?: string }> {
-  const validation = validateGoogleWorkspaceEmail(email);
-  if (!validation.valid) {
-    return { success: false, error: validation.error };
+  const trimmed = email.trim().toLowerCase();
+  if (!trimmed || !trimmed.includes("@") || !trimmed.includes(".")) {
+    return { success: false, error: "Please enter a valid Google email address." };
   }
 
-  // Find or Just-In-Time provision the student profile for this Google Workspace identity
-  const user = db.findOrCreateGoogleProfile(email, fullName, avatarUrl);
+  // Find or Just-In-Time provision the student profile for this Google identity
+  const user = db.findOrCreateGoogleProfile(trimmed, fullName, avatarUrl);
 
-  // Generate HMAC-SHA256 session token with Google Workspace provider marker
+  // Generate HMAC-SHA256 session token with Google provider marker
   const token = signSessionToken(user.id, user.email, user.role, "google_workspace");
 
   db.setActiveUser(user.id);
@@ -126,12 +138,23 @@ export async function googleWorkspaceAuthAction(
   });
 
   try {
-    testingStore.startSession(user.id, user.role, user.fullName, "Google Workspace SSO");
+    testingStore.startSession(user.id, user.role, user.fullName, "Google Sign-In");
   } catch (logErr) {
-    console.error("[TestingStore] Failed to record SSO login session:", logErr);
+    console.error("[TestingStore] Failed to record Google login session:", logErr);
   }
 
   return { success: true, user };
+}
+
+/**
+ * Backward-compatible alias for Google Workspace authentication.
+ */
+export async function googleWorkspaceAuthAction(
+  email: string,
+  fullName?: string,
+  avatarUrl?: string
+): Promise<{ success: boolean; user?: Profile; error?: string }> {
+  return googleSignInAction(email, fullName, avatarUrl);
 }
 
 /**

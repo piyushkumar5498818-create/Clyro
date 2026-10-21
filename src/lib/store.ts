@@ -1898,7 +1898,13 @@ export const db = {
     const state = getDatabase();
     const org = state.organizations.find((o) => o.id === organizationId);
     const orgPrefix = org?.shortName.replace(/[^a-zA-Z]/g, "").substring(0, 3).toUpperCase() || "MST";
-    const verificationCode = `GITCLUB-${orgPrefix}-${Math.floor(1000 + Math.random() * 9000)}`;
+    let verificationCode = "";
+    let attempts = 0;
+    do {
+      const randSuffix = attempts > 0 ? `-${Math.floor(100 + Math.random() * 900)}` : "";
+      verificationCode = `GITCLUB-${orgPrefix}-${Math.floor(1000 + Math.random() * 9000)}${randSuffix}`;
+      attempts++;
+    } while (state.certificates.some((c) => c.verificationCode === verificationCode));
     
     // Deterministic cryptographic-style ledger digest
     const rawPayload = `${userId}:${organizationId}:${title}:${type}:${Date.now()}`;

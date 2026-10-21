@@ -79,7 +79,7 @@ export default function HomePage() {
             href="/login"
             className="glass-btn-primary px-8 py-3.5 rounded-2xl font-bold text-sm shadow-xl flex items-center gap-2 transition"
           >
-            Sign In with Google Workspace <ArrowRight className="w-4 h-4" />
+            Sign In with Google <ArrowRight className="w-4 h-4" />
           </Link>
           <Link
             href="/dashboard"

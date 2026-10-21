@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { googleWorkspaceAuthAction } from "@/actions/auth";
-import { GOOGLE_WORKSPACE_DOMAIN } from "@/lib/auth";
+import { googleSignInAction } from "@/actions/auth";
 
 export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams;
@@ -16,7 +15,7 @@ export async function GET(request: NextRequest) {
 
   if (!code) {
     return NextResponse.redirect(
-      new URL("/login?error=Authorization+code+missing+from+Google+Workspace", appUrl)
+      new URL("/login?error=Authorization+code+missing+from+Google", appUrl)
     );
   }
 
@@ -26,7 +25,7 @@ export async function GET(request: NextRequest) {
   if (!clientId || !clientSecret) {
     // If live credentials are not set, return with clear guidance
     return NextResponse.redirect(
-      new URL("/login?error=Google+Workspace+OAuth+credentials+not+configured+in+environment", appUrl)
+      new URL("/login?error=Google+OAuth+credentials+not+configured+in+environment", appUrl)
     );
   }
 
@@ -57,20 +56,8 @@ export async function GET(request: NextRequest) {
     const payloadBase64 = tokenData.id_token.split(".")[1];
     const googleUser = JSON.parse(Buffer.from(payloadBase64, "base64url").toString("utf-8"));
 
-    // 3. Strictly verify Google Workspace hosted domain (hd)
-    if (googleUser.hd !== GOOGLE_WORKSPACE_DOMAIN && !googleUser.email.endsWith(`@${GOOGLE_WORKSPACE_DOMAIN}`)) {
-      return NextResponse.redirect(
-        new URL(
-          `/login?error=${encodeURIComponent(
-            `Access restricted: Only Google Workspace accounts from @${GOOGLE_WORKSPACE_DOMAIN} are permitted.`
-          )}`,
-          appUrl
-        )
-      );
-    }
-
-    // 4. Authenticate or Just-In-Time provision via server action
-    const authResult = await googleWorkspaceAuthAction(
+    // 3. Authenticate or Just-In-Time provision via server action (supports any Google account)
+    const authResult = await googleSignInAction(
       googleUser.email,
       googleUser.name,
       googleUser.picture
