@@ -16,7 +16,7 @@ export async function GET() {
       status: 200,
       headers: {
         "Content-Type": "application/json",
-        "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate",
+        "Cache-Control": "public, max-age=0, s-maxage=2, stale-while-revalidate=10",
         "X-Edge-Performance": "optimized-sub-200ms",
         "Access-Control-Allow-Origin": "*",
       },
