@@ -31,7 +31,7 @@ export function MobileBottomNav({ activeSection }: MobileBottomNavProps) {
   return (
     <nav
       aria-label="Mobile Bottom Navigation"
-      className="fixed bottom-0 inset-x-0 z-40 pointer-events-auto"
+      className="md:hidden fixed bottom-0 inset-x-0 z-40 pointer-events-auto"
     >
       {/* Background with ultra glassmorphism & safe area */}
       <div className="bg-[#070b16]/92 backdrop-blur-2xl border-t border-white/10 shadow-[0_-8px_30px_rgba(0,0,0,0.6)] pb-[env(safe-area-inset-bottom)]">

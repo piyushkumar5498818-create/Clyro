@@ -154,11 +154,11 @@ export function OverviewView({
             </p>
           </div>
 
-          <div className="flex gap-2">
+          <div className="flex flex-wrap sm:flex-nowrap gap-2">
             <motion.button
               whileTap={{ scale: 0.96 }}
               onClick={() => navigateTo(isStudent ? "attendance" : "activities")}
-              className="flex-1 glass-btn-primary px-3.5 py-2 rounded-xl font-bold text-xs shadow-md flex items-center justify-center gap-1.5 active:scale-95"
+              className="flex-1 min-w-[100px] glass-btn-primary px-3.5 py-2 rounded-xl font-bold text-xs shadow-md flex items-center justify-center gap-1.5 active:scale-95"
             >
               {isStudent ? "Check In" : "Activities"}
               <ArrowRight className="w-3.5 h-3.5" />
@@ -166,14 +166,14 @@ export function OverviewView({
             <motion.button
               whileTap={{ scale: 0.96 }}
               onClick={() => navigateTo("clubs")}
-              className="flex-1 glass-btn-secondary px-3.5 py-2 rounded-xl font-semibold text-xs flex items-center justify-center gap-1.5 active:scale-95"
+              className="flex-1 min-w-[80px] glass-btn-secondary px-3.5 py-2 rounded-xl font-semibold text-xs flex items-center justify-center gap-1.5 active:scale-95"
             >
               Clubs
             </motion.button>
             <motion.button
               whileTap={{ scale: 0.96 }}
               onClick={handleExportAcademicReport}
-              className="flex-1 glass-btn-secondary px-3.5 py-2 rounded-xl font-semibold text-xs flex items-center justify-center gap-1.5 active:scale-95 text-cyan-300 hover:text-white"
+              className="flex-1 min-w-[120px] glass-btn-secondary px-3.5 py-2 rounded-xl font-semibold text-xs flex items-center justify-center gap-1.5 active:scale-95 text-cyan-300 hover:text-white"
               title="Download MSOT Academic Review Report (CSV)"
             >
               <Download className="w-3.5 h-3.5" />
@@ -183,7 +183,7 @@ export function OverviewView({
         </div>
 
         {/* Global Metric Summary with 3D Pop Out */}
-        <div className="mt-5 pt-5 border-t border-white/10 grid grid-cols-2 gap-2.5">
+        <div className="mt-5 pt-5 border-t border-white/10 grid grid-cols-2 lg:grid-cols-4 gap-2.5">
           <motion.div
             initial={{ opacity: 0, scale: 0.9, y: 16 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}

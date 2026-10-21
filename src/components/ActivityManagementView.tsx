@@ -420,8 +420,8 @@ export function ActivityManagementView({
       )}
       </AnimatePresence>
 
-      {/* Activities Grid (Low Profile by default, details revealed on hover) */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+      {/* Activities Grid (Fully responsive on mobile, tablet, and desktop) */}
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
         {activities.length === 0 && (
           <div className="col-span-full p-8 rounded-3xl border border-white/10 bg-white/[0.02] text-center space-y-2">
             <Calendar className="w-8 h-8 text-slate-500 mx-auto" />

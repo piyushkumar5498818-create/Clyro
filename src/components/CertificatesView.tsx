@@ -333,9 +333,8 @@ export function CertificatesView({
         )}
       </AnimatePresence>
 
-      {/* Certificates Roster */}
-      {/* Certificates Grid (Low Profile by default, details revealed on hover) */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+      {/* Certificates Roster (Fully responsive on mobile, tablet, and desktop) */}
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
         {certificates.map((cert) => (
           <div
             key={cert.id}

@@ -395,7 +395,7 @@ export function ClubsHierarchyView({
                 </div>
 
                 {/* Right Actions & Expand Pill */}
-                <div className="flex items-center gap-2.5 shrink-0 self-end sm:self-auto">
+                <div className="flex flex-wrap sm:flex-nowrap items-center gap-2.5 shrink-0 self-start sm:self-auto w-full sm:w-auto justify-between sm:justify-end">
                   {isStudent && (
                     (() => {
                       const mem = myMemberships.find((m) => m.organizationId === kaizen.id);
@@ -666,7 +666,7 @@ export function ClubsHierarchyView({
                 </div>
 
                 {/* Right Actions & Expand Pill */}
-                <div className="flex items-center gap-2.5 shrink-0 self-end sm:self-auto">
+                <div className="flex flex-wrap sm:flex-nowrap items-center gap-2.5 shrink-0 self-start sm:self-auto w-full sm:w-auto justify-between sm:justify-end">
                   {isStudent && (
                     (() => {
                       const mem = myMemberships.find((m) => m.organizationId === nexcell.id);
@@ -823,7 +823,7 @@ export function ClubsHierarchyView({
                 </div>
 
                 {/* Right Actions & Expand Pill */}
-                <div className="flex items-center gap-2.5 shrink-0 self-end sm:self-auto">
+                <div className="flex flex-wrap sm:flex-nowrap items-center gap-2.5 shrink-0 self-start sm:self-auto w-full sm:w-auto justify-between sm:justify-end">
                   {isStudent && (
                     (() => {
                       const mem = myMemberships.find((m) => m.organizationId === malhar.id);
@@ -986,7 +986,7 @@ export function ClubsHierarchyView({
                   </div>
                 </div>
 
-                <div className="flex items-center gap-2.5 shrink-0 self-end sm:self-auto">
+                <div className="flex flex-wrap sm:flex-nowrap items-center gap-2.5 shrink-0 self-start sm:self-auto w-full sm:w-auto justify-between sm:justify-end">
                   {isStudent && (
                     (() => {
                       const mem = myMemberships.find((m) => m.organizationId === club.id);

@@ -237,7 +237,7 @@ export function AttendanceView({
               {qrDataUrl && (
                 <div className="p-3 bg-white border-2 border-indigo-500/60 rounded-2xl shadow-xl shadow-black/40">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={qrDataUrl} alt="Attendance QR Code" className="w-48 h-48 object-contain" />
+                  <img src={qrDataUrl} alt="Attendance QR Code" className="w-40 h-40 sm:w-48 sm:h-48 max-w-full object-contain mx-auto" />
                 </div>
               )}
               <div className="p-3.5 rounded-2xl bg-slate-950/80 border border-white/10 text-white w-full backdrop-blur-md">
@@ -340,8 +340,8 @@ export function AttendanceView({
               </span>
             </div>
 
-            <div className="overflow-x-auto">
-              <table className="w-full text-left text-xs">
+            <div className="overflow-x-auto -mx-1 px-1">
+              <table className="w-full text-left text-xs whitespace-nowrap min-w-[500px]">
                 <thead className="bg-white/5 border-b border-white/10 text-slate-300 font-semibold uppercase">
                   <tr>
                     <th className="py-2.5 px-3">Student Name</th>

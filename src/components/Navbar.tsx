@@ -3,14 +3,26 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { Profile, UserRole } from "@/types/database";
-import { Menu } from "lucide-react";
+import { Menu, LogOut, ChevronDown } from "lucide-react";
 import { GitclubLogo } from "./GitclubLogo";
 import { RightNavbarDrawer } from "./RightNavbarDrawer";
+import { scrollToSection } from "./SmoothScroll";
+import { logoutAction } from "@/actions/auth";
 
 interface NavbarProps {
   currentUser: Profile;
   activeSection: string;
 }
+
+const DESKTOP_NAV_LINKS = [
+  { id: "overview", label: "Overview", tag: "01" },
+  { id: "clubs", label: "Clubs", tag: "02" },
+  { id: "attendance", label: "Check-In", tag: "03" },
+  { id: "activities", label: "Activities", tag: "04" },
+  { id: "submissions", label: "Deliverables", tag: "05" },
+  { id: "certificates", label: "Ledger", tag: "06" },
+  { id: "testing-log", label: "QA Log", tag: "07" },
+];
 
 const ROLE_LABELS: Record<UserRole, { label: string; badge: string }> = {
   president: { label: "President", badge: "bg-blue-500/20 text-blue-300 border-blue-400/30" },
@@ -52,44 +64,76 @@ export function Navbar({
 
   return (
     <>
-      {/* Sleek Mobile-Targeted Top Ribbon Header */}
+      {/* Sleek Fully-Responsive Top Header */}
       <header className="sticky top-0 z-40 bg-[#070b16]/85 backdrop-blur-2xl border-b border-white/10 transition-all">
-        <div className="max-w-md w-full mx-auto px-3.5 sm:px-4">
-          <div className="flex items-center justify-between h-14">
+        <div className="max-w-7xl w-full mx-auto px-3.5 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between h-16">
             {/* Left: Clean Brand Logo */}
             <Link href="/" className="flex items-center gap-2 group active:scale-95 transition-transform">
               <GitclubLogo size="sm" showText={true} />
             </Link>
 
-            {/* Center: Live Scroll Position Pill */}
-            <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/[0.04] border border-white/10 text-[11px] backdrop-blur-md shadow-sm">
+            {/* Center (Desktop): Fast Navigation Links */}
+            <nav className="hidden lg:flex items-center gap-1 bg-white/[0.04] p-1 rounded-2xl border border-white/10 backdrop-blur-md">
+              {DESKTOP_NAV_LINKS.map((link) => {
+                const isActive = activeSection === link.id;
+                return (
+                  <button
+                    key={link.id}
+                    onClick={() => scrollToSection(link.id)}
+                    className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 ${
+                      isActive
+                        ? "bg-gradient-to-r from-blue-600 to-cyan-500 text-white shadow-md shadow-blue-500/25"
+                        : "text-slate-400 hover:text-white hover:bg-white/5"
+                    }`}
+                  >
+                    <span className="font-mono text-[10px] opacity-75">[{link.tag}]</span>
+                    <span>{link.label}</span>
+                  </button>
+                );
+              })}
+            </nav>
+
+            {/* Center (Mobile / Tablet): Live Scroll Position Indicator Pill */}
+            <div className="flex lg:hidden items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/[0.04] border border-white/10 text-[11px] backdrop-blur-md shadow-sm">
               <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse shrink-0" />
               <span className="font-mono text-[10px] text-cyan-300 font-bold uppercase tracking-wider">
                 [{activeSec.tag}]
               </span>
-              <span className="text-white font-semibold tracking-tight text-[11px] max-w-[120px] sm:max-w-[160px] truncate">
+              <span className="text-white font-semibold tracking-tight text-[11px] max-w-[120px] sm:max-w-[200px] truncate">
                 {activeSec.label}
               </span>
             </div>
 
-            {/* Right: Unified Avatar & Drawer Trigger */}
-            <button
-              onClick={() => setDrawerOpen(true)}
-              className="flex items-center gap-2 pl-1.5 pr-2.5 py-1 rounded-2xl bg-white/[0.05] hover:bg-white/[0.1] active:scale-95 border border-white/10 hover:border-cyan-400/40 transition-all group shadow-sm"
-              aria-label="Open Navigation Drawer"
-            >
-              <div className="w-6 h-6 rounded-lg bg-gradient-to-tr from-blue-600 via-indigo-600 to-cyan-400 p-[1.5px] shrink-0">
-                <div className="w-full h-full bg-[#0a1124] rounded-[6px] flex items-center justify-center text-cyan-300 text-[10px] font-black">
-                  {currentUser.fullName.charAt(0)}
-                </div>
-              </div>
-
-              <span className="text-xs font-bold text-white group-hover:text-cyan-300 transition leading-tight hidden xs:inline">
-                {currentUser.fullName.split(" ")[0]}
+            {/* Right: Unified Role Badge & Drawer Trigger */}
+            <div className="flex items-center gap-2.5">
+              <span className={`hidden sm:inline-block px-2.5 py-0.5 rounded-full text-[11px] font-bold border ${roleInfo.badge}`}>
+                {roleInfo.label}
               </span>
 
-              <Menu className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
-            </button>
+              <button
+                onClick={() => setDrawerOpen(true)}
+                className="flex items-center gap-2 pl-1.5 pr-2.5 py-1.5 rounded-2xl bg-white/[0.05] hover:bg-white/[0.1] active:scale-95 border border-white/10 hover:border-cyan-400/40 transition-all group shadow-sm"
+                aria-label="Open Navigation Drawer"
+              >
+                <div className="w-7 h-7 rounded-lg bg-gradient-to-tr from-blue-600 via-indigo-600 to-cyan-400 p-[1.5px] shrink-0">
+                  <div className="w-full h-full bg-[#0a1124] rounded-[6px] flex items-center justify-center text-cyan-300 text-xs font-black">
+                    {currentUser.fullName.charAt(0)}
+                  </div>
+                </div>
+
+                <div className="hidden sm:flex flex-col text-left leading-tight">
+                  <span className="text-xs font-bold text-white group-hover:text-cyan-300 transition">
+                    {currentUser.fullName}
+                  </span>
+                  <span className="text-[10px] text-slate-400 font-mono">
+                    {currentUser.studentId || "Verified"}
+                  </span>
+                </div>
+
+                <Menu className="w-4 h-4 text-cyan-400 shrink-0 ml-1" />
+              </button>
+            </div>
           </div>
         </div>
       </header>

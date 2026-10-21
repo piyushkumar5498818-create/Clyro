@@ -278,8 +278,8 @@ export default function DashboardPage() {
         activeSection={activeSection}
       />
 
-      {/* Mobile-Targeted Canvas (Fits 100% on phones, beautifully framed on wider viewports) */}
-      <main className="flex-1 max-w-md sm:max-w-lg w-full mx-auto px-3.5 sm:px-4 py-4 space-y-7 pb-28">
+      {/* Fully-Responsive Dynamic Container (Expands fluidly on desktop/tablets, fits 100% on phones) */}
+      <main className="flex-1 max-w-7xl w-full mx-auto px-3.5 sm:px-6 lg:px-8 py-6 space-y-8 pb-28 md:pb-16">
         {/* Section 01: [01] / OVERVIEW & CAMPUS CLUBS METRICS */}
         <ScrollFadeIn direction="up">
           <section id="overview" className="scroll-mt-20 space-y-3.5">
